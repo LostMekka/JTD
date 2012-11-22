@@ -6,9 +6,9 @@ package jtd.entities;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import jtd.Point;
-import jtd.pathing.Path;
-import jtd.effect.timed.AbstractTimedEffect;
+import jtd.PointF;
+import jtd.level.Path;
+import jtd.effect.timed.TimedEffect;
 
 /**
  *
@@ -19,9 +19,9 @@ public abstract class Mob extends Entity {
 	public float maxHP, hpRegen, shield, maxShield, shieldRegen, armor, speed;
 
 	private float hp;
-	private Iterator<Point> path;
-	private Point pathTarget;
-	private LinkedList<AbstractTimedEffect> effects = new LinkedList<>();
+	private Iterator<PointF> path;
+	private PointF pathTarget;
+	private LinkedList<TimedEffect> effects = new LinkedList<>();
 	
 	public Mob(
 			float maxHP, float hpRegen, 
@@ -41,12 +41,12 @@ public abstract class Mob extends Entity {
 		pathTarget = path.next();
 	}
 	
-	public void applyTimedEffect(AbstractTimedEffect effect){
+	public void applyTimedEffect(TimedEffect effect){
 		effects.add(effect);
 		effect.apply(this);
 	}
 	
-	public void removeTimedEffect(AbstractTimedEffect effect){
+	public void removeTimedEffect(TimedEffect effect){
 		effects.remove(effect);
 		effect.remove(this);
 	}
@@ -60,13 +60,13 @@ public abstract class Mob extends Entity {
 			hp -= damage - shield;
 			shield = 0;
 		}
-		if(hp == 0) killedBy(attacker);
+		if(hp == 0) kill(attacker);
 	}
 
 	@Override
 	public void tick(float time) {
 		// tick effects
-		for(AbstractTimedEffect e:effects) e.tick(time, this);
+		for(TimedEffect e:effects) e.tick(time, this);
 		// regen hp
 		hp += time * hpRegen;
 		if(hp > maxHP) hp = maxHP;

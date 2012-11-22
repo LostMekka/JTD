@@ -10,7 +10,7 @@ import jtd.entities.Mob;
  *
  * @author LostMekka
  */
-public class ArmorDrainEffect extends AbstractInstantEffect{
+public class ArmorDrainEffect extends InstantEffect{
 
 	public float amount;
 

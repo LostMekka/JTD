@@ -5,7 +5,7 @@
 package jtd.entities;
 
 import java.util.LinkedList;
-import jtd.Point;
+import jtd.PointF;
 
 /**
  *
@@ -13,10 +13,10 @@ import jtd.Point;
  */
 public abstract class Entity {
 	
-	public Point loc;
+	public PointF loc;
 	private LinkedList<KillListener> killListeners = new LinkedList<>();
 
-	public Entity(Point loc) {
+	public Entity(PointF loc) {
 		this.loc = loc;
 	}
 	
@@ -32,7 +32,7 @@ public abstract class Entity {
 		return killListeners.remove(l);
 	}
 	
-	public void killedBy(Entity killer){
+	public void kill(Entity killer){
 		for(KillListener l:killListeners) l.EntityKilled(this, killer);
 	}
 	

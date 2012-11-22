@@ -10,11 +10,11 @@ import jtd.entities.Mob;
  *
  * @author LostMekka
  */
-public abstract class AbstractInstantEffect {
+public abstract class InstantEffect {
 	
 	public float cooldown;
 
-	public AbstractInstantEffect(float cooldown) {
+	public InstantEffect(float cooldown) {
 		this.cooldown = cooldown;
 	}
 	
