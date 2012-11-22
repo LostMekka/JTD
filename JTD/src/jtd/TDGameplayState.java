@@ -29,6 +29,11 @@ public class TDGameplayState extends BasicGameState {
 	private LinkedList<Mob> mobs;
 	private LinkedList<Tower> towers;
 
+	public Mob giveTarget(Tower tower){
+		// TODO: return a mob if possible
+		return null;
+	}
+	
 	@Override
 	public int getID() {
 		return 1;
@@ -36,7 +41,8 @@ public class TDGameplayState extends BasicGameState {
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		mobs = new LinkedList<>();
+		towers = new LinkedList<>();
 	}
 
 	@Override

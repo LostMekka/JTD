@@ -13,7 +13,7 @@ import jtd.Point;
  */
 public abstract class Entity {
 	
-	protected Point loc;
+	public Point loc;
 	private LinkedList<KillListener> killListeners = new LinkedList<>();
 
 	public Entity(Point loc) {

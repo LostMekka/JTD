@@ -12,9 +12,10 @@ import jtd.Point;
  */
 public class Tower extends Entity{
 
-	private TowerDef def;
+	public TowerDef def;
 	private float cooldown;
 	private float[] EffectCooldowns;
+	private Mob target = null;
 
 	public Tower(TowerDef def, Point loc) {
 		super(loc);
@@ -25,6 +26,11 @@ public class Tower extends Entity{
 	@Override
 	public void tick(float time) {
 		
+		
+		// TODO: targeting
+		Mob target = null;
+		
 	}
+	
 	
 }
