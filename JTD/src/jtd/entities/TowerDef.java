@@ -6,6 +6,8 @@ package jtd.entities;
 
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffectDef;
+import jtd.entities.ProjectileDef;
+import org.newdawn.slick.Image;
 
 /**
  *
@@ -17,8 +19,9 @@ public class TowerDef {
 	public TimedEffectDef[] timedEffects;
 	public InstantEffect[] instantEffects;
 	public ProjectileDef projectileDef;
+	public Image body, head;
 
-	public TowerDef(float range, float damageRadius, float reloadTime, float damage, TimedEffectDef[] timedEffects, InstantEffect[] instantEffects, ProjectileDef projectileDef) {
+	public TowerDef(float range, float damageRadius, float reloadTime, float damage, TimedEffectDef[] timedEffects, InstantEffect[] instantEffects, ProjectileDef projectileDef, Image body, Image head) {
 		this.range = range;
 		this.damageRadius = damageRadius;
 		this.reloadTime = reloadTime;
@@ -26,6 +29,8 @@ public class TowerDef {
 		this.timedEffects = timedEffects;
 		this.instantEffects = instantEffects;
 		this.projectileDef = projectileDef;
+		this.body = body;
+		this.head = head;
 	}
-	
+
 }

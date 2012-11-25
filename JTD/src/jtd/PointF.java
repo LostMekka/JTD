@@ -34,11 +34,28 @@ public class PointF {
 		return (float)Math.sqrt(x*x + y*y);
 	}
 	
-	public void travelTo(PointF p, float dist){
+	public float travelTo(PointF p, float dist, boolean stopAtArrival){
 		float dx = x - p.x, dy = y - p.y;
-		float f = (float)Math.sqrt(dx*dx + dy*dy) / dist;
-		x += dx * f;
-		y += dy * f;
+		float d = (float)Math.sqrt(dx*dx + dy*dy);
+		if((d >= dist) && stopAtArrival){
+			x = p.x;
+			y = p.y;
+			return d;
+		}
+		x += dx * d / dist;
+		y += dy * d / dist;
+		return d;
+	}
+
+	public float getRotationTo(PointF p){
+		if(p.x == x){
+			if(p.y < y){
+				return (float)Math.PI;
+			} else {
+				return 0f;
+			}
+		}
+		return (float)Math.atan((p.y - y) / (p.x - x));
 	}
 	
 	@Override

@@ -48,6 +48,8 @@ public class Level {
 		towers = new Tower[h][w];
 		mobs = new LinkedList<>();
 		projectiles = new LinkedList<>();
+		// test stuff
+		
 	}
 	
 	public boolean isBuildable(PointI loc){

@@ -44,8 +44,32 @@ public class TDGameplayState extends BasicGameState implements KillListener{
 		return null;
 	}
 	
-	public void shoot(Tower tower, Mob mob, LinkedList<InstantEffect> instantEffects, LinkedList<TimedEffect> timedEffects){
-		level.projectiles.add(new Projectile(tower.def.projectileDef, mob, tower, instantEffects, timedEffects, tower.loc));
+	public void shoot(
+			Tower tower, Mob mob, 
+			LinkedList<InstantEffect> instantEffects, 
+			LinkedList<TimedEffect> timedEffects){
+		level.projectiles.add(
+				new Projectile(
+					tower.def.projectileDef, mob, tower, 
+					instantEffects, timedEffects, tower.loc));
+	}
+	
+	public void dealDamage(Mob mob, Tower attacker, 
+			LinkedList<InstantEffect> instantEffects, 
+			LinkedList<TimedEffect> timedEffects){
+		for(TimedEffect e:timedEffects) mob.applyTimedEffect(e);
+		for(InstantEffect e:instantEffects) mob.applyInstantEffect(e);
+		mob.damage(attacker.def.damage, attacker);
+	}
+	
+	public void dealAreaDamage(PointF loc, Tower attacker, 
+			LinkedList<InstantEffect> instantEffects, 
+			LinkedList<TimedEffect> timedEffects){
+		for(Mob mob:level.mobs){
+			if(mob.loc.distanceTo(loc) <= attacker.def.damageRadius){
+				dealDamage(mob, attacker, instantEffects, timedEffects);
+			}
+		}
 	}
 	
 	@Override

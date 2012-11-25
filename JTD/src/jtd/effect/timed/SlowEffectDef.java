@@ -22,12 +22,12 @@ public class SlowEffectDef extends TimedEffectDef{
 
 	@Override
 	public void apply(Mob mob, Entity caster) {
-		mob.speed *= speedup;
+		mob.speedMultiplier *= speedup;
 	}
 
 	@Override
 	public void remove(Mob mob, Entity caster) {
-		mob.speed /= speedup;
+		mob.speedMultiplier /= speedup;
 	}
 
 }

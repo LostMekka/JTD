@@ -21,8 +21,8 @@ public class ArmorDrainEffect extends InstantEffect{
 
 	@Override
 	public void apply(Mob mob) {
-		mob.armor -= amount;
-		if(mob.armor < 0) mob.armor = 0;
+		mob.armorOffset -= amount;
+		if(mob.armorOffset < 0) mob.armorOffset = 0;
 	}
 	
 }

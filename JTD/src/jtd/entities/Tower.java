@@ -9,6 +9,11 @@ import jtd.PointF;
 import jtd.TDGameplayState;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
+import jtd.entities.Entity;
+import jtd.entities.Mob;
+import org.newdawn.slick.GameContainer;
+import org.newdawn.slick.Graphics;
+import org.newdawn.slick.state.StateBasedGame;
 
 /**
  *
@@ -25,7 +30,9 @@ public class Tower extends Entity{
 	private PointF lastTargetLocation = null;
 
 	public Tower(TowerDef def, PointF loc) {
-		super(loc);
+		super(loc, 2);
+		sprites[0] = def.body;
+		sprites[1] = def.head;
 		this.def = def;
 		cooldown = def.reloadTime;
 		instantEffectCooldowns = new float[def.instantEffects.length];
@@ -79,6 +86,17 @@ public class Tower extends Entity{
 			cooldown += def.reloadTime;
 		}		
 	}
-	
+
+	@Override
+	public void entityDraw(GameContainer gc, StateBasedGame sbg, Graphics grphcs) {
+		// draw head
+		if(sprites[1] != null){
+			if(target == null){
+				sprites[1].setRotation(loc.getRotationTo(lastTargetLocation));
+			} else {
+				sprites[1].setRotation(loc.getRotationTo(target.loc));
+			}
+		}
+	}
 	
 }
