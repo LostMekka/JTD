@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
 import jtd.entities.Entity;
+import jtd.entities.Explosion;
 import jtd.entities.KillListener;
 import jtd.entities.Mob;
 import jtd.entities.Projectile;
@@ -36,7 +37,26 @@ public class TDGameplayState extends BasicGameState implements KillListener{
 
 	@Override
 	public void EntityKilled(Entity entity, Entity killer) {
-		// TODO: handle kill
+		if(entity instanceof Mob){
+			if(killer != null){
+				if(killer == entity){
+					// mob got through. punish player!
+				}
+				if(killer instanceof Tower){
+					// got killed by a tower. reward player!
+				}
+			}
+			level.mobs.remove(entity);
+			return;
+		}
+		if(entity instanceof Tower){
+			level.removeTower((Tower)entity);
+		}
+		if(entity instanceof Projectile){
+			Projectile p = (Projectile)entity;
+			level.projectiles.remove(p);
+			level.explosions.add(new Explosion(p.loc, p.def.expDef));
+		}
 	}
 
 	public Mob giveTarget(Tower tower){

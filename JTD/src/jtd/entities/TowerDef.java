@@ -21,7 +21,10 @@ public class TowerDef {
 	public ProjectileDef projectileDef;
 	public Image body, head;
 
-	public TowerDef(float range, float damageRadius, float reloadTime, float damage, TimedEffectDef[] timedEffects, InstantEffect[] instantEffects, ProjectileDef projectileDef, Image body, Image head) {
+	public TowerDef(
+			float range, float damageRadius, float reloadTime, float damage, 
+			TimedEffectDef[] timedEffects, InstantEffect[] instantEffects, 
+			ProjectileDef projectileDef, Image body, Image head) {
 		this.range = range;
 		this.damageRadius = damageRadius;
 		this.reloadTime = reloadTime;

@@ -7,7 +7,9 @@ package jtd.level;
 import jtd.entities.Projectile;
 import java.util.LinkedList;
 import jtd.PointI;
+import jtd.entities.Explosion;
 import jtd.entities.Mob;
+import jtd.entities.Particle;
 import jtd.entities.Tower;
 
 /**
@@ -37,8 +39,10 @@ public class Level {
 	
 	public Field[][] fields;
 	public Tower[][] towers;
-	public LinkedList<Mob> mobs;
-	public LinkedList<Projectile> projectiles;
+	public LinkedList<Mob> mobs = new LinkedList<>();
+	public LinkedList<Projectile> projectiles = new LinkedList<>();
+	public LinkedList<Explosion> explosions = new LinkedList<>();
+	public LinkedList<Particle> particles = new LinkedList<>();
 	public int w, h;
 	
 	public Level(){
@@ -46,9 +50,7 @@ public class Level {
 		h = fields.length;
 		w = fields[0].length;
 		towers = new Tower[h][w];
-		mobs = new LinkedList<>();
-		projectiles = new LinkedList<>();
-		// test stuff
+		// init test stuff
 		
 	}
 	
@@ -61,6 +63,18 @@ public class Level {
 	
 	public boolean iWalkable(PointI loc){
 		return (fields[loc.y][loc.x] == Field.floor) && (towers[loc.y][loc.x] == null);
+	}
+	
+	public boolean removeTower(Tower t){
+		for(int y=0; y<h; y++){
+			for(int x=0; x<w; x++){
+				if(towers[y][x] == t){
+					towers[y][x] = null;
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 }

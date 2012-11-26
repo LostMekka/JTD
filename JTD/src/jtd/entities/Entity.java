@@ -58,7 +58,9 @@ public abstract class Entity {
 		if((currSprite >= 0) && (currSprite < sprites.length)){
 			if(sprites[currSprite] != null){
 				sprites[currSprite].setRotation(rotation);
-				sprites[currSprite].draw(loc.x, loc.y, scale);
+				sprites[currSprite].draw(
+						loc.x - sprites[currSprite].getWidth() / 2f, 
+						loc.y - sprites[currSprite].getHeight() / 2f, scale);
 			}
 		}
 		entityDraw(gc, sbg, grphcs);

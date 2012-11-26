@@ -5,8 +5,14 @@
 package jtd;
 
 import java.util.ArrayList;
+import jtd.effect.instant.InstantEffect;
+import jtd.effect.timed.SlowEffectDef;
+import jtd.effect.timed.TimedEffectDef;
+import jtd.entities.ExplosionDef;
 import jtd.entities.MobDef;
+import jtd.entities.ProjectileDef;
 import jtd.entities.TowerDef;
+import org.newdawn.slick.Image;
 
 /**
  *
@@ -37,6 +43,34 @@ public class GameDef {
 	
 	public static void init(){
 		// TODO: init
+		Image body = AssetLoader.getImage("tower_body.png");
+		Image head = AssetLoader.getImage("tower_head.png");
+		Image proj = AssetLoader.getImage("shot.png");
+		Image expl = AssetLoader.getImage("explosion.png");
+		
+		TimedEffectDef[] te = new TimedEffectDef[1];
+		te[0] = new SlowEffectDef(0.5f, 3f, 5f);
+		InstantEffect[] ie = new InstantEffect[0];
+		
+		Image[] es = new Image[1];
+		float[] et = new float[1];
+		es[0] = expl;
+		et[0] = 0.5f;
+		ExplosionDef e = new ExplosionDef(es, et);
+		
+		ProjectileDef p = new ProjectileDef(4f, 10f, proj, e);
+		
+		for(int lev=0; lev<3; lev++){
+			TowerDef t = new TowerDef(4f, 0f, 0.5f, lev, te, ie, p, body, head);
+			TOWER_NAILGUN.add(t);
+		}
+	}
+	
+	public static int getTowerCount(TowerType t){
+		switch(t){
+			case nailgun: return TOWER_NAILGUN.size();
+			default: return -1;
+		}
 	}
 	
 	public static TowerDef getTowerDef(TowerType t, int level){
@@ -82,7 +116,6 @@ public class GameDef {
 	}
 	
 	private static MobDef generateMobDef(MobType t, int level, boolean boss){
-		// TODO: gen mob def
-		return null;
+		return new MobDef(level * 5, 0, 0, 0, 0, 0.5f, AssetLoader.getImage("mob.png", false));
 	}
 }

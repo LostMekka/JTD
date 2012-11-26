@@ -21,6 +21,10 @@ public class AssetLoader {
 	private static HashMap<String, Sound> sounds = new HashMap<>();
 	private static HashMap<String, Image> images = new HashMap<>();
 	
+	public static Image getImage(String name){
+		return getImage(name, false);
+	}
+	
 	public static Image getImage(String name, boolean flipped){
 		if(flipped){
 			String name2 = "__FLIPPED__" + name;
