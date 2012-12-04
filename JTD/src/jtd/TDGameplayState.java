@@ -34,6 +34,7 @@ public class TDGameplayState extends BasicGameState implements KillListener{
 	private TDGameplayState(){}
 	
 	public Level level;
+	public GameDef gameDef = new GameDef();
 
 	@Override
 	public void EntityKilled(Entity entity, Entity killer) {
@@ -99,7 +100,7 @@ public class TDGameplayState extends BasicGameState implements KillListener{
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
-		level = new Level();
+		level = new Level(gameDef);
 	}
 
 	@Override

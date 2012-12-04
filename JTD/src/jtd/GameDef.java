@@ -20,8 +20,6 @@ import org.newdawn.slick.Image;
  */
 public class GameDef {
 	
-	private GameDef(){}
-	
 	public enum TowerType{
 		nailgun
 	}
@@ -29,24 +27,14 @@ public class GameDef {
 	public enum MobType{
 		normal, swarm, armored
 	}
-	
-	private static ArrayList<TowerDef> TOWER_NAILGUN = new ArrayList<>();
-	
-	private static ArrayList<MobDef> MOB_NORMAL = new ArrayList<>(200);
-	private static ArrayList<MobDef> BOSS_NORMAL = new ArrayList<>(200);
 
-	private static ArrayList<MobDef> MOB_SWARM = new ArrayList<>(200);
-	private static ArrayList<MobDef> BOSS_SWARM = new ArrayList<>(200);
-
-	private static ArrayList<MobDef> MOB_ARMORED = new ArrayList<>(200);
-	private static ArrayList<MobDef> BOSS_ARMORED = new ArrayList<>(200);
-	
-	public static void init(){
+	public GameDef() {
 		// TODO: init
 		Image body = AssetLoader.getImage("tower_body.png");
 		Image head = AssetLoader.getImage("tower_head.png");
 		Image proj = AssetLoader.getImage("shot.png");
 		Image expl = AssetLoader.getImage("explosion.png");
+		Image mob = AssetLoader.getImage("mob.png");
 		
 		TimedEffectDef[] te = new TimedEffectDef[1];
 		te[0] = new SlowEffectDef(0.5f, 3f, 5f);
@@ -66,26 +54,37 @@ public class GameDef {
 		}
 	}
 	
-	public static int getTowerCount(TowerType t){
+	private ArrayList<TowerDef> TOWER_NAILGUN = new ArrayList<>();
+	
+	private ArrayList<MobDef> MOB_NORMAL = new ArrayList<>(200);
+	private ArrayList<MobDef> BOSS_NORMAL = new ArrayList<>(200);
+
+	private ArrayList<MobDef> MOB_SWARM = new ArrayList<>(200);
+	private ArrayList<MobDef> BOSS_SWARM = new ArrayList<>(200);
+
+	private ArrayList<MobDef> MOB_ARMORED = new ArrayList<>(200);
+	private ArrayList<MobDef> BOSS_ARMORED = new ArrayList<>(200);
+	
+	public int getTowerCount(TowerType t){
 		switch(t){
 			case nailgun: return TOWER_NAILGUN.size();
 			default: return -1;
 		}
 	}
 	
-	public static TowerDef getTowerDef(TowerType t, int level){
+	public TowerDef getTowerDef(TowerType t, int level){
 		switch(t){
 			case nailgun: return getTowerDef(TOWER_NAILGUN, level);
 			default: return null;
 		}
 	}
 	
-	private static TowerDef getTowerDef(ArrayList<TowerDef> list, int level){
+	private TowerDef getTowerDef(ArrayList<TowerDef> list, int level){
 		if((level < 0) || (level >= list.size())) return null;
 		return list.get(level);
 	}
 	
-	public static MobDef getMobDef(MobType t, int level, boolean boss){
+	public MobDef getMobDef(MobType t, int level, boolean boss){
 		if(boss){
 			switch(t){
 				case normal: return getMobDef(BOSS_NORMAL, t, level, boss);
@@ -103,7 +102,7 @@ public class GameDef {
 		}
 	}
 	
-	private static MobDef getMobDef(ArrayList<MobDef> list, MobType t, int level, boolean boss){
+	private MobDef getMobDef(ArrayList<MobDef> list, MobType t, int level, boolean boss){
 		if(level < 0) return null;
 		if(level >= list.size()){
 			list.ensureCapacity(level);
@@ -115,7 +114,7 @@ public class GameDef {
 		return list.get(level);
 	}
 	
-	private static MobDef generateMobDef(MobType t, int level, boolean boss){
+	private MobDef generateMobDef(MobType t, int level, boolean boss){
 		return new MobDef(level * 5, 0, 0, 0, 0, 0.5f, AssetLoader.getImage("mob.png", false));
 	}
 }

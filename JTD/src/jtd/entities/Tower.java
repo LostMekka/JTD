@@ -31,9 +31,16 @@ public class Tower extends Entity{
 
 	public Tower(TowerDef def, PointF loc) {
 		super(loc, 2);
+		lastTargetLocation = loc.clone();
+		lastTargetLocation.y -= 1;
+		updateTowerDef(def);
+	}
+	
+	public final void updateTowerDef(TowerDef def){
+		if(this.def == def) return;
+		this.def = def;
 		sprites[0] = def.body;
 		sprites[1] = def.head;
-		this.def = def;
 		cooldown = def.reloadTime;
 		instantEffectCooldowns = new float[def.instantEffects.length];
 		for(int i=0; i<instantEffectCooldowns.length; i++){
@@ -43,8 +50,6 @@ public class Tower extends Entity{
 		for(int i=0; i<timedEffectCooldowns.length; i++){
 			timedEffectCooldowns[i] = def.timedEffects[i].cooldown;
 		}
-		lastTargetLocation = loc.clone();
-		lastTargetLocation.y -= 1;
 	}
 	
 	@Override

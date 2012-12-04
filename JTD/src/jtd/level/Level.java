@@ -6,11 +6,14 @@ package jtd.level;
 
 import jtd.entities.Projectile;
 import java.util.LinkedList;
+import jtd.AssetLoader;
+import jtd.GameDef;
 import jtd.PointI;
 import jtd.entities.Explosion;
 import jtd.entities.Mob;
 import jtd.entities.Particle;
 import jtd.entities.Tower;
+import org.newdawn.slick.Image;
 
 /**
  *
@@ -44,14 +47,33 @@ public class Level {
 	public LinkedList<Explosion> explosions = new LinkedList<>();
 	public LinkedList<Particle> particles = new LinkedList<>();
 	public int w, h;
+	public GameDef def;
+	private Image iWall, iGrass, iFloor, iSrc, iDest;
 	
-	public Level(){
+	public Level(GameDef def){
+		iWall = AssetLoader.getImage("wall.png");
+		iGrass = AssetLoader.getImage("grass.png");
+		iFloor = AssetLoader.getImage("floor.png");
+		iSrc = AssetLoader.getImage("src.png");
+		iDest = AssetLoader.getImage("dest.png");
+		this.def = def;
 		fields = lev1;
 		h = fields.length;
 		w = fields[0].length;
 		towers = new Tower[h][w];
 		// init test stuff
 		
+	}
+	
+	public Image getTileImage(int x, int y){
+		switch(fields[y][x]){
+			case dest: return iDest;
+			case floor: return iFloor;
+			case grass: return iGrass;
+			case src: return iSrc;
+			case wall: return iWall;
+			default: return null;
+		}
 	}
 	
 	public boolean isBuildable(PointI loc){
