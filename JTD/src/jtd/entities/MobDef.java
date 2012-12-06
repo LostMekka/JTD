@@ -15,7 +15,11 @@ public class MobDef {
 	public float maxHP, hpRegen, maxShield, shieldRegen, armor, speed;
 	public Image sprite;
 
-	public MobDef(float maxHP, float hpRegen, float maxShield, float shieldRegen, float armor, float speed, Image sprite) {
+	public MobDef(
+			float maxHP, float hpRegen, 
+			float maxShield, float shieldRegen, 
+			float armor, float speed, 
+			Image sprite) {
 		this.maxHP = maxHP;
 		this.hpRegen = hpRegen;
 		this.maxShield = maxShield;

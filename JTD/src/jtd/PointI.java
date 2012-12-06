@@ -26,10 +26,10 @@ public class PointI {
 		y = 0;
 	}
 	
-	public PointF getPountF(){
+	public PointF getPointF(float randomComponent){
 		return new PointF(
-				x + (ran.nextFloat() - 0.5f) / 4f , 
-				y + (ran.nextFloat() - 0.5f) / 4f);
+				x + (ran.nextFloat() - 0.5f) * randomComponent , 
+				y + (ran.nextFloat() - 0.5f) * randomComponent);
 	}
 	
 	public int distanceTo(PointI p){

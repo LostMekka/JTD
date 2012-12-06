@@ -18,7 +18,7 @@ import jtd.level.Path;
 public class Mob extends Entity {
 
 	public MobDef def;
-	public float speedMultiplier = 1, armorOffset = 0, bonusDamage = 0;
+	public float speedMultiplier = 1f, armorOffset = 0f, bonusDamage = 0f;
 	
 	private float hp, shield;
 	private Iterator<PointF> path;
@@ -35,6 +35,7 @@ public class Mob extends Entity {
 		pathTarget = path.next();
 		sprites[0] = def.sprite;
 		rotation = tmp.getRotationTo(pathTarget);
+		sizeInTiles = 0.6f;
 	}
 	
 	public void applyInstantEffect(InstantEffect effect){
@@ -84,7 +85,11 @@ public class Mob extends Entity {
 				if(travel > 0){
 					pathTarget = path.next();
 					if(pathTarget == null){
-						travel = 0;
+						pathTarget = loc.clone();
+						float d = random.nextFloat() * 1.5f + 0.5f;
+						float a = random.nextFloat() * 360f;
+						pathTarget.x += d * (float)Math.cos(a);
+						pathTarget.y += d * (float)Math.sin(a);
 					}
 				}
 			}
@@ -92,7 +97,7 @@ public class Mob extends Entity {
 		if(pathTarget == null){
 			rotation = random.nextFloat() * 2f * (float)Math.PI;
 		} else {
-			rotation = loc.getRotationTo(pathTarget);
+			rotation = loc.getRotationTo(pathTarget) + 90f;
 		}
 		def.tick(time);
 	}

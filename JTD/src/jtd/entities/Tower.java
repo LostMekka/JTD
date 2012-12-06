@@ -5,12 +5,11 @@
 package jtd.entities;
 
 import java.util.LinkedList;
+import jtd.CoordinateTransformator;
 import jtd.PointF;
 import jtd.TDGameplayState;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
-import jtd.entities.Entity;
-import jtd.entities.Mob;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.state.StateBasedGame;
@@ -27,12 +26,14 @@ public class Tower extends Entity{
 	private float cooldown;
 	private float[] instantEffectCooldowns, timedEffectCooldowns;
 	private Mob target = null;
-	private PointF lastTargetLocation = null;
+	private PointF lastTargetLocation;
 
 	public Tower(TowerDef def, PointF loc) {
 		super(loc, 2);
-		lastTargetLocation = loc.clone();
-		lastTargetLocation.y -= 1;
+		lastTargetLocation = new PointF(1f, 0f);
+		lastTargetLocation.rotate(random.nextFloat() * 360f);
+		lastTargetLocation.x += loc.x;
+		lastTargetLocation.y += loc.y;
 		updateTowerDef(def);
 	}
 	
@@ -55,6 +56,11 @@ public class Tower extends Entity{
 	@Override
 	public void tick(float time) {
 		// targeting
+		lastTargetLocation.x -= loc.x;
+		lastTargetLocation.y -= loc.y;
+		lastTargetLocation.rotate(time * 30f);
+		lastTargetLocation.x += loc.x;
+		lastTargetLocation.y += loc.y;
 		if(target == null){
 			target = GAME.giveTarget(this);
 		} else {
@@ -72,7 +78,7 @@ public class Tower extends Entity{
 			timedEffectCooldowns[i] -= time;
 		}
 		// shooting
-		while(cooldown <= 0){
+		while((cooldown <= 0) && (target != null)){
 			LinkedList<InstantEffect> instantEffects = new LinkedList<>();
 			LinkedList<TimedEffect> timedEffects = new LinkedList<>();
 			for(int i=0; i<instantEffectCooldowns.length; i++){
@@ -93,13 +99,15 @@ public class Tower extends Entity{
 	}
 
 	@Override
-	public void entityDraw(GameContainer gc, StateBasedGame sbg, Graphics grphcs) {
+	public void entityDraw(
+			GameContainer gc, StateBasedGame sbg, 
+			Graphics grphcs, CoordinateTransformator transformator) {
 		// draw head
 		if(sprites[1] != null){
 			if(target == null){
-				sprites[1].setRotation(loc.getRotationTo(lastTargetLocation));
+				transformator.drawImage(sprites[1], loc, sizeInTiles, loc.getRotationTo(lastTargetLocation));
 			} else {
-				sprites[1].setRotation(loc.getRotationTo(target.loc));
+				transformator.drawImage(sprites[1], loc, sizeInTiles, loc.getRotationTo(target.loc));
 			}
 		}
 	}

@@ -6,6 +6,7 @@ package jtd.entities;
 
 import java.util.LinkedList;
 import java.util.Random;
+import jtd.CoordinateTransformator;
 import jtd.PointF;
 import jtd.TDGameplayState;
 import org.newdawn.slick.GameContainer;
@@ -22,7 +23,7 @@ public abstract class Entity {
 	public static final Random random = new Random();
 	
 	public PointF loc;
-	public float rotation = 0, scale = 1;
+	public float rotation = 0, sizeInTiles = 1;
 	public int currSprite = 0;
 	public Image[] sprites;
 	private LinkedList<KillListener> killListeners = new LinkedList<>();
@@ -54,19 +55,18 @@ public abstract class Entity {
 		rotation = (rotation + amount) % (float)(2d * Math.PI);
 	}
 	
-	public final void draw(GameContainer gc, StateBasedGame sbg, Graphics grphcs){
+	public final void draw(
+			GameContainer gc, StateBasedGame sbg, 
+			Graphics grphcs, CoordinateTransformator transformator){
 		if((currSprite >= 0) && (currSprite < sprites.length)){
-			if(sprites[currSprite] != null){
-				sprites[currSprite].setRotation(rotation);
-				sprites[currSprite].draw(
-						loc.x - sprites[currSprite].getWidth() / 2f, 
-						loc.y - sprites[currSprite].getHeight() / 2f, scale);
-			}
+			transformator.drawImage(sprites[currSprite], loc, sizeInTiles, rotation);
 		}
-		entityDraw(gc, sbg, grphcs);
+		entityDraw(gc, sbg, grphcs, transformator);
 	}
 	
-	public void entityDraw(GameContainer gc, StateBasedGame sbg, Graphics grphcs){}
+	public void entityDraw(
+			GameContainer gc, StateBasedGame sbg, 
+			Graphics grphcs, CoordinateTransformator transformator){}
 	
 	public abstract void tick(float time);
 	

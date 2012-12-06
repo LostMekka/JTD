@@ -37,7 +37,7 @@ public class Path {
 		@Override
 		public PointF next() {
 			if(iter.hasNext()){
-				return iter.next().getPountF();
+				return iter.next().getPointF(0.1f);
 			} else {
 				return null;
 			}
@@ -51,11 +51,25 @@ public class Path {
 	private LinkedList<PointI> path = new LinkedList<>();
 	
 	public void generate(){
+		path = new LinkedList<>();
+		path.add(new PointI(0, 0));
+		path.add(new PointI(4, 0));
+		path.add(new PointI(4, 2));
+		path.add(new PointI(2, 2));
 		
+		path.add(new PointI(2, 4));
+		path.add(new PointI(4, 4));
+		path.add(new PointI(4, 6));
+		path.add(new PointI(2, 6));
+		
+		path.add(new PointI(2, 8));
+		path.add(new PointI(0, 8));
+		path.add(new PointI(0, 11));
+		path.add(new PointI(4, 11));
 	}
 	
 	public PointF getStart(){
-		return path.getFirst().getPountF();
+		return path.getFirst().getPointF(0.5f);
 	}
 	
 	public Iterator<PointF> getPointIterator(){

@@ -30,11 +30,10 @@ public class GameDef {
 
 	public GameDef() {
 		// TODO: init
-		Image body = AssetLoader.getImage("tower_body.png");
-		Image head = AssetLoader.getImage("tower_head.png");
-		Image proj = AssetLoader.getImage("shot.png");
-		Image expl = AssetLoader.getImage("explosion.png");
-		Image mob = AssetLoader.getImage("mob.png");
+		Image body = AssetLoader.getImage("tower_body.png", false);
+		Image head = AssetLoader.getImage("tower_head.png", false);
+		Image proj = AssetLoader.getImage("shot.png", false);
+		Image expl = AssetLoader.getImage("explosion.png", false);
 		
 		TimedEffectDef[] te = new TimedEffectDef[1];
 		te[0] = new SlowEffectDef(0.5f, 3f, 5f);
@@ -115,6 +114,6 @@ public class GameDef {
 	}
 	
 	private MobDef generateMobDef(MobType t, int level, boolean boss){
-		return new MobDef(level * 5, 0, 0, 0, 0, 0.5f, AssetLoader.getImage("mob.png", false));
+		return new MobDef(level * 5, 0, 0, 0, 0, 3f, AssetLoader.getImage("mob.png", false));
 	}
 }

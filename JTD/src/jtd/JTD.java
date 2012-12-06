@@ -28,7 +28,8 @@ public class JTD {
 			}
 		};
 		try {
-			GameContainer gc = new AppGameContainer(game, 800, 600, false);
+			AppGameContainer gc = new AppGameContainer(game, 800, 600, false);
+			gc.start();
 		} catch (SlickException ex) {
 			Logger.getLogger(JTD.class.getName()).log(Level.SEVERE, null, ex);
 		}

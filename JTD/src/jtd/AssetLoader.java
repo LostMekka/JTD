@@ -21,11 +21,11 @@ public class AssetLoader {
 	private static HashMap<String, Sound> sounds = new HashMap<>();
 	private static HashMap<String, Image> images = new HashMap<>();
 	
-	public static Image getImage(String name){
-		return getImage(name, false);
+	public static Image getImage(String name, boolean smoothFiltered){
+		return getImage(name, smoothFiltered, false);
 	}
 	
-	public static Image getImage(String name, boolean flipped){
+	public static Image getImage(String name, boolean smoothFiltered, boolean flipped){
 		if(flipped){
 			String name2 = "__FLIPPED__" + name;
 			if(images.containsKey(name2)){
@@ -43,10 +43,12 @@ public class AssetLoader {
 				Image i;
 				try {
 					i = new Image(name);
+					if(!smoothFiltered) i.setFilter(Image.FILTER_NEAREST);
 				} catch (Exception ex) {
 					if(errorImage == null){
 						try {
 							errorImage = new Image("error.png");
+							errorImage.setFilter(Image.FILTER_NEAREST);
 						} catch (SlickException ex1) {}
 					}
 					return errorImage;

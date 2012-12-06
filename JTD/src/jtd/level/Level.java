@@ -8,11 +8,13 @@ import jtd.entities.Projectile;
 import java.util.LinkedList;
 import jtd.AssetLoader;
 import jtd.GameDef;
+import jtd.PointF;
 import jtd.PointI;
 import jtd.entities.Explosion;
 import jtd.entities.Mob;
 import jtd.entities.Particle;
 import jtd.entities.Tower;
+import jtd.entities.TowerDef;
 import org.newdawn.slick.Image;
 
 /**
@@ -51,18 +53,23 @@ public class Level {
 	private Image iWall, iGrass, iFloor, iSrc, iDest;
 	
 	public Level(GameDef def){
-		iWall = AssetLoader.getImage("wall.png");
-		iGrass = AssetLoader.getImage("grass.png");
-		iFloor = AssetLoader.getImage("floor.png");
-		iSrc = AssetLoader.getImage("src.png");
-		iDest = AssetLoader.getImage("dest.png");
+		iWall = AssetLoader.getImage("wall.png", false);
+		iGrass = AssetLoader.getImage("grass.png", false);
+		iFloor = AssetLoader.getImage("floor.png", false);
+		iSrc = AssetLoader.getImage("src.png", false);
+		iDest = AssetLoader.getImage("dest.png", false);
 		this.def = def;
 		fields = lev1;
 		h = fields.length;
 		w = fields[0].length;
 		towers = new Tower[h][w];
 		// init test stuff
-		
+		addTower(new PointI(1, 1), def.getTowerDef(GameDef.TowerType.nailgun, 1));
+		addTower(new PointI(2, 1), def.getTowerDef(GameDef.TowerType.nailgun, 1));
+		addTower(new PointI(3, 1), def.getTowerDef(GameDef.TowerType.nailgun, 1));
+		addTower(new PointI(1, 5), def.getTowerDef(GameDef.TowerType.nailgun, 1));
+		addTower(new PointI(2, 5), def.getTowerDef(GameDef.TowerType.nailgun, 1));
+		addTower(new PointI(3, 5), def.getTowerDef(GameDef.TowerType.nailgun, 1));
 	}
 	
 	public Image getTileImage(int x, int y){
@@ -85,6 +92,12 @@ public class Level {
 	
 	public boolean iWalkable(PointI loc){
 		return (fields[loc.y][loc.x] == Field.floor) && (towers[loc.y][loc.x] == null);
+	}
+	
+	public boolean addTower(PointI loc, TowerDef def){
+		if(towers[loc.y][loc.x] != null) return false;
+		towers[loc.y][loc.x] = new Tower(def, loc.getPointF(0f));
+		return true;
 	}
 	
 	public boolean removeTower(Tower t){
