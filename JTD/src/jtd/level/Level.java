@@ -50,7 +50,13 @@ public class Level {
 	public LinkedList<Particle> particles = new LinkedList<>();
 	public int w, h;
 	public GameDef def;
+
 	private Image iWall, iGrass, iFloor, iSrc, iDest;
+	private LinkedList<Mob> mobsToDelete = new LinkedList<>();
+	private LinkedList<Projectile> projectilesToDelete = new LinkedList<>();
+	private LinkedList<Explosion> explosionsToDelete = new LinkedList<>();
+	private LinkedList<Particle> particlesToDelete = new LinkedList<>();
+	
 	
 	public Level(GameDef def){
 		iWall = AssetLoader.getImage("wall.png", false);
@@ -64,12 +70,12 @@ public class Level {
 		w = fields[0].length;
 		towers = new Tower[h][w];
 		// init test stuff
-		addTower(new PointI(1, 1), def.getTowerDef(GameDef.TowerType.nailgun, 1));
-		addTower(new PointI(2, 1), def.getTowerDef(GameDef.TowerType.nailgun, 1));
-		addTower(new PointI(3, 1), def.getTowerDef(GameDef.TowerType.nailgun, 1));
-		addTower(new PointI(1, 5), def.getTowerDef(GameDef.TowerType.nailgun, 1));
-		addTower(new PointI(2, 5), def.getTowerDef(GameDef.TowerType.nailgun, 1));
-		addTower(new PointI(3, 5), def.getTowerDef(GameDef.TowerType.nailgun, 1));
+
+		addTower(new PointI(3, 1), def.getTowerDef(GameDef.TowerType.cannon, 1));
+		addTower(new PointI(3, 5), def.getTowerDef(GameDef.TowerType.cannon, 1));
+		addTower(new PointI(1, 6), def.getTowerDef(GameDef.TowerType.cannon, 1));
+
+		addTower(new PointI(3, 3), def.getTowerDef(GameDef.TowerType.freezer, 1));
 	}
 	
 	public Image getTileImage(int x, int y){
@@ -90,7 +96,7 @@ public class Level {
 		return ((fields[loc.y][loc.x] == Field.grass) || (fields[loc.y][loc.x] == Field.floor)) && (towers[loc.y][loc.x] == null);
 	}
 	
-	public boolean iWalkable(PointI loc){
+	public boolean isWalkable(PointI loc){
 		return (fields[loc.y][loc.x] == Field.floor) && (towers[loc.y][loc.x] == null);
 	}
 	
@@ -110,6 +116,33 @@ public class Level {
 			}
 		}
 		return false;
+	}
+	
+	public void markMobForDeletion(Mob m){
+		mobsToDelete.add(m);
+	}
+	
+	public void markProjectileForDeletion(Projectile p){
+		projectilesToDelete.add(p);
+	}
+	
+	public void markExplosionForDeletion(Explosion e){
+		explosionsToDelete.add(e);
+	}
+	
+	public void markParticleForDeletion(Particle p){
+		particlesToDelete.add(p);
+	}
+	
+	public void deleteMarkedEntities(){
+		for(Mob m:mobsToDelete) mobs.remove(m);
+		for(Projectile p:projectilesToDelete) projectiles.remove(p);
+		for(Explosion e:explosionsToDelete) explosions.remove(e);
+		for(Particle p:particlesToDelete) particles.remove(p);
+		mobsToDelete.clear();
+		projectilesToDelete.clear();
+		explosionsToDelete.clear();
+		particlesToDelete.clear();
 	}
 	
 }

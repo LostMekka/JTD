@@ -4,6 +4,7 @@
  */
 package jtd.entities;
 
+import jtd.KillListener;
 import java.util.LinkedList;
 import java.util.Random;
 import jtd.CoordinateTransformator;
@@ -20,17 +21,20 @@ import org.newdawn.slick.state.StateBasedGame;
  */
 public abstract class Entity {
 	
-	public static final Random random = new Random();
+	public static final TDGameplayState GAME = TDGameplayState.get();	
+	public static final Random RANDOM = new Random();
 	
 	public PointF loc;
-	public float rotation = 0, sizeInTiles = 1;
+	public float rotation = 0f, sizeInTiles = 1f;
 	public int currSprite = 0;
-	public Image[] sprites;
+	public EntityDef entityDef;
+	
 	private LinkedList<KillListener> killListeners = new LinkedList<>();
+	private boolean initialTick = true;
 
-	public Entity(PointF loc, int spriteCount) {
+	public Entity(PointF loc, EntityDef def) {
 		this.loc = loc;
-		sprites = new Image[spriteCount];
+		this.entityDef = def;
 	}
 	
 	public final boolean addKillListener(KillListener l){
@@ -51,23 +55,32 @@ public abstract class Entity {
 	}
 	
 	public final void rotate(float amount){
-		while(amount < 0) amount += 2f * (float)(Math.PI);
-		rotation = (rotation + amount) % (float)(2d * Math.PI);
+		while(amount < 0) amount += 360f;
+		rotation = (rotation + amount) % 360f;
 	}
 	
 	public final void draw(
 			GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator){
-		if((currSprite >= 0) && (currSprite < sprites.length)){
-			transformator.drawImage(sprites[currSprite], loc, sizeInTiles, rotation);
+		if((currSprite >= 0) && (currSprite < entityDef.sprites.length)){
+			transformator.drawImage(entityDef.sprites[currSprite], loc, 
+					sizeInTiles * entityDef.sizes[currSprite], rotation);
 		}
 		entityDraw(gc, sbg, grphcs, transformator);
 	}
 	
+	public final void tick(float time){
+		entityTick(time);
+		if(initialTick){
+			initialTick = false;
+			entityInitialTick();
+		}
+	}
+	
+	public void entityTick(float time){}
+	public void entityInitialTick(){}
 	public void entityDraw(
 			GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator){}
-	
-	public abstract void tick(float time);
-	
+		
 }

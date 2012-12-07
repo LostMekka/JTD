@@ -4,36 +4,33 @@
  */
 package jtd.entities;
 
-import jtd.AssetLoader;
 import jtd.PointF;
-import org.newdawn.slick.GameContainer;
-import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
-import org.newdawn.slick.state.StateBasedGame;
 
 /**
  *
  * @author LostMekka
  */
-public class Particle extends Entity{
+public class Particle extends AnimatedEntity{
 
+	public ParticleDef def;
 	public PointF vel;
-	public float size, spinVel, lifetime;
-	private float age;
+	public float spinVel;
 	
-	public Particle(PointF loc, float size, PointF vel, float spinVel, Image sprite) {
-		super(loc, 1);
-		this.size = size;
-		this.spinVel = spinVel;
+	private float lifeTimeLeft;
+
+	public Particle(PointF loc, PointF vel, float rotation, float spinVel, ParticleDef particleDef) {
+		super(loc, particleDef);
+		this.def = particleDef;
 		this.vel = vel;
-		sprites[0] = sprite;
-		age = 0;
+		this.rotation = rotation;
+		this.spinVel = spinVel;
+		lifeTimeLeft = particleDef.lifetime + RANDOM.nextFloat() * particleDef.randomLifeTime;
 	}
 
 	@Override
-	public void tick(float time) {
-		age += time;
-		if(age >= lifetime){
+	public void animatedEntityTick(float time) {
+		lifeTimeLeft -= time;
+		if(lifeTimeLeft <= 0f){
 			kill(null);
 			return;
 		}
@@ -41,5 +38,5 @@ public class Particle extends Entity{
 		loc.y += time * vel.y;
 		rotate(time * spinVel);
 	}
-
+	
 }

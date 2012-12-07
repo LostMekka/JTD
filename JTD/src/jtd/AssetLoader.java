@@ -45,6 +45,7 @@ public class AssetLoader {
 					i = new Image(name);
 					if(!smoothFiltered) i.setFilter(Image.FILTER_NEAREST);
 				} catch (Exception ex) {
+					System.err.println("---------- ERROR: can't load image \"" + name + "\"");
 					if(errorImage == null){
 						try {
 							errorImage = new Image("error.png");

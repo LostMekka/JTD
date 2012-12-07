@@ -10,25 +10,23 @@ import org.newdawn.slick.Image;
  *
  * @author LostMekka
  */
-public class MobDef {
+public class MobDef extends AnimatedEntityDef{
 
 	public float maxHP, hpRegen, maxShield, shieldRegen, armor, speed;
-	public Image sprite;
 
-	public MobDef(
+	public MobDef(Image[] sprites, float[] times, float[] sizes, 
 			float maxHP, float hpRegen, 
 			float maxShield, float shieldRegen, 
-			float armor, float speed, 
-			Image sprite) {
+			float armor, float speed) {
+		super(sprites, times, sizes, true);
 		this.maxHP = maxHP;
 		this.hpRegen = hpRegen;
 		this.maxShield = maxShield;
 		this.shieldRegen = shieldRegen;
 		this.armor = armor;
 		this.speed = speed;
-		this.sprite = sprite;
 	}
 
-	public void tick(float time){}
+	public void tick(Mob mob, float time){}
 
 }

@@ -9,7 +9,6 @@ import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
 import jtd.entities.Entity;
 import jtd.entities.Explosion;
-import jtd.entities.KillListener;
 import jtd.entities.Mob;
 import jtd.entities.Particle;
 import jtd.entities.Projectile;
@@ -40,29 +39,9 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	
 	public Level level;
 	public GameDef gameDef = new GameDef();
-	float renderScale = 1f;
+	float renderScale = 2.5f;
 	PointF renderOffset = new PointF(0f, 0f);
 
-	@Override
-	public float getRenderOffsetX() {
-		return renderOffset.x;
-	}
-
-	@Override
-	public float getRenderOffsetY() {
-		return renderOffset.y;
-	}
-
-	@Override
-	public float getTileSize() {
-		return TILE_SIZE;
-	}
-
-	@Override
-	public float getRenderScale() {
-		return renderScale;
-	}
-	
 	@Override
 	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation){
 		i.setCenterOfRotation(
@@ -76,7 +55,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	}
 
 	@Override
-	public PointF transformX(PointF loc) {
+	public PointF transformPoint(PointF loc) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
@@ -85,14 +64,13 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	public void EntityKilled(Entity entity, Entity killer) {
 		if(entity instanceof Mob){
 			if(killer != null){
-				if(killer == entity){
-					// mob got through. punish player!
-				}
 				if(killer instanceof Tower){
 					// got killed by a tower. reward player!
+				} else {
+					// mob got through. punish player!
 				}
 			}
-			level.mobs.remove(entity);
+			level.markMobForDeletion((Mob)entity);
 			return;
 		}
 		if(entity instanceof Tower){
@@ -100,24 +78,36 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		}
 		if(entity instanceof Projectile){
 			Projectile p = (Projectile)entity;
-			level.projectiles.remove(p);
-			level.explosions.add(new Explosion(p.loc, p.def.expDef));
+			level.markProjectileForDeletion(p);
+			if(p.projectileDef.expDef != null){
+				level.explosions.add(new Explosion(p.loc, p.projectileDef.expDef));
+			}
+		}
+		if(entity instanceof Particle){
+			level.markParticleForDeletion((Particle)entity);
+		}
+		if(entity instanceof Explosion){
+			level.markExplosionForDeletion((Explosion)entity);
 		}
 	}
 
 	public Mob giveTarget(Tower tower){
 		// TODO: return a mob if possible
+		for(Mob m:level.mobs){
+			if(m.loc.distanceTo(tower.loc) < tower.towerDef.range){
+				return m;
+			}
+		}
 		return null;
 	}
 	
 	public void shoot(
-			Tower tower, Mob mob, 
+			PointF loc, Tower tower, Mob mob, 
 			LinkedList<InstantEffect> instantEffects, 
 			LinkedList<TimedEffect> timedEffects){
-		level.projectiles.add(
-				new Projectile(
-					tower.def.projectileDef, mob, tower, 
-					instantEffects, timedEffects, tower.loc));
+		level.projectiles.add(new Projectile(
+					tower.towerDef.projectileDef, mob, tower, 
+					instantEffects, timedEffects, loc));
 	}
 	
 	public void dealDamage(Mob mob, Tower attacker, 
@@ -125,17 +115,21 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			LinkedList<TimedEffect> timedEffects){
 		for(TimedEffect e:timedEffects) mob.applyTimedEffect(e);
 		for(InstantEffect e:instantEffects) mob.applyInstantEffect(e);
-		mob.damage(attacker.def.damage, attacker);
+		mob.damage(attacker.towerDef.damage, attacker);
 	}
 	
 	public void dealAreaDamage(PointF loc, Tower attacker, 
 			LinkedList<InstantEffect> instantEffects, 
 			LinkedList<TimedEffect> timedEffects){
 		for(Mob mob:level.mobs){
-			if(mob.loc.distanceTo(loc) <= attacker.def.damageRadius){
+			if(mob.loc.distanceTo(loc) <= attacker.towerDef.damageRadius){
 				dealDamage(mob, attacker, instantEffects, timedEffects);
 			}
 		}
+	}
+	
+	public boolean addParticle(Particle p){
+		return level.particles.add(p);
 	}
 	
 	@Override
@@ -174,19 +168,22 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	}
 
 	Path p = new Path();
-	int t = 0, n=0, diff=100;
+	int t = 0, n=30, diff=1000;
 	
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int i) throws SlickException {
 		float time = ((float)i) / 1000f;
+		for(Particle p:level.particles) p.tick(time);
+		for(Explosion e:level.explosions) e.tick(time);
+		for(Projectile p:level.projectiles) p.tick(time);
 		for(Mob m:level.mobs) m.tick(time);
 		for(Tower[] t1:level.towers) for(Tower t2:t1) if(t2 != null) t2.tick(time);
-		for(Projectile p:level.projectiles) p.tick(time);
-		if(n>50)return;
+		level.deleteMarkedEntities();
+		if(n<0)return;
 		t+=i;
 		while(t>diff){
 			t-=diff;
-			n++;
+			n--;
 			level.mobs.add(new Mob(gameDef.getMobDef(GameDef.MobType.swarm, 1, false), p));
 		}
 	}

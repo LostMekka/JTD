@@ -10,14 +10,25 @@ import org.newdawn.slick.Image;
  *
  * @author LostMekka
  */
-public class ExplosionDef {
-	
-	public Image[] sprites;
-	public float[] times;
+public class ExplosionDef extends AnimatedEntityDef{
 
-	public ExplosionDef(Image[] sprites, float[] times) {
-		this.sprites = sprites;
-		this.times = times;
-	}
+	public ParticleFactory[] particleFactories, initialFactories;
+	public float[] particleCooldowns;
+	public int[] initialParticleCounts;
+	public float force, randomForce;
 	
+	public ExplosionDef(
+			Image[] sprites, float[] sizes, float[] times, 
+			ParticleFactory[] particleFactories,
+			float[] particleCooldowns, float force, float randomForce,
+			ParticleFactory[] initialFactories, int[] initialParticleCounts) {
+		super(sprites, sizes, times, false);
+		this.particleFactories = particleFactories;
+		this.particleCooldowns = particleCooldowns;	
+		this.force = force;
+		this.randomForce = randomForce;
+		this.initialFactories = initialFactories;
+		this.initialParticleCounts = initialParticleCounts;
+	}
+
 }
