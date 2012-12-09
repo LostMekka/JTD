@@ -48,7 +48,7 @@ public class Tower extends Entity implements KillListener{
 	private static final Comparator<Mob> RANDOM_COMPARATOR = new Comparator<Mob>() {
 		@Override
 		public int compare(Mob o1, Mob o2) {
-			return RANDOM.nextInt(3) - 1;
+			return RANDOM.nextInt(2) * 2 - 1;
 		}
 	};
 	

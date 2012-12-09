@@ -4,6 +4,7 @@
  */
 package jtd.level;
 
+import java.util.ArrayList;
 import jtd.entities.Projectile;
 import java.util.LinkedList;
 import jtd.AssetLoader;
@@ -28,6 +29,18 @@ public class Level {
 	}
 	
 	private static final Field[][] lev1 = {
+		{Field.src,   Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.src, Field.floor, Field.floor, Field.wall},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.wall, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.dest, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.wall, Field.floor, Field.dest},
+	};
+	
+	private static final Field[][] lev2 = {
 		{Field.src,   Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.floor, Field.floor, Field.wall, Field.floor, Field.floor},
 		{Field.floor, Field.wall, Field.floor, Field.floor, Field.floor},
@@ -40,22 +53,26 @@ public class Level {
 	};
 	
 	public Field[][] fields;
+	public int[][] killCounts;
 	public Tower[][] towers;
+	public int w, h;
+	public GameDef def;
+
 	public LinkedList<Mob> mobs = new LinkedList<>();
 	public LinkedList<Projectile> projectiles = new LinkedList<>();
 	public LinkedList<Explosion> explosions = new LinkedList<>();
 	public LinkedList<Particle> particles = new LinkedList<>();
 	public LinkedList<Particle> bgParticles = new LinkedList<>();
-	public int w, h;
-	public GameDef def;
-
-	private Image iWall, iGrass, iFloor, iSrc, iDest;
+	
 	public LinkedList<Mob> mobsToDelete = new LinkedList<>();
 	public LinkedList<Projectile> projectilesToDelete = new LinkedList<>();
 	public LinkedList<Explosion> explosionsToDelete = new LinkedList<>();
 	public LinkedList<Particle> particlesToDelete = new LinkedList<>();
+
+	public ArrayList<PointI> sources, destinations;
 	
-	
+	private Image iWall, iGrass, iFloor, iSrc, iDest;
+		
 	public Level(GameDef def){
 		iWall = AssetLoader.getImage("wall.png", false);
 		iGrass = AssetLoader.getImage("grass.png", false);
@@ -67,15 +84,34 @@ public class Level {
 		h = fields.length;
 		w = fields[0].length;
 		towers = new Tower[h][w];
+		// init pathing stuff
+		killCounts = new int[h][w];
+		sources = new ArrayList<>();
+		destinations = new ArrayList<>();
+		for(int x=0; x<w; x++){
+			for(int y=0;y<h; y++){
+				if(fields[y][x] == Field.src) sources.add(new PointI(x, y));
+				if(fields[y][x] == Field.dest) destinations.add(new PointI(x, y));
+			}
+		}
 		// init test stuff
-		addTower(new PointI(1, 3), def.getTowerDef(GameDef.TowerType.repeater, 1));
-		addTower(new PointI(2, 5), def.getTowerDef(GameDef.TowerType.repeater, 1));
+		addTower(new PointI(0, 3), def.getTowerDef(GameDef.TowerType.repeater, 4));
+		addTower(new PointI(0, 4), def.getTowerDef(GameDef.TowerType.cannon, 4));
+		addTower(new PointI(0, 5), def.getTowerDef(GameDef.TowerType.repeater, 4));
 
-		addTower(new PointI(3, 1), def.getTowerDef(GameDef.TowerType.cannon, 1));
-		addTower(new PointI(3, 5), def.getTowerDef(GameDef.TowerType.cannon, 1));
-		addTower(new PointI(1, 6), def.getTowerDef(GameDef.TowerType.repeater, 1));
-
-		addTower(new PointI(3, 3), def.getTowerDef(GameDef.TowerType.freezer, 1));
+		addTower(new PointI(5, 5), def.getTowerDef(GameDef.TowerType.repeater, 2));
+		addTower(new PointI(6, 3), def.getTowerDef(GameDef.TowerType.cannon, 1));
+		addTower(new PointI(8, 2), def.getTowerDef(GameDef.TowerType.repeater, 2));
+		addTower(new PointI(8, 5), def.getTowerDef(GameDef.TowerType.cannon, 2));
+		addTower(new PointI(9, 4), def.getTowerDef(GameDef.TowerType.freezer, 2));
+	}
+	
+	public void killHappenedOn(PointI p){
+		killCounts[p.y][p.x]++;
+	}
+	
+	public int getPathingWeight(PointI p){
+		return killCounts[p.y][p.x];
 	}
 	
 	public Image getTileImage(int x, int y){
@@ -97,7 +133,11 @@ public class Level {
 	}
 	
 	public boolean isWalkable(PointI loc){
-		return (fields[loc.y][loc.x] == Field.floor) && (towers[loc.y][loc.x] == null);
+		return (
+				(fields[loc.y][loc.x] == Field.floor) || 
+				(fields[loc.y][loc.x] == Field.src) || 
+				(fields[loc.y][loc.x] == Field.dest)
+				) && (towers[loc.y][loc.x] == null);
 	}
 	
 	public boolean addTower(PointI loc, TowerDef def){

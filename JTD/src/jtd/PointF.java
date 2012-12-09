@@ -22,7 +22,7 @@ public class PointF {
 		y = 0f;
 	}
 	
-	public PointI getPountI(){
+	public PointI getPointI(){
 		return new PointI(Math.round(x), Math.round(y));
 	}
 	

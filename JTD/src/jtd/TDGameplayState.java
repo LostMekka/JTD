@@ -19,6 +19,7 @@ import jtd.entities.Projectile;
 import jtd.entities.Tower;
 import jtd.level.Level;
 import jtd.level.Path;
+import jtd.level.PathListener;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -32,7 +33,7 @@ import org.newdawn.slick.tiled.TileSet;
  *
  * @author LostMekka
  */
-public class TDGameplayState extends BasicGameState implements KillListener, CoordinateTransformator{
+public class TDGameplayState extends BasicGameState implements KillListener, CoordinateTransformator, PathListener{
 	
 	private static TDGameplayState in = null;
 	public static TDGameplayState get(){
@@ -67,16 +68,29 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 
 	
 	@Override
+	public void fieldWalkedBy(PointI p, Mob m) {
+	}
+
+	@Override
+	public void pathEndReachedBy(PointI p, Mob m) {
+		mobGotThrough(m);
+		m.kill(null);
+	}
+
+	@Override
 	public void EntityKilled(Entity entity, Entity killer) {
 		if(entity instanceof Mob){
-			if(killer != null){
-				if(killer instanceof Tower){
-					// got killed by a tower. reward player!
-				} else {
-					// mob got through. punish player!
-				}
+			Mob mob = (Mob)entity;
+			if((killer != null) && (killer instanceof Tower)){
+				mobGotKilled(mob);
+				PointI p = mob.loc.getPointI();
+				if(p.x < 0) p.x = 0;
+				if(p.x >= level.w) p.x = level.w - 1;
+				if(p.y < 0) p.y = 0;
+				if(p.y >= level.h) p.y = level.h - 1;
+				level.killHappenedOn(p);
 			}
-			level.markMobForDeletion((Mob)entity);
+			level.markMobForDeletion(mob);
 			return;
 		}
 		if(entity instanceof Tower){
@@ -100,8 +114,10 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	public Mob giveTarget(Tower tower){
 		SortedSet<Mob> mobs = new TreeSet<>(tower.getComparator());
 		for(Mob m:level.mobs){
-			if((m.loc.distanceTo(tower.loc) < tower.def.range) && !level.mobsToDelete.contains(m)){
-				mobs.add(m);
+			// hamming distance is faster. normally many mobs dont meet the distance criterion
+			// therefore checking the hamming distance first should make the game faster over all
+			if((m.loc.hammingDistanceTo(tower.loc) < tower.def.range) && !level.mobsToDelete.contains(m)){
+				if(m.loc.distanceTo(tower.loc) < tower.def.range) mobs.add(m);
 			}
 		}
 		if(mobs.isEmpty()) return null;
@@ -173,7 +189,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		level = new Level(gameDef);
-		p.generate();
+		p = Path.generate(level);
 	}
 
 	@Override
@@ -202,8 +218,16 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	}
 	
 
-	Path p = new Path();
-	int n=0;
+	private void mobGotThrough(Mob mob){
+		spm /= tst;
+	}
+	
+	private void mobGotKilled(Mob mob){
+		spm *= tst;
+	}
+	
+	Path p;
+	float n = 0f, spm = 1f, tst = 0.99f, t = 0f;
 	
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int i) throws SlickException {
@@ -222,8 +246,15 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		
 		Input in = gc.getInput();
 		if(in.isKeyPressed(Input.KEY_M)) n++;
+		t += time;
+		while(t > spm){
+			t -= spm;
+			n++;
+		}
 		while(n>0){
+			if(level.mobs.size() >= 1000) break;
 			n--;
+			p = Path.generate(level);
 			level.mobs.add(new Mob(gameDef.getMobDef(GameDef.MobType.swarm, 1, false), p));
 		}
 	}

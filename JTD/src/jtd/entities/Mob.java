@@ -113,15 +113,19 @@ public class Mob extends Entity {
 			while(travel > 0){
 				travel -= loc.travelTo(pathTarget, travel, true);
 				if(travel > 0){
+					PointF lastTargetPoint = pathTarget;
 					pathTarget = path.next();
 					// if we have reached the last node in the path, wander around randomly
 					if(pathTarget == null){
+						GAME.pathEndReachedBy(lastTargetPoint.getPointI(), this);
 						pathTarget = loc.clone();
 						float d = RANDOM.nextFloat() * 1.5f + 0.5f;
 						float a = RANDOM.nextFloat() * 360f;
 						pathTarget.x += d * (float)Math.cos(a);
 						pathTarget.y += d * (float)Math.sin(a);
 						GAME.movePointIntoLevl(pathTarget);
+					} else {
+						GAME.fieldWalkedBy(pathTarget.getPointI(), this);
 					}
 					// set proper direction
 					rotation = loc.getRotationTo(pathTarget);

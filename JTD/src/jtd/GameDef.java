@@ -198,7 +198,7 @@ public final class GameDef {
 			shotParticleCounts[0] = 1;
 			// towers
 			TowerDef t = new TowerDef(imageArray, sizesArray, Tower.TargetingMode.nearest,
-					1.5f + lev, 0f, 1.5f, 2f + lev, 
+					2f + 0.5f * lev, 0f, 1.5f, 2f + lev, 
 					0.5f, 360f, 140f, -80f,
 					towerTimedEffects, towerInstantEffects, rocketDef, 
 					TowerType.cannon, "Cannon Tower", lev, 
@@ -316,11 +316,11 @@ public final class GameDef {
 			shotParticleCounts[0] = 1;
 			shotParticleFactorys[1] = new ParticleFactory(part_muzzle_000, 
 					0f, 0f, 0f, 0f, 0f, 0f, 0.05f, 0.01f);
-			shotParticleFactorys[1].locationOffset = new PointF(0.45f, 0f);
+			shotParticleFactorys[1].locationOffset = new PointF(0.5f, 0f);
 			shotParticleCounts[1] = 1;
 			// towers
 			TowerDef t = new TowerDef(imageArray, sizesArray, Tower.TargetingMode.random,
-					1f + lev, 0f, 0.1f, 0.125f + 0.125f * lev, 
+					1.5f + 0.33f * lev, 0f, 0.1f, 0.125f + 0.125f * lev, 
 					0.3f, 600f, 400f, 20f,
 					towerTimedEffects, towerInstantEffects, null, 
 					TowerType.repeater, "Repeater Tower", lev, 
@@ -362,7 +362,7 @@ public final class GameDef {
 	
 	private TowerDef getTowerDef(ArrayList<TowerDef> list, int level){
 		if((level < 0) || (list == null) || (level >= list.size())) return null;
-		return list.get(level);
+		return list.get(level - 1);
 	}
 	
 	public MobDef getMobDef(MobType t, int level, boolean boss){
@@ -418,7 +418,7 @@ public final class GameDef {
 		
 		ParticleFactory[] hitFacts = new ParticleFactory[1];
 		float[] hitRatios = new float[1];
-		hitFacts[0] = new ParticleFactory(part_bloodsplat_000, 0f, 40f, 0f, 0f, 0.4f, 0.5f, 5f, 0f);
+		hitFacts[0] = new ParticleFactory(part_bloodsplat_000, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f);
 		hitRatios[0] = 0.5f;
 		return new MobDef(imageArray, timesArray, sizesArray, 
 				2 + 2 * level, 0, 0, 0, 0, 1, 
