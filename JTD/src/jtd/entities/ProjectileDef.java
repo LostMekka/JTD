@@ -16,20 +16,16 @@ public class ProjectileDef extends AnimatedEntityDef{
 	public ExplosionDef expDef;
 	public ParticleFactory[] particleFactories;
 	public float[] particleCooldowns;
-	public float force, randomForce;
 	
 	public ProjectileDef(Image[] sprites, float[] sizes, float[] times,
 			float speed, float lifeTime, ExplosionDef expDef, 
-			ParticleFactory[] particleFactories,
-			float[] particleCooldowns, float force, float randomForce) {
-		super(sprites, sizes, times, false);
+			ParticleFactory[] particleFactories, float[] particleCooldowns) {
+		super(sprites, sizes, times, true);
 		this.speed = speed;
 		this.lifeTime = lifeTime;
 		this.expDef = expDef;
 		this.particleFactories = particleFactories;
 		this.particleCooldowns = particleCooldowns;	
-		this.force = force;
-		this.randomForce = randomForce;
 	}
 
 }

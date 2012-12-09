@@ -10,6 +10,7 @@ import jtd.PointF;
 import jtd.TDGameplayState;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
+import jtd.effect.timed.TimedEffectDef;
 import org.newdawn.slick.Image;
 
 /**
@@ -18,12 +19,12 @@ import org.newdawn.slick.Image;
  */
 public class Projectile extends AnimatedEntity implements KillListener{
 
-	public ProjectileDef projectileDef;
+	public ProjectileDef def;
 	public Mob target;
 	public PointF targetLoc;
 	public Tower attacker;
 	public LinkedList<InstantEffect> instantEffects;
-	public LinkedList<TimedEffect> timedEffects;
+	public LinkedList<TimedEffectDef> timedEffects;
 	
 	private float lifeTime = 0f;
 	private float[] particleCooldowns;
@@ -31,10 +32,10 @@ public class Projectile extends AnimatedEntity implements KillListener{
 	public Projectile(
 			ProjectileDef def, Mob target, Tower attacker, 
 			LinkedList<InstantEffect> instantEffects, 
-			LinkedList<TimedEffect> timedEffects, 
+			LinkedList<TimedEffectDef> timedEffects, 
 			PointF loc) {
 		super(loc, def);
-		this.projectileDef = def;
+		this.def = def;
 		this.target = target;
 		target.addKillListener(this);
 		targetLoc = target.loc;
@@ -42,28 +43,28 @@ public class Projectile extends AnimatedEntity implements KillListener{
 		this.instantEffects = instantEffects;
 		this.timedEffects = timedEffects;
 		rotation = attacker.loc.getRotationTo(target.loc);
-		particleCooldowns = new float[projectileDef.particleFactories.length];
-		System.arraycopy(projectileDef.particleCooldowns, 0, particleCooldowns, 0, particleCooldowns.length);
+		particleCooldowns = new float[this.def.particleFactories.length];
+		System.arraycopy(this.def.particleCooldowns, 0, particleCooldowns, 0, particleCooldowns.length);
 	}
 	
 	@Override
 	public void animatedEntityTick(float time) {
 		// tick lifetime, kill if expired
 		lifeTime += time;
-		if(lifeTime >= projectileDef.lifeTime){
+		if(lifeTime >= def.lifeTime){
 			kill(null);
 			return;
 		}
 		// move to target
-		loc.travelTo(targetLoc, time * projectileDef.speed, true);
+		loc.travelTo(targetLoc, time * def.speed, true);
 		rotation = loc.getRotationTo(targetLoc);
 		// if target is reached, deal damage and kill self
-		if(loc.hammingDistanceTo(targetLoc) < 0.05f){
-			if(attacker.towerDef.damageRadius > 0){
+		if(loc.hammingDistanceTo(targetLoc) < 0.1f){
+			if(attacker.def.damageRadius > 0){
 				TDGameplayState.get().dealAreaDamage(targetLoc, attacker, instantEffects, timedEffects);
 			} else {
 				if(target != null){
-					TDGameplayState.get().dealDamage(target, attacker, instantEffects, timedEffects);
+					TDGameplayState.get().dealDamage(target, attacker, instantEffects, timedEffects, rotation);
 				}
 			}
 			kill(null);
@@ -72,9 +73,8 @@ public class Projectile extends AnimatedEntity implements KillListener{
 		for(int i=0; i<particleCooldowns.length; i++){
 			particleCooldowns[i] -= time;
 			while(particleCooldowns[i] <= 0){
-				particleCooldowns[i] += projectileDef.particleCooldowns[i];
-				GAME.addParticle(projectileDef.particleFactories[i].createParticle(
-						loc.clone(), rotation + 180f, projectileDef.force, projectileDef.randomForce));
+				particleCooldowns[i] += def.particleCooldowns[i];
+				GAME.addParticle(def.particleFactories[i], loc.clone(), rotation + 180f);
 			}
 		}
 	}

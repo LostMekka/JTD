@@ -27,14 +27,14 @@ public abstract class Entity {
 	public PointF loc;
 	public float rotation = 0f, sizeInTiles = 1f;
 	public int currSprite = 0;
-	public EntityDef entityDef;
+	public EntityDef def;
 	
 	private LinkedList<KillListener> killListeners = new LinkedList<>();
 	private boolean initialTick = true;
 
 	public Entity(PointF loc, EntityDef def) {
 		this.loc = loc;
-		this.entityDef = def;
+		this.def = def;
 	}
 	
 	public final boolean addKillListener(KillListener l){
@@ -62,9 +62,9 @@ public abstract class Entity {
 	public final void draw(
 			GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator){
-		if((currSprite >= 0) && (currSprite < entityDef.sprites.length)){
-			transformator.drawImage(entityDef.sprites[currSprite], loc, 
-					sizeInTiles * entityDef.sizes[currSprite], rotation);
+		if((currSprite >= 0) && (currSprite < def.sprites.length)){
+			transformator.drawImage(def.sprites[currSprite], loc, 
+					sizeInTiles * def.sizes[currSprite], rotation);
 		}
 		entityDraw(gc, sbg, grphcs, transformator);
 	}

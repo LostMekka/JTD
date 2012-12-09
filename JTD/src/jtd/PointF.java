@@ -51,6 +51,12 @@ public class PointF {
 		return travelDistance;
 	}
 
+	public void travelInDirection(float travelDirection, float travelDistance){
+		double dirInPi = travelDirection / 180d * Math.PI;
+		x += travelDistance * (float)Math.cos(dirInPi);
+		y += travelDistance * (float)Math.sin(dirInPi);
+	}
+
 	public float getRotationTo(PointF p){
 		if(p.x == x){
 			if(p.y < y){
@@ -67,6 +73,10 @@ public class PointF {
 		float tmp = x * (float)Math.cos(amount) - y * (float)Math.sin(amount);
 		y = x * (float)Math.sin(amount) + y * (float)Math.cos(amount);
 		x = tmp;
+	}
+	
+	public boolean isInSameTileWith(PointF p){
+		return ((Math.round(x) == Math.round(p.x)) && (Math.round(y) == Math.round(p.y)));
 	}
 	
 	@Override

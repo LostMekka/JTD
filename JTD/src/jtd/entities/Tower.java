@@ -4,12 +4,15 @@
  */
 package jtd.entities;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import jtd.CoordinateTransformator;
 import jtd.KillListener;
 import jtd.PointF;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
+import jtd.effect.timed.TimedEffectDef;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.state.StateBasedGame;
@@ -20,27 +23,69 @@ import org.newdawn.slick.state.StateBasedGame;
  */
 public class Tower extends Entity implements KillListener{
 
-	public TowerDef towerDef;
-	public Mob target = null;
-	public PointF lastTargetLocation;
+	public enum TargetingMode{
+		nearest, leatHealth, random
+	}
 	
-	private float shotCooldown;
+	private static final Comparator<Mob> NEAREST_COMPARATOR = new Comparator<Mob>() {
+		@Override
+		public int compare(Mob o1, Mob o2) {
+			float d1 = o1.getDistanceStillToWalk();
+			float d2 = o2.getDistanceStillToWalk();
+			if(d1 > d2) return 1;
+			if(d1 < d2) return -1;
+			return 0;
+		}
+	};
+	private static final Comparator<Mob> LEAST_HEALTH_COMPARATOR = new Comparator<Mob>() {
+		@Override
+		public int compare(Mob o1, Mob o2) {
+			if(o1.hp > o2.hp) return 1;
+			if(o1.hp < o2.hp) return -1;
+			return 0;
+		}
+	};
+	private static final Comparator<Mob> RANDOM_COMPARATOR = new Comparator<Mob>() {
+		@Override
+		public int compare(Mob o1, Mob o2) {
+			return RANDOM.nextInt(3) - 1;
+		}
+	};
+	
+	public Comparator<Mob> getComparator(){
+		switch(targetingMode){
+			case leatHealth: return LEAST_HEALTH_COMPARATOR;
+			case nearest: return NEAREST_COMPARATOR;
+			case random: return RANDOM_COMPARATOR;
+			default: return null;
+		}
+	}
+	
+	public static final float IDLE_COOLDOWN_TIME = 2f;
+	public static final float IDLE_COOLDOWN_RANDOM_TIME = 14f;
+	
+	public TowerDef def;
+	public Mob target = null;
+	public TargetingMode targetingMode;
+	
+	private float shotCooldown, headDir, headVel, idleCounter, lastTargetDirection;
 	private float[] instantEffectCooldowns, timedEffectCooldowns, idleParticleCooldowns;
 
 	public Tower(TowerDef def, PointF loc) {
 		super(loc, def);
-		lastTargetLocation = new PointF(1f, 0f);
-		lastTargetLocation.rotate(RANDOM.nextFloat() * 360f);
-		lastTargetLocation.x += loc.x;
-		lastTargetLocation.y += loc.y;
+		headDir = RANDOM.nextFloat() * 360f;
+		lastTargetDirection = headDir;
+		headVel = def.headIdleVel;
 		updateTowerDef(def);
+		resetIdleCounter();
+		targetingMode = def.defaultTargetingMode;
 	}
-	
+
 	public final void updateTowerDef(TowerDef towerDef){
-		if(this.towerDef == towerDef) return;
+		if(this.def == towerDef) return;
 		// update def references
-		this.towerDef = towerDef;
-		this.entityDef = towerDef;
+		this.def = towerDef;
+		super.def = towerDef;
 		// reset shot cooldown
 		shotCooldown = towerDef.reloadTime;
 		// init instant effect cooldowns
@@ -62,76 +107,125 @@ public class Tower extends Entity implements KillListener{
 		target = GAME.giveTarget(this);
 		if(target != null){
 			target.addKillListener(this);
-			lastTargetLocation = target.loc;
+			resetIdleCounter();
+		}
+	}
+	
+	private void resetIdleCounter(){
+		idleCounter = IDLE_COOLDOWN_TIME + RANDOM.nextFloat() * IDLE_COOLDOWN_RANDOM_TIME;
+	}
+
+	private float turnTo(float direction, float tickTime){
+		float dirDiff = direction - headDir;
+		while(dirDiff < -180f) dirDiff += 360f;
+		while(dirDiff > 180f) dirDiff -= 360f;
+		float sign = Math.signum(dirDiff);
+		// already time to decelerate?
+		if(dirDiff * sign <= headVel * headVel / def.headAcceleration * 0.5f){
+			// decelerate
+			headVel -= sign * def.headAcceleration * tickTime;
+			if(headVel * sign < 0f) headVel = 0f;
+		} else {
+			// accelerate if still possible
+			headVel += sign * def.headAcceleration * tickTime;
+			if(headVel * sign > def.headMaxVel) headVel = sign * def.headMaxVel;
+		}
+		return dirDiff;
+	}
+	
+	private float accelerateTo(float velocity, float tickTime){
+		float sign = Math.signum(velocity - headVel);
+		headVel += sign * def.headAcceleration * tickTime;
+		if(headVel * sign > velocity * sign){
+			headVel = velocity;
+		}
+		return velocity - headVel;
+	}
+	
+	public void shoot(){
+		PointF shotStart = loc.clone();
+		shotStart.travelInDirection(headDir, def.headLength);
+		// fill effects
+		LinkedList<InstantEffect> instantEffects = new LinkedList<>();
+		LinkedList<TimedEffectDef> timedEffects = new LinkedList<>();
+		for(int i=0; i<instantEffectCooldowns.length; i++){
+			if(instantEffectCooldowns[i] <= 0){
+				instantEffectCooldowns[i] = def.instantEffects[i].cooldown;
+				instantEffects.add(def.instantEffects[i]);
+			}
+		}
+		for(int i=0; i<timedEffectCooldowns.length; i++){
+			if(timedEffectCooldowns[i] <= 0){
+				timedEffectCooldowns[i] = def.timedEffects[i].cooldown;
+				timedEffects.add(def.timedEffects[i]);
+			}
+		}
+		// shoot
+		if(def.projectileDef == null){
+			// no projectile! deal damage immediately
+			if(def.damageRadius > 0f){
+				GAME.dealAreaDamage(target.loc, this, instantEffects, timedEffects);
+			} else {
+				GAME.dealDamage(target, this, instantEffects, timedEffects, headDir);
+			}
+		} else {
+			// shoot projectile
+			GAME.shoot(shotStart, this, target, instantEffects, timedEffects);
+		}
+		// add shot particles
+		for(int i=0; i<def.shotParticleFactories.length; i++){
+			for(int n=0; n<def.shotParticleCounts[i]; n++){
+				GAME.addParticle(def.shotParticleFactories[i], loc.clone(), headDir);
+			}
 		}
 	}
 	
 	@Override
 	public void entityTick(float time) {
-		// targeting
-		if(target == null){
+		// compute tower rotation
+		headDir += headVel * time;
+		if(headDir < 0f) headDir += 360;
+		if(headDir > 360f) headDir -= 360;
+		// aqquire new target if necessary
+		if((target == null) || (loc.distanceTo(target.loc) > def.range)){
 			requestTarget();
-		} else {
-			if(loc.distanceTo(target.loc) > towerDef.range){
-				lastTargetLocation = target.loc.clone();
-				requestTarget();
-			}
 		}
-		// if target is still null, spin head
+		// targeting
+		float targetDirDiff = 180f;
 		if(target == null){
-			lastTargetLocation.x -= loc.x;
-			lastTargetLocation.y -= loc.y;
-			lastTargetLocation.rotate(time * 40f);
-			lastTargetLocation.x += loc.x;
-			lastTargetLocation.y += loc.y;
+			// no target. rotate to last target direction and spin sweep after the timeout
+			idleCounter -= time;
+			turnTo(lastTargetDirection, time);
+			if(idleCounter <= 0f){
+				lastTargetDirection = RANDOM.nextFloat() * 360f;
+				resetIdleCounter();
+			}
+		} else {
+			// there is a target. turn towards it and set its direction and the angle left to turn
+			// (used by the shooting part later)
+			lastTargetDirection = loc.getRotationTo(target.loc);
+			targetDirDiff = turnTo(lastTargetDirection, time);
 		}
-		// shot cooldowns
+		// shot cooldowns / reload times
 		shotCooldown -= time;
-		for(int i=0; i<instantEffectCooldowns.length; i++){
-			instantEffectCooldowns[i] -= time;
-		}
-		for(int i=0; i<timedEffectCooldowns.length; i++){
-			timedEffectCooldowns[i] -= time;
-		}
+		for(int i=0; i<instantEffectCooldowns.length; i++) instantEffectCooldowns[i] -= time;
+		for(int i=0; i<timedEffectCooldowns.length; i++) timedEffectCooldowns[i] -= time;
 		// shooting
-		while(shotCooldown <= 0f){
-			if(target == null){
+		if(shotCooldown <= 0f){
+			// if tower has no target or tower does not face target, delay shot
+			if((target == null) || (Math.abs(targetDirDiff) > 5f)){
 				shotCooldown = 0f;
-				break;
+			} else {
+				shoot();
+				shotCooldown += def.reloadTime;
 			}
-			LinkedList<InstantEffect> instantEffects = new LinkedList<>();
-			LinkedList<TimedEffect> timedEffects = new LinkedList<>();
-			for(int i=0; i<instantEffectCooldowns.length; i++){
-				if(instantEffectCooldowns[i] <= 0){
-					instantEffectCooldowns[i] -= towerDef.instantEffects[i].cooldown;
-					instantEffects.add(towerDef.instantEffects[i]);
-				}
-			}
-			for(int i=0; i<timedEffectCooldowns.length; i++){
-				if(timedEffectCooldowns[i] <= 0){
-					timedEffectCooldowns[i] -= towerDef.timedEffects[i].cooldown;
-					timedEffects.add(new TimedEffect(this, towerDef.timedEffects[i]));
-				}
-			}
-			PointF p = loc.clone();
-			p.travelTo(lastTargetLocation, towerDef.headLength, false);
-			float shotDir = loc.getRotationTo(lastTargetLocation);
-			GAME.shoot(p, this, target, instantEffects, timedEffects);
-			for(int i=0; i<towerDef.shotParticleFactories.length; i++){
-				for(int n=0; n<towerDef.shotParticleCounts[i]; n++){
-					GAME.addParticle(towerDef.shotParticleFactories[i].createParticle(
-							p.clone(), shotDir, towerDef.shotForce, towerDef.shotRandomForce));
-				}
-			}
-			shotCooldown += towerDef.reloadTime;
 		}
 		// idle particles
 		for(int i=0; i<idleParticleCooldowns.length; i++){
 			idleParticleCooldowns[i] -= time;
 			while(idleParticleCooldowns[i] <= 0){
-				idleParticleCooldowns[i] += towerDef.idlePartCooldowns[i];
-				GAME.addParticle(towerDef.idlePartFacts[i].createParticle(
-						loc.clone(), 0f, towerDef.idleParticleForce, towerDef.idleParticleRandomForce));
+				idleParticleCooldowns[i] += def.idlePartCooldowns[i];
+				GAME.addParticle(def.idlePartFacts[i], loc.clone(), 0f);
 			}
 		}
 	}
@@ -141,21 +235,27 @@ public class Tower extends Entity implements KillListener{
 			GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator) {
 		// draw head
-		if(towerDef.sprites[1] != null){
-			if(target == null){
-				transformator.drawImage(towerDef.sprites[1], loc, sizeInTiles, loc.getRotationTo(lastTargetLocation));
-			} else {
-				transformator.drawImage(towerDef.sprites[1], loc, sizeInTiles, loc.getRotationTo(target.loc));
-			}
+		if(def.sprites[1] != null){
+			transformator.drawImage(def.sprites[1], loc, sizeInTiles, headDir);
 		}
+//		PointF tol = transformator.transformPoint(loc);
+//		grphcs.drawString("" + shotCooldown, tol.x, tol.y);
+//		if(target != null){
+//			PointF tal = transformator.transformPoint(target.loc);
+//			grphcs.drawLine(tol.x, tol.y, tal.x, tal.y);
+//		}
+//		PointF p = loc.clone();
+//		p.travelInDirection(headDir, def.range);
+//		PointF p2 = transformator.transformPoint(p);
+//		grphcs.drawLine(tol.x, tol.y, p2.x, p2.y);
+//		PointF os = transformator.transformPoint(new PointF(loc.x - def.range, loc.y - def.range));
+//		PointF oe = transformator.transformPoint(new PointF(loc.x + def.range, loc.y + def.range));
+//		grphcs.drawOval(os.x, os.y, oe.x - os.x, oe.y - os.y);
 	}
 
 	@Override
 	public void EntityKilled(Entity entity, Entity killer) {
-		if(entity == target){
-			lastTargetLocation = target.loc.clone();
-			target = null;
-		}
+		if(entity == target) target = null;
 	}
 	
 }

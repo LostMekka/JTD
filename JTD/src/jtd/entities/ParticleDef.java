@@ -12,12 +12,12 @@ import org.newdawn.slick.Image;
  */
 public class ParticleDef extends AnimatedEntityDef{
 
-	public float lifetime, randomLifeTime;
-	
-	public ParticleDef(Image[] sprites, float[] sizes, float[] times, float lifetime, float randomLifeTime) {
+	public ParticleDef(Image[] sprites, float[] sizes, float[] times, boolean isCyclic) {
+		super(sprites, sizes, times, isCyclic);
+	}
+
+	public ParticleDef(Image[] sprites, float[] sizes, float[] times) {
 		super(sprites, sizes, times, true);
-		this.lifetime = lifetime;
-		this.randomLifeTime = randomLifeTime;
 	}
 	
 }

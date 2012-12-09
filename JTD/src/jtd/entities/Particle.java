@@ -18,13 +18,13 @@ public class Particle extends AnimatedEntity{
 	
 	private float lifeTimeLeft;
 
-	public Particle(PointF loc, PointF vel, float rotation, float spinVel, ParticleDef particleDef) {
+	public Particle(ParticleDef particleDef, PointF loc, PointF vel, float rotation, float spinVel, float lifeTime) {
 		super(loc, particleDef);
 		this.def = particleDef;
 		this.vel = vel;
 		this.rotation = rotation;
 		this.spinVel = spinVel;
-		lifeTimeLeft = particleDef.lifetime + RANDOM.nextFloat() * particleDef.randomLifeTime;
+		lifeTimeLeft = lifeTime;
 	}
 
 	@Override
@@ -37,6 +37,11 @@ public class Particle extends AnimatedEntity{
 		loc.x += time * vel.x;
 		loc.y += time * vel.y;
 		rotate(time * spinVel);
+	}
+
+	@Override
+	public void animationEnded() {
+		kill(null);
 	}
 	
 }

@@ -17,8 +17,7 @@ import org.newdawn.slick.Image;
  */
 public class TowerDef extends EntityDef{
 	
-	public float range, damageRadius, reloadTime, damage, headLength;
-	public float shotForce, shotRandomForce, idleParticleForce, idleParticleRandomForce;
+	public float range, damageRadius, reloadTime, damage, headLength, headMaxVel, headAcceleration, headIdleVel;
 	public TimedEffectDef[] timedEffects;
 	public InstantEffect[] instantEffects;
 	public ProjectileDef projectileDef;
@@ -28,23 +27,25 @@ public class TowerDef extends EntityDef{
 	public ParticleFactory[] idlePartFacts, shotParticleFactories;
 	public float[] idlePartCooldowns;
 	public int[] shotParticleCounts;
+	public Tower.TargetingMode defaultTargetingMode;
 
-	public TowerDef(Image[] sprites, float[] sizes, 
-			float range, float damageRadius, float reloadTime, float damage, float headLength,
+	public TowerDef(Image[] sprites, float[] sizes, Tower.TargetingMode defaultTargetingMode,
+			float range, float damageRadius, float reloadTime, float damage, 
+			float headLength, float headMaxSpeed, float headAcceleration, float headIdleSpeed,
 			TimedEffectDef[] timedEffects, InstantEffect[] instantEffects, 
 			ProjectileDef projectileDef, TowerType towerType, String name, int level, 
-			ParticleFactory[] idlePartFacts, float[] idlePartCooldowns, float idleParticleForce, float idleParticleRandomForce, 
-			ParticleFactory[] shotParticleFactory, int[] shotParticleCounts, float shotForce, float shotRandomForce) {
+			ParticleFactory[] idlePartFacts, float[] idlePartCooldowns, 
+			ParticleFactory[] shotParticleFactory, int[] shotParticleCounts) {
 		super(sprites, sizes);
+		this.defaultTargetingMode = defaultTargetingMode;
 		this.range = range;
 		this.damageRadius = damageRadius;
 		this.reloadTime = reloadTime;
 		this.damage = damage;
 		this.headLength = headLength;
-		this.shotForce = shotForce;
-		this.shotRandomForce = shotRandomForce;
-		this.idleParticleForce = idleParticleForce;
-		this.idleParticleRandomForce = idleParticleRandomForce;
+		this.headMaxVel = headMaxSpeed;
+		this.headAcceleration = headAcceleration;
+		this.headIdleVel = headIdleSpeed;
 		this.timedEffects = timedEffects;
 		this.instantEffects = instantEffects;
 		this.projectileDef = projectileDef;

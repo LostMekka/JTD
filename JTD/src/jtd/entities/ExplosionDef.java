@@ -15,18 +15,14 @@ public class ExplosionDef extends AnimatedEntityDef{
 	public ParticleFactory[] particleFactories, initialFactories;
 	public float[] particleCooldowns;
 	public int[] initialParticleCounts;
-	public float force, randomForce;
 	
 	public ExplosionDef(
 			Image[] sprites, float[] sizes, float[] times, 
-			ParticleFactory[] particleFactories,
-			float[] particleCooldowns, float force, float randomForce,
+			ParticleFactory[] particleFactories, float[] particleCooldowns,
 			ParticleFactory[] initialFactories, int[] initialParticleCounts) {
 		super(sprites, sizes, times, false);
 		this.particleFactories = particleFactories;
 		this.particleCooldowns = particleCooldowns;	
-		this.force = force;
-		this.randomForce = randomForce;
 		this.initialFactories = initialFactories;
 		this.initialParticleCounts = initialParticleCounts;
 	}

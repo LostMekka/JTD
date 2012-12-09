@@ -25,9 +25,15 @@ public class Path {
 		}
 	}
 	
-	private class MyIter implements Iterator<PointF>{
-		Iterator<PointI> iter;
-		public MyIter(List<PointI> list) {
+	public class PathIterator implements Iterator<PointF>{
+		private List<PointI> list;
+		private Iterator<PointI> iter;
+		private int index = 0;
+		private PointI currentPointI = null;
+		private float randomComponent;
+		public PathIterator(List<PointI> list, float randomComponent) {
+			this.list = list;
+			this.randomComponent = randomComponent;
 			iter = list.iterator();
 		}
 		@Override
@@ -37,7 +43,9 @@ public class Path {
 		@Override
 		public PointF next() {
 			if(iter.hasNext()){
-				return iter.next().getPointF(0.1f);
+				index++;
+				currentPointI = iter.next();
+				return currentPointI.getPointF(randomComponent);
 			} else {
 				return null;
 			}
@@ -45,6 +53,18 @@ public class Path {
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException();
+		}
+		public float getDistanceLeft(){
+			Iterator<PointI> iter2 = list.iterator();
+			PointI p = null;
+			while((p != currentPointI) && iter2.hasNext()) p = iter2.next();
+			float dist = 0;
+			while(iter2.hasNext()){
+				PointI p2 = iter2.next();
+				dist += p.distanceTo(p2);
+				p = p2;
+			}
+			return dist;
 		}
 	}
 	
@@ -63,16 +83,14 @@ public class Path {
 		path.add(new PointI(2, 6));
 		
 		path.add(new PointI(2, 8));
-		path.add(new PointI(0, 8));
-		path.add(new PointI(0, 11));
-		path.add(new PointI(4, 11));
+		path.add(new PointI(4, 8));
 	}
 	
 	public PointF getStart(){
 		return path.getFirst().getPointF(0.5f);
 	}
 	
-	public Iterator<PointF> getPointIterator(){
-		return new MyIter(path);
+	public PathIterator getPointIterator(float randomComponent){
+		return new PathIterator(path, randomComponent);
 	}
 }

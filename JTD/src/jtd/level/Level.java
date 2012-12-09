@@ -29,16 +29,13 @@ public class Level {
 	
 	private static final Field[][] lev1 = {
 		{Field.src,   Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.floor, Field.floor, Field.wall, Field.floor, Field.floor},
+		{Field.floor, Field.wall, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.grass, Field.floor, Field.grass, Field.grass},
 		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.grass, Field.floor, Field.grass, Field.grass},
-		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.floor, Field.floor, Field.floor, Field.floor, Field.dest},
 	};
 	
@@ -48,14 +45,15 @@ public class Level {
 	public LinkedList<Projectile> projectiles = new LinkedList<>();
 	public LinkedList<Explosion> explosions = new LinkedList<>();
 	public LinkedList<Particle> particles = new LinkedList<>();
+	public LinkedList<Particle> bgParticles = new LinkedList<>();
 	public int w, h;
 	public GameDef def;
 
 	private Image iWall, iGrass, iFloor, iSrc, iDest;
-	private LinkedList<Mob> mobsToDelete = new LinkedList<>();
-	private LinkedList<Projectile> projectilesToDelete = new LinkedList<>();
-	private LinkedList<Explosion> explosionsToDelete = new LinkedList<>();
-	private LinkedList<Particle> particlesToDelete = new LinkedList<>();
+	public LinkedList<Mob> mobsToDelete = new LinkedList<>();
+	public LinkedList<Projectile> projectilesToDelete = new LinkedList<>();
+	public LinkedList<Explosion> explosionsToDelete = new LinkedList<>();
+	public LinkedList<Particle> particlesToDelete = new LinkedList<>();
 	
 	
 	public Level(GameDef def){
@@ -70,10 +68,12 @@ public class Level {
 		w = fields[0].length;
 		towers = new Tower[h][w];
 		// init test stuff
+		addTower(new PointI(1, 3), def.getTowerDef(GameDef.TowerType.repeater, 1));
+		addTower(new PointI(2, 5), def.getTowerDef(GameDef.TowerType.repeater, 1));
 
 		addTower(new PointI(3, 1), def.getTowerDef(GameDef.TowerType.cannon, 1));
 		addTower(new PointI(3, 5), def.getTowerDef(GameDef.TowerType.cannon, 1));
-		addTower(new PointI(1, 6), def.getTowerDef(GameDef.TowerType.cannon, 1));
+		addTower(new PointI(1, 6), def.getTowerDef(GameDef.TowerType.repeater, 1));
 
 		addTower(new PointI(3, 3), def.getTowerDef(GameDef.TowerType.freezer, 1));
 	}
@@ -138,7 +138,10 @@ public class Level {
 		for(Mob m:mobsToDelete) mobs.remove(m);
 		for(Projectile p:projectilesToDelete) projectiles.remove(p);
 		for(Explosion e:explosionsToDelete) explosions.remove(e);
-		for(Particle p:particlesToDelete) particles.remove(p);
+		for(Particle p:particlesToDelete){
+			particles.remove(p);
+			bgParticles.remove(p);
+		}
 		mobsToDelete.clear();
 		projectilesToDelete.clear();
 		explosionsToDelete.clear();
