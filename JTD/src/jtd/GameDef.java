@@ -274,7 +274,7 @@ public final class GameDef {
 			shotParticleCounts = new int[1];
 			shotParticleFactorys[0] = new ParticleFactory(part_dust_001, 
 					180f, 50f, 0f, 0f, 1f, 1.5f, 1f, 1f);
-			shotParticleFactorys[0].locationOffset = new PointF(-0.25f, 0f);
+			shotParticleFactorys[0].locationOffset = new PointF(-0.15f, 0f);
 			shotParticleCounts[0] = 15;
 			// towers
 			TowerDef t = new TowerDef(imageArray, sizesArray, Tower.TargetingMode.nearest,
@@ -316,7 +316,7 @@ public final class GameDef {
 			shotParticleCounts[0] = 1;
 			shotParticleFactorys[1] = new ParticleFactory(part_muzzle_000, 
 					0f, 0f, 0f, 0f, 0f, 0f, 0.05f, 0.01f);
-			shotParticleFactorys[1].locationOffset = new PointF(0.4f, 0f);
+			shotParticleFactorys[1].locationOffset = new PointF(0.45f, 0f);
 			shotParticleCounts[1] = 1;
 			// towers
 			TowerDef t = new TowerDef(imageArray, sizesArray, Tower.TargetingMode.random,
