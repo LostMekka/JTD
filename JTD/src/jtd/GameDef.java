@@ -277,8 +277,8 @@ public final class GameDef {
 			shotParticleFactorys[0].locationOffset = new PointF(-0.15f, 0f);
 			shotParticleCounts[0] = 15;
 			// towers
-			TowerDef t = new TowerDef(imageArray, sizesArray, Tower.TargetingMode.nearest,
-					3.5f + lev, 0.5f + 0.5f * lev, 3f, 0.5f, 
+			TowerDef t = new TowerDef(imageArray, sizesArray, Tower.TargetingMode.random,
+					3.5f + lev, 0.5f + 0.5f * lev, 3f, 0.1f, 
 					0.15f, 140f, 40f, 30f,
 					towerTimedEffects, towerInstantEffects, rocketDef, 
 					TowerType.freezer, "Freezer Tower", lev, 
@@ -401,12 +401,15 @@ public final class GameDef {
 	}
 	
 	private MobDef generateMobDef(MobType t, int level, boolean boss){
-		imageArray = new Image[1];
-		timesArray = new float[1];
-		sizesArray = new float[1];
-		imageArray[0] = AssetLoader.getImage("mob.png", false);
-		timesArray[0] = 0.5f;
-		sizesArray[0] = 0.5f;
+		n = 2;
+		imageArray = new Image[n];
+		timesArray = new float[n];
+		sizesArray = new float[n];
+		for(int i=0; i<n; i++){
+			imageArray[i] = AssetLoader.getImage("hummer_000_00" + i + ".png", false);
+			timesArray[i] = 0.2f;
+			sizesArray[i] = 0.5f;
+		}
 		
 		ParticleFactory[] deathFacts = new ParticleFactory[2];
 		int[] deathCounts = new int[2];
@@ -420,7 +423,7 @@ public final class GameDef {
 		float[] hitRatios = new float[1];
 		hitFacts[0] = new ParticleFactory(part_bloodsplat_000, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f);
 		hitRatios[0] = 0.5f;
-		return new MobDef(imageArray, timesArray, sizesArray, 
+		return new MobDef(imageArray, sizesArray, timesArray, 
 				2 + 2 * level, 0, 0, 0, 0, 1, 
 				deathFacts, deathCounts, hitFacts, hitRatios);
 	}

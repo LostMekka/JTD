@@ -17,13 +17,13 @@ public class MobDef extends AnimatedEntityDef{
 	public float[] damagePerParticle;
 	public int[] deathParticleCounts;
 
-	public MobDef(Image[] sprites, float[] times, float[] sizes, 
+	public MobDef(Image[] sprites, float[] sizes, float[] times, 
 			float maxHP, float hpRegen, 
 			float maxShield, float shieldRegen, 
 			float armor, float speed, 
 			ParticleFactory[] deathParticleFacts, int[] deathParticleCounts,
 			ParticleFactory[] hitParticleFacts, float[] damagePerParticle) {
-		super(sprites, times, sizes, true);
+		super(sprites, sizes, times, true);
 		this.maxHP = maxHP;
 		this.hpRegen = hpRegen;
 		this.maxShield = maxShield;

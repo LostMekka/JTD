@@ -4,12 +4,12 @@
  */
 package jtd.entities;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import jtd.PointF;
+import jtd.PointI;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
-import jtd.level.Path;
+import jtd.level.PathingGraph;
 
 /**
  *
@@ -17,25 +17,52 @@ import jtd.level.Path;
  */
 public class Mob extends Entity {
 
+	public static final float WALK_RANDOM_COMPONENT = 0.1f;
+	
 	public MobDef def;
 	public float speedMultiplier = 1f, armorOffset = 0f, bonusDamage = 0f;
 	public float hp, shield;
 	
 	private float[] dmgCounters;
-	private Path.PathIterator path;
+	private PathingGraph.PathingGraphIterator path = null;
 	private PointF pathTarget;
 	private LinkedList<TimedEffect> effects = new LinkedList<>(), effectsToRemove = new LinkedList<>();
 	
-	public Mob(MobDef mobDef, Path p){
-		super(p.getStart().clone(), mobDef);
+	public Mob(PointF loc, MobDef mobDef){
+		super(loc, mobDef);
 		this.def = mobDef;
 		hp = mobDef.maxHP;
 		shield = mobDef.maxShield;
-		path = p.getPointIterator(0.1f);
-		PointF tmp = path.next();
-		pathTarget = path.next();
-		rotation = tmp.getRotationTo(pathTarget);
+		if(loc == null){
+			path = GAME.getCurrentPathingGraph().iterator();
+			this.loc = path.getLastPoint().getPointF(WALK_RANDOM_COMPONENT);
+		} else {
+			path = GAME.getCurrentPathingGraph().iterator(loc.getPointI());
+		}
+		nextPathTarget();
+		rotation = this.loc.getRotationTo(pathTarget);
 		dmgCounters = new float[def.hitParticleFacts.length];
+	}
+	
+	public Mob(MobDef mobDef){
+		this(null, mobDef);
+	}
+	
+	private void nextPathTarget(){
+		PointI p = path.next();
+		if(p == null){
+			pathTarget = null;
+		} else {
+			pathTarget = p.getPointF(WALK_RANDOM_COMPONENT);
+		}
+	}
+	
+	public final void updatePath(){
+		if((path == null) || (pathTarget == null)){
+			path = GAME.getCurrentPathingGraph().iterator();
+		} else {
+			path = GAME.getCurrentPathingGraph().iterator(pathTarget.getPointI());
+		}
 	}
 	
 	public float getDistanceStillToWalk(){
@@ -114,7 +141,7 @@ public class Mob extends Entity {
 				travel -= loc.travelTo(pathTarget, travel, true);
 				if(travel > 0){
 					PointF lastTargetPoint = pathTarget;
-					pathTarget = path.next();
+					nextPathTarget();
 					// if we have reached the last node in the path, wander around randomly
 					if(pathTarget == null){
 						GAME.pathEndReachedBy(lastTargetPoint.getPointI(), this);

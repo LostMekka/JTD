@@ -14,5 +14,6 @@ public interface CoordinateTransformator {
 	
 	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation);
 	public PointF transformPoint(PointF loc);
+	public PointF transformPointBack(float x, float y);
 	
 }

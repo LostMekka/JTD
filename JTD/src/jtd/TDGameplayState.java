@@ -18,8 +18,9 @@ import jtd.entities.ParticleFactory;
 import jtd.entities.Projectile;
 import jtd.entities.Tower;
 import jtd.level.Level;
-import jtd.level.Path;
 import jtd.level.PathListener;
+import jtd.level.PathingGraph;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -27,7 +28,6 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.BasicGameState;
 import org.newdawn.slick.state.StateBasedGame;
-import org.newdawn.slick.tiled.TileSet;
 
 /**
  *
@@ -64,6 +64,13 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		return new PointF(
 				(loc.x + renderOffset.x + 0.5f) * TILE_SIZE * renderScale, 
 				(loc.y + renderOffset.y + 0.5f) * TILE_SIZE * renderScale);
+	}
+
+	@Override
+	public PointF transformPointBack(float x, float y) {
+		return new PointF(
+				x / TILE_SIZE / renderScale - renderOffset.x - 0.5f, 
+				y / TILE_SIZE / renderScale - renderOffset.y - 0.5f);
 	}
 
 	
@@ -189,7 +196,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		level = new Level(gameDef);
-		p = Path.generate(level);
+		currPathingGraph = new PathingGraph(level);
 	}
 
 	@Override
@@ -215,9 +222,25 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		for(Explosion e:level.explosions) e.draw(gc, sbg, grphcs, this);
 		for(Particle pa:level.particles) pa.draw(gc, sbg, grphcs, this);
 		for(Projectile pr:level.projectiles) pr.draw(gc, sbg, grphcs, this);
+		grphcs.drawString("update in: " + pathTime, 10, 20);
+		
+		for(int x=0; x<level.w; x++){
+			for(int y=0; y<level.h; y++){
+				PointF p1 = transformPoint(new PointF(x, y));
+				for(PointI p:currPathingGraph.transitions.get(x).get(y)){
+					PointF p2 = transformPoint(p.getPointF(0f));
+					grphcs.drawGradientLine(p1.x, p1.y, Color.red, p2.x, p2.y, Color.yellow);
+				}
+			}
+		}
 	}
 	
-
+	LinkedList<PointF> p;
+	
+	public PathingGraph getCurrentPathingGraph(){
+		return currPathingGraph;
+	}
+	
 	private void mobGotThrough(Mob mob){
 		spm /= tst;
 	}
@@ -226,26 +249,41 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		spm *= tst;
 	}
 	
-	Path p;
+	PathingGraph currPathingGraph = null;
+	int maxPathTime = 500, pathTime = maxPathTime;
 	float n = 0f, spm = 1f, tst = 0.99f, t = 0f;
 	
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int i) throws SlickException {
+		// pathing
+		pathTime -= i;
+		if(pathTime <= 0){
+			pathTime = maxPathTime;
+			if(currPathingGraph == null){
+				currPathingGraph = new PathingGraph(level);
+			} else {
+				currPathingGraph.generate(level);
+			}
+			for(Mob m:level.mobs) m.updatePath();
+		}
+		// tick entities
 		float time = ((float)i) / 1000f * timeScale;
 		for(Particle p:level.particles) p.tick(time);
 		for(Particle p:level.bgParticles) p.tick(time);
-		level.deleteMarkedEntities();
 		for(Explosion e:level.explosions) e.tick(time);
-		level.deleteMarkedEntities();
 		for(Projectile p:level.projectiles) p.tick(time);
-		level.deleteMarkedEntities();
 		for(Mob m:level.mobs) m.tick(time);
 		level.deleteMarkedEntities();
 		for(Tower[] t1:level.towers) for(Tower t2:t1) if(t2 != null) t2.tick(time);
-		level.deleteMarkedEntities();
-		
+		// testing stuff
 		Input in = gc.getInput();
 		if(in.isKeyPressed(Input.KEY_M)) n++;
+		if(in.isMousePressed(0)){
+			PointF p = transformPointBack(in.getMouseX(), in.getMouseY());
+			if(level.isWalkable(p.getPointI())){
+				level.mobs.add(new Mob(p, gameDef.getMobDef(GameDef.MobType.swarm, 1, false)));
+			}
+		}
 		t += time;
 		while(t > spm){
 			t -= spm;
@@ -254,8 +292,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		while(n>0){
 			if(level.mobs.size() >= 1000) break;
 			n--;
-			p = Path.generate(level);
-			level.mobs.add(new Mob(gameDef.getMobDef(GameDef.MobType.swarm, 1, false), p));
+			level.mobs.add(new Mob(gameDef.getMobDef(GameDef.MobType.swarm, 1, false)));
 		}
 	}
 

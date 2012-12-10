@@ -236,7 +236,7 @@ public class Tower extends Entity implements KillListener{
 			Graphics grphcs, CoordinateTransformator transformator) {
 		// draw head
 		if(def.sprites[1] != null){
-			transformator.drawImage(def.sprites[1], loc, sizeInTiles, headDir);
+			transformator.drawImage(def.sprites[1], loc, def.sizes[1], headDir);
 		}
 //		PointF tol = transformator.transformPoint(loc);
 //		grphcs.drawString("" + shotCooldown, tol.x, tol.y);

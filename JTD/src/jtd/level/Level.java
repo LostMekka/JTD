@@ -4,16 +4,14 @@
  */
 package jtd.level;
 
-import java.util.ArrayList;
-import jtd.entities.Projectile;
 import java.util.LinkedList;
 import jtd.AssetLoader;
 import jtd.GameDef;
-import jtd.PointF;
 import jtd.PointI;
 import jtd.entities.Explosion;
 import jtd.entities.Mob;
 import jtd.entities.Particle;
+import jtd.entities.Projectile;
 import jtd.entities.Tower;
 import jtd.entities.TowerDef;
 import org.newdawn.slick.Image;
@@ -29,15 +27,15 @@ public class Level {
 	}
 	
 	private static final Field[][] lev1 = {
-		{Field.src,   Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.src, Field.floor, Field.floor, Field.wall},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.wall, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.dest, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.wall, Field.floor, Field.dest},
+		{Field.src,   Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.src, Field.floor, Field.floor, Field.wall},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.wall, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.dest, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.wall, Field.floor, Field.dest},
 	};
 	
 	private static final Field[][] lev2 = {
@@ -69,7 +67,7 @@ public class Level {
 	public LinkedList<Explosion> explosionsToDelete = new LinkedList<>();
 	public LinkedList<Particle> particlesToDelete = new LinkedList<>();
 
-	public ArrayList<PointI> sources, destinations;
+	public LinkedList<PointI> sources, destinations;
 	
 	private Image iWall, iGrass, iFloor, iSrc, iDest;
 		
@@ -86,8 +84,8 @@ public class Level {
 		towers = new Tower[h][w];
 		// init pathing stuff
 		killCounts = new int[h][w];
-		sources = new ArrayList<>();
-		destinations = new ArrayList<>();
+		sources = new LinkedList<>();
+		destinations = new LinkedList<>();
 		for(int x=0; x<w; x++){
 			for(int y=0;y<h; y++){
 				if(fields[y][x] == Field.src) sources.add(new PointI(x, y));
@@ -98,12 +96,13 @@ public class Level {
 		addTower(new PointI(0, 3), def.getTowerDef(GameDef.TowerType.repeater, 4));
 		addTower(new PointI(0, 4), def.getTowerDef(GameDef.TowerType.cannon, 4));
 		addTower(new PointI(0, 5), def.getTowerDef(GameDef.TowerType.repeater, 4));
+		addTower(new PointI(2, 1), def.getTowerDef(GameDef.TowerType.repeater, 2));
 
-		addTower(new PointI(5, 5), def.getTowerDef(GameDef.TowerType.repeater, 2));
-		addTower(new PointI(6, 3), def.getTowerDef(GameDef.TowerType.cannon, 1));
-		addTower(new PointI(8, 2), def.getTowerDef(GameDef.TowerType.repeater, 2));
-		addTower(new PointI(8, 5), def.getTowerDef(GameDef.TowerType.cannon, 2));
-		addTower(new PointI(9, 4), def.getTowerDef(GameDef.TowerType.freezer, 2));
+		addTower(new PointI(6, 5), def.getTowerDef(GameDef.TowerType.repeater, 4));
+		addTower(new PointI(8, 3), def.getTowerDef(GameDef.TowerType.cannon, 1));
+		addTower(new PointI(10, 2), def.getTowerDef(GameDef.TowerType.repeater, 2));
+		addTower(new PointI(10, 5), def.getTowerDef(GameDef.TowerType.cannon, 2));
+		addTower(new PointI(11, 4), def.getTowerDef(GameDef.TowerType.freezer, 2));
 	}
 	
 	public void killHappenedOn(PointI p){
