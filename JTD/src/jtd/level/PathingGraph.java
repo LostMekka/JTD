@@ -19,6 +19,7 @@ import jtd.PointI;
 public class PathingGraph {
 	
 	public static final float WALK_COST = 0.6f;
+	public static final float WALK_DIAGONAL_COST = WALK_COST * (float)Math.sqrt(2f);
 	private static final Random random = new Random();
 	
 	private static class Node{
@@ -147,24 +148,29 @@ public class PathingGraph {
 				nodesToExpand.remove(node);
 				int x = node.loc.x;
 				int y = node.loc.y;
-				PointI[] reach = new PointI[4];
-				if(node.loc.x > 0){
-					reach[0] = new PointI(x - 1, y);
-				}
-				if(node.loc.x < level.w - 1){
-					reach[1] = new PointI(x + 1, y);
-				}
-				if(node.loc.y > 0){
-					reach[2] = new PointI(x, y - 1);
-				}
-				if(node.loc.y < level.h - 1){
-					reach[3] = new PointI(x, y + 1);
-				}
+				LinkedList<PointI> reach = new LinkedList<>();
+				boolean x1 = (node.loc.x > 0);
+				boolean x2 = (node.loc.x < level.w - 1);
+				boolean y1 = (node.loc.y > 0);
+				boolean y2 = (node.loc.y < level.h - 1);
+				if(x1) reach.add(new PointI(x - 1, y));
+				if(x2) reach.add(new PointI(x + 1, y));
+				if(y1) reach.add(new PointI(x, y - 1));
+				if(y2) reach.add(new PointI(x, y + 1));
+				if(x1 && y1) reach.add(new PointI(x - 1, y - 1));
+				if(x1 && y2) reach.add(new PointI(x - 1, y + 1));
+				if(x2 && y1) reach.add(new PointI(x + 1, y - 1));
+				if(x2 && y2) reach.add(new PointI(x + 1, y + 1));
 				for(PointI p:reach){
 					if(p != null){
 						if((visited[p.x][p.y] == VISITED) || !level.isWalkable(p)) continue;
 						// add node to new nodes
-						Node n = new Node(p, node, level.getPathingWeight(p) + WALK_COST);
+						Node n;
+						if(p.hammingDistanceTo(node.loc) == 1){
+							n = new Node(p, node, level.getPathingWeight(p) + WALK_COST);
+						} else {
+							n = new Node(p, node, level.getPathingWeight(p) + WALK_DIAGONAL_COST);
+						}
 						if(!newNodes.contains(n)) newNodes.add(n);
 						// add transition in graph
 						if(visited[p.x][p.y] == UNVISITED){

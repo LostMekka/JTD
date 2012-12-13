@@ -133,10 +133,15 @@ public class Level {
 	
 	public boolean isWalkable(PointI loc){
 		return (
-				(fields[loc.y][loc.x] == Field.floor) || 
+				(loc.x >= 0) &&
+				(loc.y >= 0) &&
+				(loc.x < w) &&
+				(loc.y < h) && 
+				((fields[loc.y][loc.x] == Field.floor) || 
 				(fields[loc.y][loc.x] == Field.src) || 
-				(fields[loc.y][loc.x] == Field.dest)
-				) && (towers[loc.y][loc.x] == null);
+				(fields[loc.y][loc.x] == Field.dest)) &&
+				(towers[loc.y][loc.x] == null)
+				);
 	}
 	
 	public boolean addTower(PointI loc, TowerDef def){
