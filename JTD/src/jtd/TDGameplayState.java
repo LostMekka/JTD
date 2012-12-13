@@ -255,6 +255,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int i) throws SlickException {
+		//System.gc();
 		// pathing
 		pathTime -= i;
 		if(pathTime <= 0){

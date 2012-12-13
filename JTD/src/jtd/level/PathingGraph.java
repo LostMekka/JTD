@@ -168,10 +168,11 @@ public class PathingGraph {
 						if(!newNodes.contains(n)) newNodes.add(n);
 						// add transition in graph
 						if(visited[p.x][p.y] == UNVISITED){
-							transitions.get(x).get(y).clear();
+							transitions.get(p.x).get(p.y).clear();
 							visited[p.x][p.y] = VISITING;
 						}
-						addTransition(p.x, p.y, node.loc);
+						LinkedList<PointI> l = transitions.get(p.x).get(p.y);
+						if(!l.contains(node.loc)) l.add(node.loc);
 						// add location to stating point list, if cost is not higher
 						if(level.sources.contains(p)){
 							if(newStartingPoints.isEmpty() || (n.weight <= startingPointCost)){
@@ -192,15 +193,6 @@ public class PathingGraph {
 		startingPoints = newStartingPoints;
 	}
 
-	private void addTransition(int x, int y, PointI p){
-		LinkedList<PointI> l = transitions.get(x).get(y);
-		if(!l.contains(p)) l.add(p);
-	}
-	
-	private void clearTransitions(int x, int y, PointI p){
-		
-	}
-	
 	private void insertNode(Node node, LinkedList<Node> list){
 		// if list is empty, insert node as the only element
 		if(list.isEmpty()){
