@@ -15,9 +15,9 @@ import jtd.level.PathingGraph;
  *
  * @author LostMekka
  */
-public class Mob extends Entity {
+public class Mob extends AnimatedEntity {
 
-	public static final float WALK_RANDOM_COMPONENT = 0.1f;
+	public static final float WALK_RANDOM_COMPONENT = 0.33f;
 	
 	public MobDef def;
 	public float speedMultiplier = 1f, armorOffset = 0f, bonusDamage = 0f;
@@ -83,45 +83,49 @@ public class Mob extends Entity {
 		effect.remove(this);
 	}
 	
-	public void damage(float damage, Entity attacker){
-		damage(damage, attacker, null);
+	public float damage(float damage, Entity attacker){
+		return damage(damage, attacker, null);
 	}
 	
-	public void damage(float damage, Entity attacker, Float direction){
+	public float damage(float damage, Entity attacker, Float direction){
 		damage += bonusDamage;
-		damage -= def.armor + armorOffset;
-		if(damage <= 0) return;
 		if(damage <= shield){
 			shield -= damage;
+			return 0f;
 		} else {
-			hp -= damage - shield;
+			damage -= shield;
 			shield = 0;
-		}
-		if(direction != null){
-			// add hit particles
-			for(int i=0; i<def.hitParticleFacts.length; i++){
-				dmgCounters[i] += damage;
-				while(dmgCounters[i] >= def.damagePerParticle[i]){
-					dmgCounters[i] -= def.damagePerParticle[i];
-					GAME.addParticle(def.hitParticleFacts[i], loc.clone(), direction);
+			damage -= def.armor + armorOffset;
+			if(damage <= 0) return 0f;
+			hp -= damage;
+			if(direction != null){
+				// add hit particles
+				for(int i=0; i<def.hitParticleFacts.length; i++){
+					dmgCounters[i] += damage;
+					while(dmgCounters[i] >= def.damagePerParticle[i]){
+						dmgCounters[i] -= def.damagePerParticle[i];
+						GAME.addParticle(def.hitParticleFacts[i], loc.clone(), direction);
+					}
 				}
 			}
-		}
-		if(hp <= 0){
-			// add death particles
-			for(int i=0; i<def.deathParticleFacts.length; i++){
-				for(int n=0; n<def.deathParticleCounts[i]; n++){
-					float rot = 360f * RANDOM.nextFloat();
-					GAME.addParticle(def.deathParticleFacts[i], loc.clone(), rot);
+			if(hp <= 0){
+				// add death particles
+				for(int i=0; i<def.deathParticleFacts.length; i++){
+					for(int n=0; n<def.deathParticleCounts[i]; n++){
+						float rot = 360f * RANDOM.nextFloat();
+						GAME.addParticle(def.deathParticleFacts[i], loc.clone(), rot);
+					}
 				}
+				// kill mob
+				kill(attacker);
+				return damage + hp;
 			}
-			// kill mob
-			kill(attacker);
+			return damage;
 		}
 	}
 
 	@Override
-	public void entityTick(float time) {
+	public void animatedEntityTick(float time) {
 		// tick effects
 		for(TimedEffect e:effects) e.tick(time, this);
 		for(TimedEffect e:effectsToRemove) effects.remove(e);

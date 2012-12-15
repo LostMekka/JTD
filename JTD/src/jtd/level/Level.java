@@ -4,6 +4,7 @@
  */
 package jtd.level;
 
+import java.awt.Point;
 import java.util.LinkedList;
 import jtd.AssetLoader;
 import jtd.GameDef;
@@ -35,7 +36,7 @@ public class Level {
 		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.dest, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.wall, Field.floor, Field.dest},
+		{Field.dest, Field.floor, Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.wall, Field.floor, Field.dest},
 	};
 	
 	private static final Field[][] lev2 = {
@@ -52,6 +53,7 @@ public class Level {
 	
 	public Field[][] fields;
 	public int[][] killCounts;
+	public float[][] damageCounts;
 	public Tower[][] towers;
 	public int w, h;
 	public GameDef def;
@@ -84,6 +86,7 @@ public class Level {
 		towers = new Tower[h][w];
 		// init pathing stuff
 		killCounts = new int[h][w];
+		damageCounts = new float[h][w];
 		sources = new LinkedList<>();
 		destinations = new LinkedList<>();
 		for(int x=0; x<w; x++){
@@ -105,12 +108,16 @@ public class Level {
 		addTower(new PointI(11, 4), def.getTowerDef(GameDef.TowerType.freezer, 2));
 	}
 	
-	public void killHappenedOn(PointI p){
+	public void damageDealtAt(PointI p, float damage){
+		damageCounts[p.y][p.x] += damage;
+	}
+	
+	public void killHappenedAt(PointI p){
 		killCounts[p.y][p.x]++;
 	}
 	
-	public int getPathingWeight(PointI p){
-		return killCounts[p.y][p.x];
+	public float getPathingWeightAt(PointI p){
+		return killCounts[p.y][p.x] + damageCounts[p.y][p.x] / 100f;
 	}
 	
 	public Image getTileImage(int x, int y){
@@ -144,9 +151,35 @@ public class Level {
 				);
 	}
 	
+	public LinkedList<PointI> getWalkableTilesFrom(PointI p){
+		LinkedList<PointI> ans = new LinkedList<>();
+		if(!isWalkable(p)) return ans;
+		PointI pr = new PointI(p.x + 1, p.y);
+		PointI pl = new PointI(p.x - 1, p.y);
+		PointI pu = new PointI(p.x, p.y + 1);
+		PointI pd = new PointI(p.x, p.y - 1);
+		PointI pru = new PointI(p.x + 1, p.y + 1);
+		PointI plu = new PointI(p.x - 1, p.y + 1);
+		PointI prd = new PointI(p.x + 1, p.y - 1);
+		PointI pld = new PointI(p.x - 1, p.y - 1);
+		boolean r = isWalkable(pr);
+		boolean l = isWalkable(pl);
+		boolean u = isWalkable(pu);
+		boolean d = isWalkable(pd);
+		if(r) ans.add(pr);
+		if(l) ans.add(pl);
+		if(u) ans.add(pu);
+		if(d) ans.add(pd);
+		if(r && u) ans.add(pru);
+		if(l && u) ans.add(plu);
+		if(r && d) ans.add(prd);
+		if(l && d) ans.add(pld);
+		return ans;
+	}
+	
 	public boolean addTower(PointI loc, TowerDef def){
 		if(towers[loc.y][loc.x] != null) return false;
-		towers[loc.y][loc.x] = new Tower(def, loc.getPointF(0f));
+		towers[loc.y][loc.x] = new Tower(def, loc.getPointF());
 		return true;
 	}
 	

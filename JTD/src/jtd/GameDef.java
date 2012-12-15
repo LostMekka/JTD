@@ -64,7 +64,7 @@ public final class GameDef {
 		for(int i=0; i<n; i++){
 			imageArray[i] = AssetLoader.getImage("blood_000_00" + i + ".png", false);
 			timesArray[i] = 0.12f;
-			sizesArray[i] = 0.25f;
+			sizesArray[i] = 1f;
 		}
 		part_blood_000 = new ParticleDef(imageArray, sizesArray, timesArray);
 
@@ -76,7 +76,7 @@ public final class GameDef {
 		for(int i=0; i<n; i++){
 			imageArray[i] = AssetLoader.getImage("bloodsplat_000_00" + i + ".png", false);
 			timesArray[i] = 0.12f;
-			sizesArray[i] = 0.25f;
+			sizesArray[i] = 1f;
 		}
 		part_bloodsplat_000 = new ParticleDef(imageArray, sizesArray, timesArray, false);
 
@@ -86,7 +86,7 @@ public final class GameDef {
 		sizesArray = new float[1];
 		imageArray[0] = AssetLoader.getImage("iceshard_000_000.png", false);
 		timesArray[0] = 1f;
-		sizesArray[0] = 0.25f;
+		sizesArray[0] = 1f;
 		part_iceshard_000 = new ParticleDef(imageArray, sizesArray, timesArray);
 
 		// dust 000
@@ -97,7 +97,7 @@ public final class GameDef {
 		for(int i=0; i<n; i++){
 			imageArray[i] = AssetLoader.getImage("dust_000_00" + i + ".png", false);
 			timesArray[i] = 0.15f;
-			sizesArray[i] = 0.25f;
+			sizesArray[i] = 1f;
 		}
 		part_dust_000 = new ParticleDef(imageArray, sizesArray, timesArray);
 
@@ -109,7 +109,7 @@ public final class GameDef {
 		for(int i=0; i<n; i++){
 			imageArray[i] = AssetLoader.getImage("dust_001_00" + i + ".png", false);
 			timesArray[i] = 0.25f;
-			sizesArray[i] = 0.15f;
+			sizesArray[i] = 1f;
 		}
 		part_dust_001 = new ParticleDef(imageArray, sizesArray, timesArray);
 
@@ -121,7 +121,7 @@ public final class GameDef {
 		for(int i=0; i<n; i++){
 			imageArray[i] = AssetLoader.getImage("muzzleflash_000_00" + i + ".png", false);
 			timesArray[i] = 1f;
-			sizesArray[i] = 0.2f;
+			sizesArray[i] = 1f;
 		}
 		part_muzzle_000 = new ParticleDef(imageArray, sizesArray, timesArray);
 		
@@ -133,7 +133,7 @@ public final class GameDef {
 		for(int i=0; i<n; i++){
 			imageArray[i] = AssetLoader.getImage("casing_000_00" + i + ".png", false);
 			timesArray[i] = 1f;
-			sizesArray[i] = 0.1f;
+			sizesArray[i] = 1f;
 		}
 		part_casing_000 = new ParticleDef(imageArray, sizesArray, timesArray);
 	}
@@ -152,7 +152,7 @@ public final class GameDef {
 			particleCooldowns = new float[0];
 			initialParticleFactories = new ParticleFactory[1];
 			initialParticleCounts = new int[1];
-			initialParticleFactories[0] = new ParticleFactory(part_dust_001, 0f, 360f, 0f, 0f, 1f, 0.2f, 0.5f, 0.5f);
+			initialParticleFactories[0] = new ParticleFactory(part_dust_001, 0.15f, 0f, 0f, 360f, 0f, 0f, 1f, 0.2f, 0.5f, 0.5f);
 			initialParticleCounts[0] = 8;
 			ExplosionDef explosionDef = new ExplosionDef(imageArray, sizesArray, timesArray, 
 					particleFactories, particleCooldowns, 
@@ -169,7 +169,7 @@ public final class GameDef {
 			particleFactories = new ParticleFactory[0];
 			particleCooldowns = new float[0];
 			ProjectileDef rocketDef = new ProjectileDef(
-					imageArray, sizesArray, timesArray, 5f, 5f,
+					imageArray, sizesArray, timesArray, 12f, 5f, false,
 					explosionDef, particleFactories, particleCooldowns);
 
 			// -------- effects ----------------------------------------------------
@@ -190,15 +190,17 @@ public final class GameDef {
 			idleParticleFactorys = new ParticleFactory[0];
 			idleParticleCooldowns = new float[0];
 			// shot particles
-			shotParticleFactorys = new ParticleFactory[1];
-			shotParticleCounts = new int[1];
-			shotParticleFactorys[0] = new ParticleFactory(part_muzzle_000, 
-					0f, 0f, 0f, 0f, 0f, 0f, 0.05f, 0.01f);
-			shotParticleFactorys[0].locationOffset = new PointF(0.5f, 0f);
+			shotParticleFactorys = new ParticleFactory[2];
+			shotParticleCounts = new int[2];
+			shotParticleFactorys[0] = new ParticleFactory(part_muzzle_000, 0.3f, 0.1f, 0f, 0f, 0f, 0f, 0f, 0f, 0.1f, 0.1f);
+			shotParticleFactorys[0].locationOffset = new PointF(0.62f, 0f);
 			shotParticleCounts[0] = 1;
+			shotParticleFactorys[1] = new ParticleFactory(part_dust_001, 0.15f, 0f, 0f, 50f, 0f, 0f, 1f, 2.5f, 0.2f, 0.3f);
+			shotParticleFactorys[1].locationOffset = new PointF(0.5f, 0f);
+			shotParticleCounts[1] = 12;
 			// towers
 			TowerDef t = new TowerDef(imageArray, sizesArray, Tower.TargetingMode.nearest,
-					2f + 0.5f * lev, 0f, 1.5f, 2f + lev, 
+					2f + 0.5f * lev, 0.3f, 1.5f, 2f + lev, 
 					0.5f, 360f, 140f, -80f,
 					towerTimedEffects, towerInstantEffects, rocketDef, 
 					TowerType.cannon, "Cannon Tower", lev, 
@@ -220,11 +222,11 @@ public final class GameDef {
 			sizesArray[0] = 0.5f;
 			particleFactories = new ParticleFactory[1];
 			particleCooldowns = new float[1];
-			particleFactories[0] = new ParticleFactory(part_dust_001, 0f, 360f, 0f, 0f, 1f, 1.5f, 0.5f, 0.5f);
+			particleFactories[0] = new ParticleFactory(part_dust_001, 0.15f, 0f, 0f, 360f, 0f, 0f, 1f, 1.5f, 0.5f, 0.5f);
 			particleCooldowns[0] = 0.1f;
 			initialParticleFactories = new ParticleFactory[1];
 			initialParticleCounts = new int[1];
-			initialParticleFactories[0] = new ParticleFactory(part_iceshard_000, 0f, 0f, 0f, 0f, 1f, 1.5f, 1f, 0.8f);
+			initialParticleFactories[0] = new ParticleFactory(part_iceshard_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 1f, 1.5f, 1f, 0.8f);
 			initialParticleCounts[0] = 24;
 			ExplosionDef explosionDef = new ExplosionDef(imageArray, sizesArray, timesArray, 
 					particleFactories, particleCooldowns, 
@@ -243,12 +245,11 @@ public final class GameDef {
 			}
 			particleFactories = new ParticleFactory[1];
 			particleCooldowns = new float[1];
-			particleFactories[0] = new ParticleFactory(part_dust_001, 
-					0f, 50f, 0f, 0f, 1f, 0.1f, 1f, 1f);
+			particleFactories[0] = new ParticleFactory(part_dust_001, 0.15f, 0f, 0f, 50f, 0f, 0f, 1f, 0.1f, 1f, 1f);
 			particleFactories[0].locationOffset = new PointF(-0.15f, 0f);
 			particleCooldowns[0] = 0.04f;
 			ProjectileDef rocketDef = new ProjectileDef(
-					imageArray, sizesArray, timesArray, 4f, 5f, 
+					imageArray, sizesArray, timesArray, 4f, 5f, true,
 					explosionDef, particleFactories, particleCooldowns);
 
 			// -------- effects ----------------------------------------------------
@@ -272,8 +273,7 @@ public final class GameDef {
 			// shot particles
 			shotParticleFactorys = new ParticleFactory[1];
 			shotParticleCounts = new int[1];
-			shotParticleFactorys[0] = new ParticleFactory(part_dust_001, 
-					180f, 50f, 0f, 0f, 1f, 1.5f, 1f, 1f);
+			shotParticleFactorys[0] = new ParticleFactory(part_dust_001, 0.15f, 0f, 180f, 50f, 0f, 0f, 1f, 1.5f, 1f, 1f);
 			shotParticleFactorys[0].locationOffset = new PointF(-0.15f, 0f);
 			shotParticleCounts[0] = 15;
 			// towers
@@ -310,12 +310,10 @@ public final class GameDef {
 			// shot particles
 			shotParticleFactorys = new ParticleFactory[2];
 			shotParticleCounts = new int[2];
-			shotParticleFactorys[0] = new ParticleFactory(part_casing_000, 
-					80f, 60f, 400f, 1000f, 0.2f, 0.4f, 1f, 0.5f);
+			shotParticleFactorys[0] = new ParticleFactory(part_casing_000, 0.1f, 0f, 80f, 60f, 400f, 1000f, 0.2f, 0.4f, 1f, 0.5f);
 			shotParticleFactorys[0].locationOffset = new PointF(0.05f, 0.15f);
 			shotParticleCounts[0] = 1;
-			shotParticleFactorys[1] = new ParticleFactory(part_muzzle_000, 
-					0f, 0f, 0f, 0f, 0f, 0f, 0.05f, 0.01f);
+			shotParticleFactorys[1] = new ParticleFactory(part_muzzle_000, 0.2f, 0.01f, 0f, 0f, 0f, 0f, 0f, 0f, 0.05f, 0.01f);
 			shotParticleFactorys[1].locationOffset = new PointF(0.5f, 0f);
 			shotParticleCounts[1] = 1;
 			// towers
@@ -401,27 +399,27 @@ public final class GameDef {
 	}
 	
 	private MobDef generateMobDef(MobType t, int level, boolean boss){
-		n = 2;
+		n = 4;
 		imageArray = new Image[n];
 		timesArray = new float[n];
 		sizesArray = new float[n];
 		for(int i=0; i<n; i++){
 			imageArray[i] = AssetLoader.getImage("hummer_000_00" + i + ".png", false);
-			timesArray[i] = 0.2f;
+			timesArray[i] = 0.08f;
 			sizesArray[i] = 0.5f;
 		}
 		
 		ParticleFactory[] deathFacts = new ParticleFactory[2];
 		int[] deathCounts = new int[2];
-		deathFacts[0] = new ParticleFactory(part_bloodsplat_000, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f);
+		deathFacts[0] = new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f);
 		deathCounts[0] = 8;
-		deathFacts[1] = new ParticleFactory(part_blood_000, 0f, 0f, 0f, 0f, 0f, 0f, 10f, 10f);
+		deathFacts[1] = new ParticleFactory(part_blood_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0f, 0f, 10f, 10f);
 		deathFacts[1].isBackgroundParticle = true;
 		deathCounts[1] = 1;
 		
 		ParticleFactory[] hitFacts = new ParticleFactory[1];
 		float[] hitRatios = new float[1];
-		hitFacts[0] = new ParticleFactory(part_bloodsplat_000, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f);
+		hitFacts[0] = new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f);
 		hitRatios[0] = 0.5f;
 		return new MobDef(imageArray, sizesArray, timesArray, 
 				2 + 2 * level, 0, 0, 0, 0, 1, 

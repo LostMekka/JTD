@@ -73,7 +73,16 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 				y / TILE_SIZE / renderScale - renderOffset.y - 0.5f);
 	}
 
-	
+	@Override
+	public float transformLength(float len) {
+		return len * TILE_SIZE * renderScale;
+	}
+
+	@Override
+	public float transformLengthBack(float len) {
+		return len / TILE_SIZE / renderScale;
+	}
+
 	@Override
 	public void fieldWalkedBy(PointI p, Mob m) {
 	}
@@ -95,7 +104,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 				if(p.x >= level.w) p.x = level.w - 1;
 				if(p.y < 0) p.y = 0;
 				if(p.y >= level.h) p.y = level.h - 1;
-				level.killHappenedOn(p);
+				level.killHappenedAt(p);
 			}
 			level.markMobForDeletion(mob);
 			return;
@@ -145,7 +154,8 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			LinkedList<TimedEffectDef> timedEffects, Float direction){
 		for(TimedEffectDef def:timedEffects) mob.applyTimedEffect(new TimedEffect(attacker, def));
 		for(InstantEffect e:instantEffects) mob.applyInstantEffect(e);
-		mob.damage(attacker.def.damage, attacker, direction);
+		float dmg = mob.damage(attacker.def.damage, attacker, direction);
+		level.damageDealtAt(mob.loc.getPointI(), dmg);
 	}
 	
 	public void dealAreaDamage(PointF loc, Tower attacker, 
@@ -222,14 +232,26 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		for(Explosion e:level.explosions) e.draw(gc, sbg, grphcs, this);
 		for(Particle pa:level.particles) pa.draw(gc, sbg, grphcs, this);
 		for(Projectile pr:level.projectiles) pr.draw(gc, sbg, grphcs, this);
-		grphcs.drawString("update in: " + pathTime, 10, 20);
 		
-		for(int x=0; x<level.w; x++){
-			for(int y=0; y<level.h; y++){
-				PointF p1 = transformPoint(new PointF(x, y));
-				for(PointI p:currPathingGraph.transitions.get(x).get(y)){
-					PointF p2 = transformPoint(p.getPointF(0f));
-					grphcs.drawGradientLine(p1.x, p1.y, Color.red, p2.x, p2.y, Color.yellow);
+		// print debug text
+		grphcs.drawString("update in: " + pathTime, 10, 20);
+		grphcs.drawString("last update time: " + currPathingGraph.lastTime, 10, 30);
+		
+		// print debugPath
+		if(false){
+			float rad = 0.1f;
+			float transformedDiameter = transformLength(2f * rad);
+			for(PointI p:currPathingGraph.startingPoints){
+				PointF p1 = transformPoint(new PointF((float)p.x - rad, (float)p.y - rad));
+				grphcs.drawOval(p1.x, p1.y, transformedDiameter, transformedDiameter);
+			}
+			for(int x=0; x<level.w; x++){
+				for(int y=0; y<level.h; y++){
+					PointF p1 = transformPoint(new PointF(x, y));
+					for(PointI p:currPathingGraph.transitions.get(x).get(y)){
+						PointF p2 = transformPoint(p.getPointF());
+						grphcs.drawGradientLine(p1.x, p1.y, Color.red, p2.x, p2.y, Color.yellow);
+					}
 				}
 			}
 		}
@@ -251,7 +273,8 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	
 	PathingGraph currPathingGraph = null;
 	int maxPathTime = 500, pathTime = maxPathTime;
-	float n = 0f, spm = 1f, tst = 0.99f, t = 0f;
+	float n = 0f, spm = 1f, tst = 0.97f, t = 0f;
+	boolean pos = true;
 	
 	@Override
 	public void update(GameContainer gc, StateBasedGame sbg, int i) throws SlickException {
@@ -294,6 +317,22 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			if(level.mobs.size() >= 1000) break;
 			n--;
 			level.mobs.add(new Mob(gameDef.getMobDef(GameDef.MobType.swarm, 1, false)));
+		}
+		
+		if(spm > 2f){
+			spm = 1f;
+			if(pos){
+				Tower t = level.towers[5][6];
+				level.towers[5][6] = null;
+				level.towers[8][4] = t;
+				t.loc = new PointF(4, 8);
+			} else {
+				Tower t = level.towers[8][4];
+				level.towers[8][4] = null;
+				level.towers[5][6] = t;
+				t.loc = new PointF(6, 5);
+			}
+			pos = !pos;
 		}
 	}
 

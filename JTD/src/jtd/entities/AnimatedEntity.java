@@ -5,7 +5,6 @@
 package jtd.entities;
 
 import jtd.PointF;
-import org.newdawn.slick.Image;
 
 /**
  *
@@ -13,6 +12,8 @@ import org.newdawn.slick.Image;
  */
 public abstract class AnimatedEntity extends Entity{
 
+	public float animationSpeed = 1f;
+	
 	private float animationTime = 0;
 	private AnimatedEntityDef def;
 	
@@ -24,7 +25,7 @@ public abstract class AnimatedEntity extends Entity{
 	@Override
 	public final void entityTick(float time) {
 		if(animationTime >= 0){
-			animationTime += time;
+			animationTime += time * animationSpeed;
 			while(animationTime >= def.times[currSprite]){
 				animationTime -= def.times[currSprite];
 				if(currSprite < def.sprites.length - 1){

@@ -36,9 +36,14 @@ public class Projectile extends AnimatedEntity implements KillListener{
 			PointF loc) {
 		super(loc, def);
 		this.def = def;
-		this.target = target;
 		target.addKillListener(this);
-		targetLoc = target.loc;
+		if(def.isHoming){
+			this.target = target;
+			targetLoc = target.loc;
+		} else {
+			this.target = null;
+			targetLoc = target.loc.clone();
+		}
 		this.attacker = attacker;
 		this.instantEffects = instantEffects;
 		this.timedEffects = timedEffects;

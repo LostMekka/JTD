@@ -32,6 +32,10 @@ public class PointI {
 				y + (ran.nextFloat() - 0.5f) * randomComponent);
 	}
 	
+	public PointF getPointF(){
+		return new PointF(x, y);
+	}
+	
 	public int hammingDistanceTo(PointI p){
 		return Math.abs(x - p.x) + Math.abs(y - p.y);
 	}

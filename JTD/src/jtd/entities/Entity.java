@@ -25,7 +25,7 @@ public abstract class Entity {
 	public static final Random RANDOM = new Random();
 	
 	public PointF loc;
-	public float rotation = 0f;
+	public float rotation = 0f, sizeMultiplier = 1f, spriteAlpha = 1f;
 	public int currSprite = 0;
 	public EntityDef def;
 	
@@ -63,7 +63,8 @@ public abstract class Entity {
 			GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator){
 		if((currSprite >= 0) && (currSprite < def.sprites.length)){
-			transformator.drawImage(def.sprites[currSprite], loc, def.sizes[currSprite], rotation);
+			def.sprites[currSprite].setAlpha(spriteAlpha);
+			transformator.drawImage(def.sprites[currSprite], loc, def.sizes[currSprite] * sizeMultiplier, rotation);
 		}
 		entityDraw(gc, sbg, grphcs, transformator);
 	}

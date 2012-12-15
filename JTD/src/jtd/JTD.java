@@ -30,7 +30,7 @@ public class JTD {
 		try {
 			AppGameContainer gc = new AppGameContainer(game, 1024, 768, false);
 			gc.setUpdateOnlyWhenVisible(false);
-			gc.setTargetFrameRate(60);
+			//gc.setTargetFrameRate(60);
 			gc.start();
 		} catch (SlickException ex) {
 			Logger.getLogger(JTD.class.getName()).log(Level.SEVERE, null, ex);
