@@ -4,6 +4,7 @@
  */
 package jtd.entities;
 
+import jtd.def.ParticleDef;
 import jtd.PointF;
 
 /**

@@ -2,19 +2,16 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package jtd;
+package jtd.def;
 
 import java.util.ArrayList;
+import jtd.AssetLoader;
+import jtd.PointF;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.SlowEffectDef;
 import jtd.effect.timed.TimedEffectDef;
-import jtd.entities.ExplosionDef;
-import jtd.entities.MobDef;
-import jtd.entities.ParticleDef;
 import jtd.entities.ParticleFactory;
-import jtd.entities.ProjectileDef;
 import jtd.entities.Tower;
-import jtd.entities.TowerDef;
 import org.newdawn.slick.Image;
 
 /**
@@ -399,6 +396,47 @@ public final class GameDef {
 	}
 	
 	private MobDef generateMobDef(MobType t, int level, boolean boss){
+		switch(t){
+			case normal: return generateNormalMobDef(level, boss);
+			case swarm: return generateSwarmMobDef(level, boss);
+			default: return null;
+		}
+	}
+	
+	private MobDef generateNormalMobDef(int level, boolean boss){
+		n = 5;
+		imageArray = new Image[n];
+		timesArray = new float[n];
+		sizesArray = new float[n];
+		for(int i=0; i<n; i++){
+			imageArray[i] = AssetLoader.getImage("ball_000_000.png", false);
+			timesArray[i] = 0.15f;
+			sizesArray[i] = 0.5f;
+		}
+		sizesArray[1] = 0.6f;
+		sizesArray[2] = 0.65f;
+		sizesArray[3] = 0.6f;		
+		
+		ParticleFactory[] deathFacts = new ParticleFactory[2];
+		int[] deathCounts = new int[2];
+		deathFacts[0] = new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f);
+		deathFacts[0].locationOffset = new PointF(0.25f, 0f);
+		deathCounts[0] = 8;
+		deathFacts[1] = new ParticleFactory(part_blood_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0f, 0f, 10f, 10f);
+		deathFacts[1].isBackgroundParticle = true;
+		deathCounts[1] = 1;
+		
+		ParticleFactory[] hitFacts = new ParticleFactory[1];
+		float[] hitRatios = new float[1];
+		hitFacts[0] = new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f);
+		hitFacts[0].locationOffset = new PointF(0.2f, 0f);
+		hitRatios[0] = 0.3f;
+		return new MobDef(imageArray, sizesArray, timesArray, 
+				3f * (1f + level), 0, 0, 0, 0, 0.5f, 
+				deathFacts, deathCounts, hitFacts, hitRatios);
+	}
+	
+	private MobDef generateSwarmMobDef(int level, boolean boss){
 		n = 4;
 		imageArray = new Image[n];
 		timesArray = new float[n];
@@ -412,6 +450,7 @@ public final class GameDef {
 		ParticleFactory[] deathFacts = new ParticleFactory[2];
 		int[] deathCounts = new int[2];
 		deathFacts[0] = new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f);
+		deathFacts[0].locationOffset = new PointF(0.25f, 0f);
 		deathCounts[0] = 8;
 		deathFacts[1] = new ParticleFactory(part_blood_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0f, 0f, 10f, 10f);
 		deathFacts[1].isBackgroundParticle = true;
@@ -420,9 +459,10 @@ public final class GameDef {
 		ParticleFactory[] hitFacts = new ParticleFactory[1];
 		float[] hitRatios = new float[1];
 		hitFacts[0] = new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f);
+		hitFacts[0].locationOffset = new PointF(0.2f, 0f);
 		hitRatios[0] = 0.5f;
 		return new MobDef(imageArray, sizesArray, timesArray, 
-				2 + 2 * level, 0, 0, 0, 0, 1, 
+				2f * (1f + level), 0, 0, 0, 0, 1, 
 				deathFacts, deathCounts, hitFacts, hitRatios);
 	}
 	

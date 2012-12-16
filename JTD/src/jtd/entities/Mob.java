@@ -4,6 +4,7 @@
  */
 package jtd.entities;
 
+import jtd.def.MobDef;
 import java.util.LinkedList;
 import jtd.PointF;
 import jtd.PointI;

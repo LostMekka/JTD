@@ -4,7 +4,9 @@
  */
 package jtd;
 
+import jtd.def.GameDef;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import jtd.effect.instant.InstantEffect;
@@ -48,6 +50,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	public GameDef gameDef = new GameDef();
 	float renderScale = 2.5f, timeScale = 1f;
 	PointF renderOffset = new PointF(0f, 0f);
+	public boolean debugPath = false, debugTowers = false;
 
 	@Override
 	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation){
@@ -225,6 +228,16 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 				Tower t = level.towers[y][x];
 				if(t != null){
 					t.draw(gc, sbg, grphcs, this);
+					if(debugTowers){
+						PointF p1 = transformPoint(new PointF(t.loc.x - t.def.range, t.loc.y - t.def.range));
+						float diameter = transformLength(t.def.range * 2f);
+						grphcs.drawOval(p1.x, p1.y, diameter, diameter);
+						PointF p2 = transformPoint(t.loc);
+						PointF p3 = t.loc.clone();
+						p3.travelInDirection(t.getHeadDir(), t.def.range);
+						p3 = transformPoint(p3);
+						grphcs.drawLine(p2.x, p2.y, p3.x, p3.y);
+					}
 				}
 			}
 		}
@@ -238,7 +251,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		grphcs.drawString("last update time: " + currPathingGraph.lastTime, 10, 30);
 		
 		// print debugPath
-		if(false){
+		if(debugPath){
 			float rad = 0.1f;
 			float transformedDiameter = transformLength(2f * rad);
 			for(PointI p:currPathingGraph.startingPoints){
@@ -271,9 +284,10 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		spm *= tst;
 	}
 	
+	Random random = new Random();
 	PathingGraph currPathingGraph = null;
 	int maxPathTime = 500, pathTime = maxPathTime;
-	float n = 0f, spm = 1f, tst = 0.97f, t = 0f;
+	float n = 0f, spm = 1f, tst = 0.98f, t = 0f;
 	boolean pos = true;
 	
 	@Override
@@ -316,7 +330,12 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		while(n>0){
 			if(level.mobs.size() >= 1000) break;
 			n--;
-			level.mobs.add(new Mob(gameDef.getMobDef(GameDef.MobType.swarm, 1, false)));
+			GameDef.MobType t = null;
+			switch(random.nextInt(2)){
+				case 0: t = GameDef.MobType.normal; break;
+				case 1: t = GameDef.MobType.swarm; break;
+			}
+			level.mobs.add(new Mob(gameDef.getMobDef(t, 1, false)));
 		}
 		
 		if(spm > 2f){

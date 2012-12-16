@@ -7,14 +7,14 @@ package jtd.level;
 import java.awt.Point;
 import java.util.LinkedList;
 import jtd.AssetLoader;
-import jtd.GameDef;
+import jtd.def.GameDef;
 import jtd.PointI;
 import jtd.entities.Explosion;
 import jtd.entities.Mob;
 import jtd.entities.Particle;
 import jtd.entities.Projectile;
 import jtd.entities.Tower;
-import jtd.entities.TowerDef;
+import jtd.def.TowerDef;
 import org.newdawn.slick.Image;
 
 /**

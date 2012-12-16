@@ -4,6 +4,7 @@
  */
 package jtd.entities;
 
+import jtd.def.AnimatedEntityDef;
 import jtd.PointF;
 
 /**
@@ -14,12 +15,15 @@ public abstract class AnimatedEntity extends Entity{
 
 	public float animationSpeed = 1f;
 	
-	private float animationTime = 0;
+	private float animationTime;
 	private AnimatedEntityDef def;
 	
 	public AnimatedEntity(PointF loc, AnimatedEntityDef animatedDef) {
 		super(loc, animatedDef);
 		this.def = animatedDef;
+		animationTime = 0f;
+		for(Float f:def.times) animationTime += f;
+		animationTime *= RANDOM.nextFloat();
 	}
 
 	@Override

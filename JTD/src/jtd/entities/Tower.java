@@ -9,10 +9,9 @@ import java.util.LinkedList;
 import jtd.CoordinateTransformator;
 import jtd.KillListener;
 import jtd.PointF;
+import jtd.def.TowerDef;
 import jtd.effect.instant.InstantEffect;
-import jtd.effect.timed.TimedEffect;
 import jtd.effect.timed.TimedEffectDef;
-import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.state.StateBasedGame;
@@ -79,6 +78,10 @@ public class Tower extends Entity implements KillListener{
 		updateTowerDef(def);
 		resetIdleCounter();
 		targetingMode = def.defaultTargetingMode;
+	}
+
+	public float getHeadDir() {
+		return headDir;
 	}
 
 	public final void updateTowerDef(TowerDef towerDef){

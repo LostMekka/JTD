@@ -2,13 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package jtd.entities;
+package jtd.def;
 
-import jtd.GameDef;
-import jtd.GameDef.TowerType;
+import jtd.def.EntityDef;
+import jtd.def.GameDef.TowerType;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffectDef;
-import jtd.entities.ProjectileDef;
+import jtd.def.ProjectileDef;
+import jtd.entities.ParticleFactory;
+import jtd.entities.Tower;
 import org.newdawn.slick.Image;
 
 /**

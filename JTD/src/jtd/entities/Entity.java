@@ -4,6 +4,7 @@
  */
 package jtd.entities;
 
+import jtd.def.EntityDef;
 import jtd.KillListener;
 import java.util.LinkedList;
 import java.util.Random;

@@ -2,8 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package jtd.entities;
+package jtd.def;
 
+import jtd.def.AnimatedEntityDef;
+import jtd.entities.Mob;
+import jtd.entities.ParticleFactory;
 import org.newdawn.slick.Image;
 
 /**

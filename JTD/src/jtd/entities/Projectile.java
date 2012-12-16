@@ -4,14 +4,13 @@
  */
 package jtd.entities;
 
-import jtd.KillListener;
 import java.util.LinkedList;
+import jtd.KillListener;
 import jtd.PointF;
 import jtd.TDGameplayState;
+import jtd.def.ProjectileDef;
 import jtd.effect.instant.InstantEffect;
-import jtd.effect.timed.TimedEffect;
 import jtd.effect.timed.TimedEffectDef;
-import org.newdawn.slick.Image;
 
 /**
  *
