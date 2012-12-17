@@ -22,8 +22,8 @@ public abstract class AnimatedEntity extends Entity{
 		super(loc, animatedDef);
 		this.def = animatedDef;
 		animationTime = 0f;
-		for(Float f:def.times) animationTime += f;
-		animationTime *= RANDOM.nextFloat();
+		currSprite = RANDOM.nextInt(def.times.length);
+		animationTime = def.times[currSprite] * RANDOM.nextFloat();
 	}
 
 	@Override

@@ -4,8 +4,8 @@
  */
 package jtd.entities;
 
-import jtd.def.ExplosionDef;
 import jtd.PointF;
+import jtd.def.ExplosionDef;
 
 /**
  *
@@ -42,9 +42,8 @@ public class Explosion extends AnimatedEntity{
 
 	@Override
 	public void entityInitialTick() {
-		int factCount = def.initialFactories.length;
-		for(int i=0; i<factCount; i++){
-			ParticleFactory f = def.initialFactories[i];
+		for(int i=0; i<def.initialParticleFactories.length; i++){
+			ParticleFactory f = def.initialParticleFactories[i];
 			for(int n=0; n<def.initialParticleCounts[i]; n++){
 				float rot = 360f / (float)def.initialParticleCounts[i] * (float)n;
 				GAME.addParticle(f, loc.clone(), rot);

@@ -50,7 +50,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	public GameDef gameDef = new GameDef();
 	float renderScale = 2.5f, timeScale = 1f;
 	PointF renderOffset = new PointF(0f, 0f);
-	public boolean debugPath = false, debugTowers = false;
+	public boolean debugPath = true, debugTowers = true;
 
 	@Override
 	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation){

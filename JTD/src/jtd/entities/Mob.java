@@ -4,10 +4,10 @@
  */
 package jtd.entities;
 
-import jtd.def.MobDef;
 import java.util.LinkedList;
 import jtd.PointF;
 import jtd.PointI;
+import jtd.def.MobDef;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
 import jtd.level.PathingGraph;
@@ -165,7 +165,7 @@ public class Mob extends AnimatedEntity {
 			}
 		}
 		// let the def tick (for special mobs only)
-		def.tick(this, time);
+		def.defTick(this, time);
 	}
 
 }

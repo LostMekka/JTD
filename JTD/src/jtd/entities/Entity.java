@@ -4,16 +4,15 @@
  */
 package jtd.entities;
 
-import jtd.def.EntityDef;
-import jtd.KillListener;
 import java.util.LinkedList;
 import java.util.Random;
 import jtd.CoordinateTransformator;
+import jtd.KillListener;
 import jtd.PointF;
 import jtd.TDGameplayState;
+import jtd.def.EntityDef;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Image;
 import org.newdawn.slick.state.StateBasedGame;
 
 /**

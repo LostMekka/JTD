@@ -4,10 +4,7 @@
  */
 package jtd.def;
 
-import jtd.def.ExplosionDef;
-import jtd.def.AnimatedEntityDef;
 import jtd.entities.ParticleFactory;
-import org.newdawn.slick.Image;
 
 /**
  *
@@ -15,22 +12,11 @@ import org.newdawn.slick.Image;
  */
 public class ProjectileDef extends AnimatedEntityDef{
 	
-	public float speed, lifeTime;
-	public ExplosionDef expDef;
-	public ParticleFactory[] particleFactories;
-	public float[] particleCooldowns;
-	public boolean isHoming;
+	public float speed = 1f;
+	public float lifeTime = 1f;
+	public ExplosionDef expDef = null;
+	public ParticleFactory[] particleFactories = {};
+	public float[] particleCooldowns = {};
+	public boolean isHoming = true;
 	
-	public ProjectileDef(Image[] sprites, float[] sizes, float[] times,
-			float speed, float lifeTime, boolean isHoming, ExplosionDef expDef, 
-			ParticleFactory[] particleFactories, float[] particleCooldowns) {
-		super(sprites, sizes, times, true);
-		this.speed = speed;
-		this.lifeTime = lifeTime;
-		this.isHoming = isHoming;
-		this.expDef = expDef;
-		this.particleFactories = particleFactories;
-		this.particleCooldowns = particleCooldowns;	
-	}
-
 }

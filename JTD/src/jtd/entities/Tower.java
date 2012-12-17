@@ -69,12 +69,13 @@ public class Tower extends Entity implements KillListener{
 	
 	private float shotCooldown, headDir, headVel, idleCounter, lastTargetDirection;
 	private float[] instantEffectCooldowns, timedEffectCooldowns, idleParticleCooldowns;
+	private int currShotOffset = 0;
 
 	public Tower(TowerDef def, PointF loc) {
 		super(loc, def);
 		headDir = RANDOM.nextFloat() * 360f;
 		lastTargetDirection = headDir;
-		headVel = def.headIdleVel;
+		headVel = 0f;
 		updateTowerDef(def);
 		resetIdleCounter();
 		targetingMode = def.defaultTargetingMode;
@@ -146,8 +147,15 @@ public class Tower extends Entity implements KillListener{
 	}
 	
 	public void shoot(){
-		PointF shotStart = loc.clone();
-		shotStart.travelInDirection(headDir, def.headLength);
+		PointF shotStart;
+		if(def.shotOffsets == null){
+			shotStart = loc.clone();
+		} else {
+			shotStart = def.shotOffsets[currShotOffset].clone();
+			shotStart.rotate(headDir);
+			shotStart.x += loc.x;
+			shotStart.y += loc.y;
+		}
 		// fill effects
 		LinkedList<InstantEffect> instantEffects = new LinkedList<>();
 		LinkedList<TimedEffectDef> timedEffects = new LinkedList<>();

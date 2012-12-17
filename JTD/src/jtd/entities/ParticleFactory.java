@@ -4,10 +4,9 @@
  */
 package jtd.entities;
 
-import jtd.def.ParticleDef;
 import java.util.Random;
 import jtd.PointF;
-import org.newdawn.slick.Image;
+import jtd.def.ParticleDef;
 
 /**
  *

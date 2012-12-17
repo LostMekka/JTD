@@ -4,21 +4,26 @@
  */
 package jtd.def;
 
-import org.newdawn.slick.Image;
-
 /**
  *
  * @author LostMekka
  */
 public abstract class AnimatedEntityDef extends EntityDef{
 
-	public float[] times;
-	public boolean isCyclic;
+	public float[] times = {1f};
+	public boolean isCyclic = true;
 
-	public AnimatedEntityDef(Image[] sprites, float[] sizes, float[] times, boolean isCyclic) {
-		super(sprites, sizes);
-		this.times = times;
-		this.isCyclic = isCyclic;
+	public void fillImage(String name, float size, float time){
+		fillImage(name, size);
+		times = new float[]{time};
 	}
-
+	
+	public void fillImages(String nameStart, String nameEnd, int imageCount, int digitCount, float sizes, float times){
+		fillImages(nameStart, nameEnd, imageCount, digitCount, sizes);
+		this.times = new float[imageCount];
+		for(int i=0; i<imageCount; i++){
+			this.times[i] = times;
+		}
+	}
+	
 }

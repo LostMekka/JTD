@@ -21,6 +21,23 @@ public class AssetLoader {
 	private static HashMap<String, Sound> sounds = new HashMap<>();
 	private static HashMap<String, Image> images = new HashMap<>();
 	
+	public static Image getErrorImage(){
+		if(errorImage == null){
+			try {
+				errorImage = new Image("error.png");
+				errorImage.setFilter(Image.FILTER_NEAREST);
+			} catch (Exception ex) {
+				System.err.println("---------- ERROR: can't load error image");
+				return null;
+			}
+		}
+		return errorImage;
+	}
+	
+	public static Image getImage(String name){
+		return getImage(name, false, false);
+	}
+	
 	public static Image getImage(String name, boolean smoothFiltered){
 		return getImage(name, smoothFiltered, false);
 	}
@@ -46,13 +63,7 @@ public class AssetLoader {
 					if(!smoothFiltered) i.setFilter(Image.FILTER_NEAREST);
 				} catch (Exception ex) {
 					System.err.println("---------- ERROR: can't load image \"" + name + "\"");
-					if(errorImage == null){
-						try {
-							errorImage = new Image("error.png");
-							errorImage.setFilter(Image.FILTER_NEAREST);
-						} catch (SlickException ex1) {}
-					}
-					return errorImage;
+					return getErrorImage();
 				}
 				if(i != null){
 					images.put(name, i);
