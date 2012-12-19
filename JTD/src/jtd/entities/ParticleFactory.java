@@ -23,7 +23,8 @@ public class ParticleFactory {
 	public float spinOffset, spinRandom;
 	public float forceOffset, forceRandom;
 	public float lifeOffset, lifeRandom;
-	public boolean isBackgroundParticle = false, fadeAlpha = true;
+	public boolean isBackgroundParticle = false;
+	public float alphaDelay = 0f;
 
 	public ParticleFactory(ParticleDef def,
 			float sizeOffset, float sizeRandom, 
@@ -58,6 +59,6 @@ public class ParticleFactory {
 		PointF vel = new PointF(
 				(float)Math.cos(rot / 180f * Math.PI) * force, 
 				(float)Math.sin(rot / 180f * Math.PI) * force);
-		return new Particle(def, start, vel, size, rot, spin, life, fadeAlpha);
+		return new Particle(def, start, vel, size, rot, spin, life, alphaDelay);
 	}
 }

@@ -50,7 +50,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	public GameDef gameDef = new GameDef();
 	float renderScale = 2.5f, timeScale = 1f;
 	PointF renderOffset = new PointF(0f, 0f);
-	public boolean debugPath = true, debugTowers = true;
+	public boolean debugPath = false, debugTowers = false;
 
 	@Override
 	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation){
@@ -135,7 +135,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		for(Mob m:level.mobs){
 			// hamming distance is faster. normally many mobs dont meet the distance criterion
 			// therefore checking the hamming distance first should make the game faster over all
-			if((m.loc.hammingDistanceTo(tower.loc) < tower.def.range) && !level.mobsToDelete.contains(m)){
+			if((m.loc.hammingDistanceTo(tower.loc) < 2f * tower.def.range) && !level.mobsToDelete.contains(m)){
 				if(m.loc.distanceTo(tower.loc) < tower.def.range) mobs.add(m);
 			}
 		}
@@ -335,7 +335,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 				case 0: t = GameDef.MobType.normal; break;
 				case 1: t = GameDef.MobType.swarm; break;
 			}
-			level.mobs.add(new Mob(gameDef.getMobDef(t, 1, false)));
+			level.mobs.add(new Mob(gameDef.getMobDef(GameDef.MobType.swarm, 1, false)));
 		}
 		
 		if(spm > 2f){

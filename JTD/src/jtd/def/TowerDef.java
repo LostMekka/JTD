@@ -23,8 +23,10 @@ public class TowerDef extends EntityDef{
 	public float headMaxVel = 1f;
 	public float headAcceleration = 1f;
 	public float cost = 1f;	
+	public TowerDef[] upgradeOptions = {};
 	public ProjectileDef projectileDef = null;
 	public String name = "<NO NAME SET>";
+	public int level = 0;
 	public Tower.TargetingMode defaultTargetingMode = Tower.TargetingMode.nearest;
 	public TimedEffectDef[] timedEffects = {};
 	public InstantEffect[] instantEffects = {};

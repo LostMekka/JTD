@@ -10,6 +10,7 @@ import jtd.PointF;
 import jtd.effect.timed.SlowEffectDef;
 import jtd.effect.timed.TimedEffectDef;
 import jtd.entities.ParticleFactory;
+import jtd.entities.Tower;
 import org.newdawn.slick.Image;
 
 /**
@@ -45,10 +46,11 @@ public final class GameDef {
 	private void initCommonDefs(){
 		//-------- particles ---------------------------------------------------
 		part_blood_000 = new ParticleDef();
-		part_blood_000.fillImage("blood_000_000.png", 3.2f, 1f);
+		part_blood_000.fillImage("blood_000_000.png", 1f, 1f);
 
 		part_bloodsplat_000 = new ParticleDef();
-		part_blood_000.fillImages("bloodsplat_000_", ".png", 6, 3, 1f, 0.12f);
+		part_bloodsplat_000.fillImages("bloodsplat_000_", ".png", 6, 3, 1f, 0.12f);
+		part_bloodsplat_000.isCyclic = false;
 
 		part_iceshard_000 = new ParticleDef();
 		part_iceshard_000.fillImage("iceshard_000_000.png", 1f, 1f);
@@ -68,11 +70,15 @@ public final class GameDef {
 	
 	private void initCannonTower(){
 		for(int lev=0; lev<5; lev++){
+			ParticleDef cannonballPart = new ParticleDef();
+			cannonballPart.fillImage("shot.png", 1f, 1f);
+			
 			ExplosionDef explosionDef = new ExplosionDef();
 			explosionDef.fillImage("explosion.png", 0.5f, 0.25f);
 			explosionDef.initialParticleFactories = new ParticleFactory[]{
-				new ParticleFactory(part_dust_001, 0.15f, 0f, 0f, 360f, 0f, 0f, 1f, 0.2f, 0.5f, 0.5f)};
-			explosionDef.initialParticleCounts = new int[]{8};
+				new ParticleFactory(part_dust_001, 0.15f, 0f, 0f, 360f, 0f, 0f, 1f, 0.2f, 0.5f, 0.5f),
+				new ParticleFactory(cannonballPart, 0.15f, 0f, 0f, 50f, 0f, 0f, 0.8f, 0.2f, 1f, 0.5f)};
+			explosionDef.initialParticleCounts = new int[]{8, 1};
 
 			ProjectileDef cannonBall = new ProjectileDef();
 			cannonBall.fillImage("shot.png", 0.15f, 0.2f);
@@ -86,10 +92,10 @@ public final class GameDef {
 				AssetLoader.getImage("tower_body.png"), 
 				AssetLoader.getImage("tower_head.png")};
 			t.sizes = new float[]{1f, 1f};
-			t.damage = 2f + lev;
+			t.damage = 1f + lev;
 			t.damageRadius = 0.25f;
 			t.reloadTime = 1.5f;
-			t.range = 1.5f + 0.5f * lev;
+			t.range = 2f + 0.5f * lev;
 			t.headAcceleration = 360f;
 			t.headMaxVel = 140f;
 			t.projectileDef = cannonBall;
@@ -101,6 +107,8 @@ public final class GameDef {
 			t.shotParticleFactories[1].locationOffset = new PointF(0.5f, 0f);
 			t.shotParticleCounts = new int[]{1, 12};
 			t.name = "Cannon Tower";
+			t.level = lev + 1;
+			if(lev > 0) t.upgradeOptions = new TowerDef[]{TOWER_CANNON.get(lev-1)};
 			TOWER_CANNON.add(t);
 		}
 	}
@@ -114,6 +122,7 @@ public final class GameDef {
 			explosionDef.particleCooldowns = new float[]{0.1f};
 			explosionDef.initialParticleFactories = new ParticleFactory[]{
 					new ParticleFactory(part_iceshard_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 1f, 1.5f, 1f, 0.8f)};
+			explosionDef.initialParticleFactories[0].alphaDelay = 0.8f;
 			explosionDef.initialParticleCounts = new int[]{24};
 
 			ProjectileDef rocketDef = new ProjectileDef();
@@ -144,6 +153,8 @@ public final class GameDef {
 			t.shotParticleCounts = new int[]{15};
 			t.shotOffsets = new PointF[]{new PointF(0.15f, 0f)};
 			t.name = "Freezer Tower";
+			t.level = lev + 1;
+			if(lev > 0) t.upgradeOptions = new TowerDef[]{TOWER_FREEZER.get(lev-1)};
 			TOWER_FREEZER.add(t);
 		}
 	}
@@ -154,9 +165,9 @@ public final class GameDef {
 			t.damage = 0.1f;
 			t.damageRadius = 0f;
 			t.reloadTime = 0.1f;
-			t.range = 1f + 0.33f * lev;
+			t.range = 1f + 0.333f * lev;
 			t.headAcceleration = 360f;
-			t.headMaxVel = 140f;
+			t.headMaxVel = 150f;
 			t.sprites = new Image[]{
 				AssetLoader.getImage("repeatertower_000_000.png"),
 				AssetLoader.getImage("repeatertower_000_001.png")};
@@ -165,10 +176,15 @@ public final class GameDef {
 				new ParticleFactory(part_casing_000, 0.1f, 0f, 80f, 60f, 400f, 1000f, 0.2f, 0.4f, 1f, 0.5f),
 				new ParticleFactory(part_muzzle_000, 0.2f, 0.01f, 0f, 0f, 0f, 0f, 0f, 0f, 0.05f, 0.01f)};
 			t.shotParticleFactories[0].locationOffset = new PointF(0.05f, 0.15f);
+			t.shotParticleFactories[0].alphaDelay = 0.8f;
 			t.shotParticleFactories[1].locationOffset = new PointF(0.5f, 0f);
+			t.shotParticleFactories[1].alphaDelay = 0.5f;
 			t.shotParticleCounts = new int[]{1, 1};
 			t.shotOffsets = new PointF[]{new PointF(0.15f, 0f)};
 			t.name = "Repeater Tower";
+			t.level = lev + 1;
+			if(lev > 0) t.upgradeOptions = new TowerDef[]{TOWER_REPEATER.get(lev-1)};
+			t.defaultTargetingMode = Tower.TargetingMode.random;
 			TOWER_REPEATER.add(t);
 		}
 	}
@@ -252,39 +268,49 @@ public final class GameDef {
 	}
 	
 	private MobDef generateNormalMobDef(int level, boolean boss){
+		if(boss) level += 10;
 		MobDef m = new MobDef();
-		m.maxHP = 3f * (1f + level);
+		m.maxHP = 2f * (1f + level);
 		m.speed = 0.7f;
 		Image i = AssetLoader.getImage("ball_000_000.png");
 		m.sprites = new Image[]{i, i, i, i, i};
 		m.times = new float[]{0.15f, 0.15f, 0.15f, 0.15f, 0.15f};
 		m.sizes = new float[]{0.5f, 0.6f, 0.65f, 0.6f, 0.5f};
 		m.deathParticleFacts = new ParticleFactory[]{
-			new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f),
+			new ParticleFactory(part_bloodsplat_000, 0.3f, 0.1f, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f),
 			new ParticleFactory(part_blood_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0f, 0f, 10f, 10f)};
 		m.deathParticleFacts[0].locationOffset = new PointF(0.25f, 0f);
+		m.deathParticleFacts[0].alphaDelay = 1f;
+		m.deathParticleFacts[1].isBackgroundParticle = true;
+		m.deathParticleFacts[1].alphaDelay = 0.9f;
 		m.deathParticleCounts = new int[]{8, 1};
 		m.hitParticleFacts = new ParticleFactory[]{
 			new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f)};
-		m.hitParticleFacts[0].locationOffset = new PointF(0.2f, 0f);
-		m.damagePerParticle = new float[]{0.3f};
+		m.hitParticleFacts[0].locationOffset = new PointF(0.3f, 0f);
+		m.hitParticleFacts[0].alphaDelay = 1f;
+		m.damagePerParticle = new float[]{0.2f};
 		return m;
 	}
 	
 	private MobDef generateSwarmMobDef(int level, boolean boss){
+		if(boss) level += 10;
 		MobDef m = new MobDef();
 		m.fillImages("hummer_000_", ".png", 4, 3, 0.5f, 0.09f);
-		m.maxHP = 2f * (1f + level);
+		m.maxHP = 2f + level;
 		m.speed = 1f;
 		m.deathParticleFacts = new ParticleFactory[]{
-			new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f),
+			new ParticleFactory(part_bloodsplat_000, 0.3f, 0.1f, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f),
 			new ParticleFactory(part_blood_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0f, 0f, 10f, 10f)};
 		m.deathParticleFacts[0].locationOffset = new PointF(0.25f, 0f);
+		m.deathParticleFacts[0].alphaDelay = 1f;
+		m.deathParticleFacts[1].isBackgroundParticle = true;
+		m.deathParticleFacts[1].alphaDelay = 0.9f;
 		m.deathParticleCounts = new int[]{8, 1};
 		m.hitParticleFacts = new ParticleFactory[]{
 			new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f)};
-		m.hitParticleFacts[0].locationOffset = new PointF(0.2f, 0f);
-		m.damagePerParticle = new float[]{0.5f};
+		m.hitParticleFacts[0].locationOffset = new PointF(0.25f, 0f);
+		m.hitParticleFacts[0].alphaDelay = 1f;
+		m.damagePerParticle = new float[]{0.15f};
 		return m;
 	}
 	

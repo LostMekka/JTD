@@ -15,10 +15,16 @@ public class Explosion extends AnimatedEntity{
 
 	public ExplosionDef def;
 	
+	private Float initialDirection;
 	private float[] particleTimes;
 
-	public Explosion(PointF loc, ExplosionDef explosionDef) {
+	public Explosion(PointF loc, ExplosionDef explosionDef, Float initialDirection) {
 		super(loc, explosionDef);
+		if(initialDirection == null){
+			this.initialDirection = 0f;
+		} else {
+			this.initialDirection = initialDirection;
+		}
 		this.def = explosionDef;
 		particleTimes = new float[explosionDef.particleCooldowns.length];
 		System.arraycopy(explosionDef.particleCooldowns, 0, particleTimes, 0, particleTimes.length);
@@ -46,7 +52,8 @@ public class Explosion extends AnimatedEntity{
 			ParticleFactory f = def.initialParticleFactories[i];
 			for(int n=0; n<def.initialParticleCounts[i]; n++){
 				float rot = 360f / (float)def.initialParticleCounts[i] * (float)n;
-				GAME.addParticle(f, loc.clone(), rot);
+				GAME.addParticle(f, loc.clone(), rot + initialDirection);
+				// TODO: use initialDirection properly
 			}
 		}
 	}

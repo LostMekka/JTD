@@ -16,21 +16,26 @@ public class Particle extends AnimatedEntity{
 	public ParticleDef def;
 	public PointF vel;
 	public float spinVel;
-	public boolean fadeAlpha;
+	public float alphaDelay;
 	
 	private float lifeTimeLeft, initialLifeTime;
 
 	public Particle(ParticleDef particleDef, PointF loc, PointF vel, float size, 
-			float rotation, float spinVel, float lifeTime, boolean fadeAlpha) {
+			float rotation, float spinVel, float lifeTime, float alphaDelay) {
 		super(loc, particleDef);
 		this.def = particleDef;
 		this.vel = vel;
 		sizeMultiplier = size;
 		this.rotation = rotation;
 		this.spinVel = spinVel;
-		this.fadeAlpha = fadeAlpha;
+		this.alphaDelay = alphaDelay;
 		lifeTimeLeft = lifeTime;
 		initialLifeTime = lifeTime;
+		if(!def.isCyclic){
+			float t = 0f;
+			for(float f:def.times) t += f;
+			if(t < initialLifeTime) initialLifeTime = t;
+		}
 	}
 
 	@Override
@@ -43,7 +48,8 @@ public class Particle extends AnimatedEntity{
 		loc.x += time * vel.x;
 		loc.y += time * vel.y;
 		rotate(time * spinVel);
-		if(fadeAlpha) spriteAlpha = initialLifeTime / lifeTimeLeft;
+		float a = lifeTimeLeft / initialLifeTime;
+		if(a < 1f - alphaDelay) spriteAlpha = a / (1f - alphaDelay);
 	}
 
 	@Override
