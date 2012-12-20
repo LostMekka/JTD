@@ -119,7 +119,10 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			Projectile p = (Projectile)entity;
 			level.markProjectileForDeletion(p);
 			if(p.def.expDef != null){
-				level.explosions.add(new Explosion(p.loc, p.def.expDef));
+				level.explosions.add(new Explosion(p.loc, p.def.expDef, p.rotation));
+				if(p.rotation == 0f){
+					int i = 0;
+				}
 			}
 		}
 		if(entity instanceof Particle){
@@ -147,9 +150,10 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			PointF loc, Tower tower, Mob mob, 
 			LinkedList<InstantEffect> instantEffects, 
 			LinkedList<TimedEffectDef> timedEffects){
-		level.projectiles.add(new Projectile(
+		Projectile p = new Projectile(
 					tower.def.projectileDef, mob, tower, 
-					instantEffects, timedEffects, loc));
+					instantEffects, timedEffects, loc);
+		level.projectiles.add(p);
 	}
 	
 	public void dealDamage(Mob mob, Tower attacker, 

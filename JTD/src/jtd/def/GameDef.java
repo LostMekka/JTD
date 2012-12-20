@@ -77,7 +77,8 @@ public final class GameDef {
 			explosionDef.fillImage("explosion.png", 0.5f, 0.25f);
 			explosionDef.initialParticleFactories = new ParticleFactory[]{
 				new ParticleFactory(part_dust_001, 0.15f, 0f, 0f, 360f, 0f, 0f, 1f, 0.2f, 0.5f, 0.5f),
-				new ParticleFactory(cannonballPart, 0.15f, 0f, 0f, 50f, 0f, 0f, 0.8f, 0.2f, 1f, 0.5f)};
+				new ParticleFactory(cannonballPart, 0.15f, 0f, 0f, 0f, 0f, 0f, 0.8f, 0.2f, 0.5f, 0.3f)};
+			explosionDef.initialParticleFactories[1].alphaDelay = 0.75f;
 			explosionDef.initialParticleCounts = new int[]{8, 1};
 
 			ProjectileDef cannonBall = new ProjectileDef();
@@ -121,8 +122,9 @@ public final class GameDef {
 					new ParticleFactory(part_dust_001, 0.15f, 0f, 0f, 360f, 0f, 0f, 1f, 1.5f, 0.5f, 0.5f)};
 			explosionDef.particleCooldowns = new float[]{0.1f};
 			explosionDef.initialParticleFactories = new ParticleFactory[]{
-					new ParticleFactory(part_iceshard_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 1f, 1.5f, 1f, 0.8f)};
+					new ParticleFactory(part_iceshard_000, 0.25f, 0.1f, 0f, 300f, 0f, 0f, 0.5f, 2f, 0.5f, 0.8f)};
 			explosionDef.initialParticleFactories[0].alphaDelay = 0.8f;
+			explosionDef.initialParticleFactories[0].locationOffset = new PointF(0.2f, 0f);
 			explosionDef.initialParticleCounts = new int[]{24};
 
 			ProjectileDef rocketDef = new ProjectileDef();
@@ -162,7 +164,7 @@ public final class GameDef {
 	private void initRepeaterTower(){
 		for(int lev=0; lev<5; lev++){
 			TowerDef t = new TowerDef();
-			t.damage = 0.1f;
+			t.damage = 0.1f + 0.05f * lev;
 			t.damageRadius = 0f;
 			t.reloadTime = 0.1f;
 			t.range = 1f + 0.333f * lev;
@@ -279,11 +281,11 @@ public final class GameDef {
 		m.deathParticleFacts = new ParticleFactory[]{
 			new ParticleFactory(part_bloodsplat_000, 0.3f, 0.1f, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f),
 			new ParticleFactory(part_blood_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0f, 0f, 10f, 10f)};
-		m.deathParticleFacts[0].locationOffset = new PointF(0.25f, 0f);
+		m.deathParticleFacts[0].locationOffset = new PointF(0.3f, 0f);
 		m.deathParticleFacts[0].alphaDelay = 1f;
 		m.deathParticleFacts[1].isBackgroundParticle = true;
 		m.deathParticleFacts[1].alphaDelay = 0.9f;
-		m.deathParticleCounts = new int[]{8, 1};
+		m.deathParticleCounts = new int[]{16, 1};
 		m.hitParticleFacts = new ParticleFactory[]{
 			new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f)};
 		m.hitParticleFacts[0].locationOffset = new PointF(0.3f, 0f);
@@ -293,19 +295,32 @@ public final class GameDef {
 	}
 	
 	private MobDef generateSwarmMobDef(int level, boolean boss){
+		ParticleDef gib000 = new ParticleDef();
+		gib000.fillImages("hummer_000_gib000_", ".png", 2, 3, 1f, 0.25f);
+		ParticleDef gib001 = new ParticleDef();
+		gib001.fillImages("hummer_000_gib001_", ".png", 2, 3, 1f, 0.25f);
+		
 		if(boss) level += 10;
 		MobDef m = new MobDef();
 		m.fillImages("hummer_000_", ".png", 4, 3, 0.5f, 0.09f);
 		m.maxHP = 2f + level;
 		m.speed = 1f;
-		m.deathParticleFacts = new ParticleFactory[]{
-			new ParticleFactory(part_bloodsplat_000, 0.3f, 0.1f, 0f, 0f, 0f, 0f, 0.1f, 0.5f, 5f, 0f),
-			new ParticleFactory(part_blood_000, 0.25f, 0.1f, 0f, 0f, 0f, 0f, 0f, 0f, 10f, 10f)};
-		m.deathParticleFacts[0].locationOffset = new PointF(0.25f, 0f);
-		m.deathParticleFacts[0].alphaDelay = 1f;
-		m.deathParticleFacts[1].isBackgroundParticle = true;
-		m.deathParticleFacts[1].alphaDelay = 0.9f;
-		m.deathParticleCounts = new int[]{8, 1};
+		
+		ParticleFactory deathSplat = new ParticleFactory(part_bloodsplat_000, 0.3f, 0.1f, 0f, 360f, 0f, 0f, 0.1f, 0.5f, 5f, 0f);
+		deathSplat.locationOffset = new PointF(0.25f, 0f);
+		deathSplat.alphaDelay = 1f;
+		ParticleFactory deathBlood = new ParticleFactory(part_blood_000, 0.25f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 10f, 10f);
+		deathBlood.isBackgroundParticle = true;
+		deathBlood.alphaDelay = 0.9f;
+		ParticleFactory deathGib000 = new ParticleFactory(gib000, 0.21f, 0.1f, 0f, 30f, -90f, 180f, -0.5f, -0.5f, 0.4f, 0.5f);
+		deathGib000.locationOffset = new PointF(-0.1f, 0.1f);
+		deathGib000.alphaDelay = 0.8f;
+		ParticleFactory deathGib001 = new ParticleFactory(gib001, 0.21f, 0.1f, 20f, 40f, -90f, 180f, 0.3f, 0.4f, 0.4f, 0.5f);
+		deathGib001.locationOffset = new PointF(0.15f, 0.05f);
+		deathGib001.alphaDelay = 0.8f;
+		m.deathParticleFacts = new ParticleFactory[]{deathSplat, deathBlood, deathGib000, deathGib001};
+		m.deathParticleCounts = new int[]{16, 1, 1, 1};
+		
 		m.hitParticleFacts = new ParticleFactory[]{
 			new ParticleFactory(part_bloodsplat_000, 0.25f, 0.1f, 0f, 40f, 0f, 0f, 0.6f, 0.5f, 5f, 0f)};
 		m.hitParticleFacts[0].locationOffset = new PointF(0.25f, 0f);

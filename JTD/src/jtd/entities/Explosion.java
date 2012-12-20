@@ -51,9 +51,7 @@ public class Explosion extends AnimatedEntity{
 		for(int i=0; i<def.initialParticleFactories.length; i++){
 			ParticleFactory f = def.initialParticleFactories[i];
 			for(int n=0; n<def.initialParticleCounts[i]; n++){
-				float rot = 360f / (float)def.initialParticleCounts[i] * (float)n;
-				GAME.addParticle(f, loc.clone(), rot + initialDirection);
-				// TODO: use initialDirection properly
+				GAME.addParticle(f, loc.clone(), initialDirection);
 			}
 		}
 	}

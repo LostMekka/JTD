@@ -113,8 +113,7 @@ public class Mob extends AnimatedEntity {
 				// add death particles
 				for(int i=0; i<def.deathParticleFacts.length; i++){
 					for(int n=0; n<def.deathParticleCounts[i]; n++){
-						float rot = 360f * RANDOM.nextFloat();
-						GAME.addParticle(def.deathParticleFacts[i], loc.clone(), rot);
+						GAME.addParticle(def.deathParticleFacts[i], loc.clone(), rotation);
 					}
 				}
 				// kill mob

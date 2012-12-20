@@ -61,7 +61,6 @@ public class Projectile extends AnimatedEntity implements KillListener{
 		}
 		// move to target
 		loc.travelTo(targetLoc, time * def.speed, true);
-		rotation = loc.getRotationTo(targetLoc);
 		// if target is reached, deal damage and kill self
 		if(loc.hammingDistanceTo(targetLoc) < 0.1f){
 			if(attacker.def.damageRadius > 0){
@@ -72,6 +71,8 @@ public class Projectile extends AnimatedEntity implements KillListener{
 				}
 			}
 			kill(null);
+		} else {
+			rotation = loc.getRotationTo(targetLoc);
 		}
 		// emit particles
 		for(int i=0; i<particleCooldowns.length; i++){
