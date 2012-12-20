@@ -11,3 +11,5 @@ to build you need these libs:
   - from slick: (http://slick.cokeandcode.com/)
     - slick.jar
 
+to start, use the parameter
+  - -Djava.library.path=<pathToLwjglNatives>
