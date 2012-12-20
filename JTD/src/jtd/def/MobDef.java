@@ -15,6 +15,7 @@ import org.newdawn.slick.Image;
  */
 public class MobDef extends AnimatedEntityDef{
 
+	public int size = 1;
 	public float maxHP = 1f;
 	public float hpRegen = 0f;
 	public float maxShield = 0f;

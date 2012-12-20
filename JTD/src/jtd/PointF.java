@@ -30,6 +30,10 @@ public class PointF {
 		return (float)Math.sqrt((x - p.x)*(x - p.x) + (y - p.y)*(y - p.y));
 	}
 
+	public float quadraticDistanceTo(PointF p){
+		return (x - p.x)*(x - p.x) + (y - p.y)*(y - p.y);
+	}
+
 	public float hammingDistanceTo(PointF p){
 		return Math.abs(x - p.x) + Math.abs(y - p.y);
 	}

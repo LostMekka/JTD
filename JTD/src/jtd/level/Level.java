@@ -5,6 +5,7 @@
 package jtd.level;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import jtd.AssetLoader;
 import jtd.def.GameDef;
@@ -21,7 +22,7 @@ import org.newdawn.slick.Image;
  *
  * @author LostMekka
  */
-public class Level {
+public final class Level {
 	
 	public enum Field{
 		wall, grass, floor, src, dest;
@@ -29,14 +30,14 @@ public class Level {
 	
 	private static final Field[][] lev1 = {
 		{Field.src,   Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.src, Field.floor, Field.floor, Field.wall},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.wall, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
 		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.dest, Field.floor, Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.wall, Field.floor, Field.dest},
+		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
+		{Field.dest, Field.floor, Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.dest},
 	};
 	
 	private static final Field[][] lev2 = {
@@ -74,6 +75,7 @@ public class Level {
 	private Image iWall, iGrass, iFloor, iSrc, iDest;
 		
 	public Level(GameDef def){
+		maxMobSize = 3;
 		iWall = AssetLoader.getImage("wall.png", false);
 		iGrass = AssetLoader.getImage("grass.png", false);
 		iFloor = AssetLoader.getImage("floor.png", false);
@@ -106,6 +108,10 @@ public class Level {
 		addTower(new PointI(10, 2), def.getTowerDef(GameDef.TowerType.repeater, 2));
 		addTower(new PointI(10, 5), def.getTowerDef(GameDef.TowerType.cannon, 2));
 		addTower(new PointI(11, 4), def.getTowerDef(GameDef.TowerType.freezer, 2));
+		
+		// init pathing graphs
+		pathingGraphs = new ArrayList<>(maxMobSize);
+		for(int s=1; s<=maxMobSize; s++) pathingGraphs.add(new PathingGraph(s, this));
 	}
 	
 	public void damageDealtAt(PointI p, float damage){
@@ -223,6 +229,30 @@ public class Level {
 		projectilesToDelete.clear();
 		explosionsToDelete.clear();
 		particlesToDelete.clear();
+	}
+	
+	private ArrayList<PathingGraph> pathingGraphs = null;
+	public final int maxMobSize;
+	
+	public PathingGraph getPathingGraph(int mobSize){
+		if((mobSize < 1) || (mobSize > pathingGraphs.size())){
+			throw new RuntimeException("mobSize " + mobSize + " not supported!");
+		}
+		return pathingGraphs.get(mobSize - 1);
+	}
+	
+	public void updatePaths(){
+		for(int s=1; s<=maxMobSize; s++){
+			pathingGraphs.get(s-1).generate(s, this);
+		}
+	}
+	
+	public long getLastPathUpdateDuration(){
+		long ans = 0L;
+		for(int s=1; s<=maxMobSize; s++){
+			ans += pathingGraphs.get(s-1).lastTime;
+		}
+		return ans;
 	}
 	
 }

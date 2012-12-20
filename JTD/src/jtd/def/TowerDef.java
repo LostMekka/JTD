@@ -16,6 +16,7 @@ import jtd.entities.Tower;
  */
 public class TowerDef extends EntityDef{
 
+	public int size = 1;
 	public float range = 1f;
 	public float damageRadius = 0f;
 	public float reloadTime = 1f;

@@ -7,7 +7,6 @@ package jtd.level;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 import java.util.Random;
 import jtd.PointI;
@@ -16,7 +15,7 @@ import jtd.PointI;
  *
  * @author LostMekka
  */
-public class PathingGraph {
+public final class PathingGraph {
 	
 	public static final float WALK_COST = 0.6f;
 	public static final float WALK_DIAGONAL_COST = WALK_COST * (float)Math.sqrt(2f);
@@ -91,7 +90,7 @@ public class PathingGraph {
 		return new PathingGraphIterator(startingPoints.get(random.nextInt(startingPoints.size())));
 	}
 	
-	public PathingGraph(Level level) {
+	public PathingGraph(int mobSize, Level level) {
 		transitions = new ArrayList<>(level.w);
 		for(int x=0; x<level.w; x++){
 			ArrayList<LinkedList<PointI>> l = new ArrayList<>(level.h);
@@ -100,14 +99,14 @@ public class PathingGraph {
 				l.add(new LinkedList<PointI>());
 			}
 		}
-		generate(level);
+		generate(mobSize, level);
 	}
 	
 	private static final byte UNVISITED = 0;
 	private static final byte VISITING = 1;
 	private static final byte VISITED = 2;
 	
-	public long generate(Level level){
+	public long generate(int mobSize, Level level){
 		long startTime = System.currentTimeMillis();
 		LinkedList<PointI> newStartingPoints = new LinkedList<>();
 		byte[][] visited = new byte[level.w][level.h];

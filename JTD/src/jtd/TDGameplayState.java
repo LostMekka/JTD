@@ -50,7 +50,10 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	public GameDef gameDef = new GameDef();
 	float renderScale = 2.5f, timeScale = 1f;
 	PointF renderOffset = new PointF(0f, 0f);
-	public boolean debugPath = false, debugTowers = false;
+	
+	// debug vars
+	public boolean debugTowers = false;
+	public int debugPathing = 1;
 
 	@Override
 	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation){
@@ -136,10 +139,8 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	public Mob giveTarget(Tower tower){
 		SortedSet<Mob> mobs = new TreeSet<>(tower.getComparator());
 		for(Mob m:level.mobs){
-			// hamming distance is faster. normally many mobs dont meet the distance criterion
-			// therefore checking the hamming distance first should make the game faster over all
-			if((m.loc.hammingDistanceTo(tower.loc) < 2f * tower.def.range) && !level.mobsToDelete.contains(m)){
-				if(m.loc.distanceTo(tower.loc) < tower.def.range) mobs.add(m);
+			if(m.loc.quadraticDistanceTo(tower.loc) < tower.def.range * tower.def.range){
+				mobs.add(m);
 			}
 		}
 		if(mobs.isEmpty()) return null;
@@ -213,7 +214,6 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		level = new Level(gameDef);
-		currPathingGraph = new PathingGraph(level);
 	}
 
 	@Override
@@ -250,34 +250,41 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		for(Particle pa:level.particles) pa.draw(gc, sbg, grphcs, this);
 		for(Projectile pr:level.projectiles) pr.draw(gc, sbg, grphcs, this);
 		
-		// print debug text
-		grphcs.drawString("update in: " + pathTime, 10, 20);
-		grphcs.drawString("last update time: " + currPathingGraph.lastTime, 10, 30);
-		
-		// print debugPath
-		if(debugPath){
-			float rad = 0.1f;
-			float transformedDiameter = transformLength(2f * rad);
-			for(PointI p:currPathingGraph.startingPoints){
-				PointF p1 = transformPoint(new PointF((float)p.x - rad, (float)p.y - rad));
-				grphcs.drawOval(p1.x, p1.y, transformedDiameter, transformedDiameter);
-			}
-			for(int x=0; x<level.w; x++){
-				for(int y=0; y<level.h; y++){
-					PointF p1 = transformPoint(new PointF(x, y));
-					for(PointI p:currPathingGraph.transitions.get(x).get(y)){
-						PointF p2 = transformPoint(p.getPointF());
-						grphcs.drawGradientLine(p1.x, p1.y, Color.red, p2.x, p2.y, Color.yellow);
-					}
+		// debug stuff
+		dbgStringReset();
+		if((debugPathing > 0) && (debugPathing <= level.maxMobSize)) dbgPath(grphcs);
+	}
+	
+	private int dbgline = 1;
+	private void dbgStringReset(){
+		dbgline = 1;
+	}
+	private void dbgString(String s, Graphics grphcs){
+		grphcs.drawString(s, 10, 10 * ++dbgline);
+	}
+	private void dbgPath(Graphics grphcs){
+		dbgString("update in: " + pathTime, grphcs);
+		dbgString("last update time: " + level.getLastPathUpdateDuration(), grphcs);
+		PathingGraph graph = level.getPathingGraph(debugPathing);
+		float rad = 0.1f;
+		float transformedDiameter = transformLength(2f * rad);
+		for(PointI p:graph.startingPoints){
+			PointF p1 = transformPoint(new PointF((float)p.x - rad, (float)p.y - rad));
+			grphcs.drawOval(p1.x, p1.y, transformedDiameter, transformedDiameter);
+		}
+		for(int x=0; x<level.w; x++){
+			for(int y=0; y<level.h; y++){
+				PointF p1 = transformPoint(new PointF(x, y));
+				for(PointI p:graph.transitions.get(x).get(y)){
+					PointF p2 = transformPoint(p.getPointF());
+					grphcs.drawGradientLine(p1.x, p1.y, Color.red, p2.x, p2.y, Color.yellow);
 				}
 			}
 		}
 	}
 	
-	LinkedList<PointF> p;
-	
-	public PathingGraph getCurrentPathingGraph(){
-		return currPathingGraph;
+	public PathingGraph getCurrentPathingGraph(int mobSize){
+		return level.getPathingGraph(mobSize);
 	}
 	
 	private void mobGotThrough(Mob mob){
@@ -289,7 +296,6 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	}
 	
 	Random random = new Random();
-	PathingGraph currPathingGraph = null;
 	int maxPathTime = 500, pathTime = maxPathTime;
 	float n = 0f, spm = 1f, tst = 0.98f, t = 0f;
 	boolean pos = true;
@@ -301,11 +307,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		pathTime -= i;
 		if(pathTime <= 0){
 			pathTime = maxPathTime;
-			if(currPathingGraph == null){
-				currPathingGraph = new PathingGraph(level);
-			} else {
-				currPathingGraph.generate(level);
-			}
+			level.updatePaths();
 			for(Mob m:level.mobs) m.updatePath();
 		}
 		// tick entities
