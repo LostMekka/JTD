@@ -53,7 +53,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	
 	// debug vars
 	public boolean debugTowers = false;
-	public int debugPathing = 1;
+	public int debugPathing = 3;
 
 	@Override
 	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation){
@@ -226,23 +226,18 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			}
 		}
 		for(Particle pa:level.bgParticles) pa.draw(gc, sbg, grphcs, this);
-		// draw turret
-		for(int x=0; x<level.w; x++){
-			for(int y=0; y<level.h; y++){
-				Tower t = level.towers[y][x];
-				if(t != null){
-					t.draw(gc, sbg, grphcs, this);
-					if(debugTowers){
-						PointF p1 = transformPoint(new PointF(t.loc.x - t.def.range, t.loc.y - t.def.range));
-						float diameter = transformLength(t.def.range * 2f);
-						grphcs.drawOval(p1.x, p1.y, diameter, diameter);
-						PointF p2 = transformPoint(t.loc);
-						PointF p3 = t.loc.clone();
-						p3.travelInDirection(t.getHeadDir(), t.def.range);
-						p3 = transformPoint(p3);
-						grphcs.drawLine(p2.x, p2.y, p3.x, p3.y);
-					}
-				}
+		// draw towers
+		for(Tower t:level.towers){
+			t.draw(gc, sbg, grphcs, this);
+			if(debugTowers){
+				PointF p1 = transformPoint(new PointF(t.loc.x - t.def.range, t.loc.y - t.def.range));
+				float diameter = transformLength(t.def.range * 2f);
+				grphcs.drawOval(p1.x, p1.y, diameter, diameter);
+				PointF p2 = transformPoint(t.loc);
+				PointF p3 = t.loc.clone();
+				p3.travelInDirection(t.getHeadDir(), t.def.range);
+				p3 = transformPoint(p3);
+				grphcs.drawLine(p2.x, p2.y, p3.x, p3.y);
 			}
 		}
 		for(Mob m:level.mobs) m.draw(gc, sbg, grphcs, this);
@@ -318,13 +313,13 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		for(Projectile p:level.projectiles) p.tick(time);
 		for(Mob m:level.mobs) m.tick(time);
 		level.deleteMarkedEntities();
-		for(Tower[] t1:level.towers) for(Tower t2:t1) if(t2 != null) t2.tick(time);
+		for(Tower t:level.towers) t.tick(time);
 		// testing stuff
 		Input in = gc.getInput();
 		if(in.isKeyPressed(Input.KEY_M)) n++;
 		if(in.isMousePressed(0)){
 			PointF p = transformPointBack(in.getMouseX(), in.getMouseY());
-			if(level.isWalkable(p.getPointI())){
+			if(level.isWalkable(p.getPointI(), 1)){
 				level.mobs.add(new Mob(p, gameDef.getMobDef(GameDef.MobType.swarm, 1, false)));
 			}
 		}
@@ -344,21 +339,6 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			level.mobs.add(new Mob(gameDef.getMobDef(GameDef.MobType.swarm, 1, false)));
 		}
 		
-		if(spm > 2f){
-			spm = 1f;
-			if(pos){
-				Tower t = level.towers[5][6];
-				level.towers[5][6] = null;
-				level.towers[8][4] = t;
-				t.loc = new PointF(4, 8);
-			} else {
-				Tower t = level.towers[8][4];
-				level.towers[8][4] = null;
-				level.towers[5][6] = t;
-				t.loc = new PointF(6, 5);
-			}
-			pos = !pos;
-		}
 	}
 
 }

@@ -117,7 +117,7 @@ public final class PathingGraph {
 		}
 		LinkedList<Node> currNodes = new LinkedList<>();
 		// init node list
-		for(PointI p:level.destinations){
+		for(PointI p:level.destinations.get(mobSize-1)){
 			currNodes.add(new Node(p));
 			visited[p.x][p.y] = VISITED;
 		}
@@ -149,9 +149,9 @@ public final class PathingGraph {
 				nodesToExpand.remove(node);
 				int x = node.loc.x;
 				int y = node.loc.y;
-				LinkedList<PointI> reach = level.getWalkableTilesFrom(node.loc);
+				LinkedList<PointI> reach = level.getWalkableTilesFrom(node.loc, mobSize);
 				for(PointI p:reach){
-					if((visited[p.x][p.y] == VISITED) || !level.isWalkable(p)) continue;
+					if((visited[p.x][p.y] == VISITED) || !level.isWalkable(p, mobSize)) continue;
 					int hDist = p.hammingDistanceTo(node.loc);
 					if((hDist > 2) || (hDist < 1)) continue;
 					// add node to new nodes
@@ -175,7 +175,7 @@ public final class PathingGraph {
 					LinkedList<PointI> l = transitions.get(p.x).get(p.y);
 					if(!l.contains(node.loc)) l.add(node.loc);
 					// add location to stating point list, if cost is not higher
-					if(level.sources.contains(p)){
+					if(level.sources.get(mobSize-1).contains(p)){
 						if(newStartingPoints.isEmpty() || (n.weight <= startingPointCost)){
 							newStartingPoints.add(p);
 							startingPointCost = n.weight;

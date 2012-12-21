@@ -302,6 +302,7 @@ public final class GameDef {
 		
 		if(boss) level += 10;
 		MobDef m = new MobDef();
+		m.size = 3;
 		m.fillImages("hummer_000_", ".png", 4, 3, 0.5f, 0.09f);
 		m.maxHP = 2f + level;
 		m.speed = 1f;
