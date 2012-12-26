@@ -44,16 +44,16 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	}
 	private TDGameplayState(){}
 	
-	public static final float TILE_SIZE = 32f;
+	public static final float TILE_SIZE = 8f;
 	
 	public Level level;
 	public GameDef gameDef = new GameDef();
-	float renderScale = 2.5f, timeScale = 1f;
+	float renderScale = 4f, timeScale = 1f;
 	PointF renderOffset = new PointF(0f, 0f);
 	
 	// debug vars
-	public boolean debugTowers = false;
-	public int debugPathing = 3;
+	public boolean debugTowers = true;
+	public int debugPathing = 2;
 
 	@Override
 	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation){
@@ -139,7 +139,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	public Mob giveTarget(Tower tower){
 		SortedSet<Mob> mobs = new TreeSet<>(tower.getComparator());
 		for(Mob m:level.mobs){
-			if(m.loc.quadraticDistanceTo(tower.loc) < tower.def.range * tower.def.range){
+			if(m.loc.quadraticDistanceTo(tower.loc) < (tower.def.range + m.def.radius) * (tower.def.range + m.def.radius)){
 				mobs.add(m);
 			}
 		}
@@ -152,8 +152,8 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			LinkedList<InstantEffect> instantEffects, 
 			LinkedList<TimedEffectDef> timedEffects){
 		Projectile p = new Projectile(
-					tower.def.projectileDef, mob, tower, 
-					instantEffects, timedEffects, loc);
+				tower.def.projectileDef, mob, tower, 
+				instantEffects, timedEffects, loc);
 		level.projectiles.add(p);
 	}
 	
@@ -219,12 +219,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics grphcs) throws SlickException {
 		// draw terrain
-		for(int x=0; x<level.w; x++){
-			for(int y=0; y<level.h; y++){
-				Image terrain = level.getTileImage(x, y);
-				drawImage(terrain, new PointF(x, y), 1f, 0f);
-			}
-		}
+		level.draw(grphcs, this);
 		for(Particle pa:level.bgParticles) pa.draw(gc, sbg, grphcs, this);
 		// draw towers
 		for(Tower t:level.towers){
@@ -292,7 +287,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	
 	Random random = new Random();
 	int maxPathTime = 500, pathTime = maxPathTime;
-	float n = 0f, spm = 1f, tst = 0.98f, t = 0f;
+	float n = 0f, spm = 3f, tst = 0.98f, t = 0f;
 	boolean pos = true;
 	
 	@Override
@@ -319,9 +314,8 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		if(in.isKeyPressed(Input.KEY_M)) n++;
 		if(in.isMousePressed(0)){
 			PointF p = transformPointBack(in.getMouseX(), in.getMouseY());
-			if(level.isWalkable(p.getPointI(), 1)){
-				level.mobs.add(new Mob(p, gameDef.getMobDef(GameDef.MobType.swarm, 1, false)));
-			}
+			Mob m = new Mob(p, gameDef.getMobDef(GameDef.MobType.swarm, 1, false));
+			if(level.isWalkable(m.getPointI(), m.entitySize)) level.mobs.add(m);
 		}
 		t += time;
 		while(t > spm){

@@ -4,10 +4,8 @@
  */
 package jtd.def;
 
-import jtd.def.AnimatedEntityDef;
 import jtd.entities.Mob;
 import jtd.entities.ParticleFactory;
-import org.newdawn.slick.Image;
 
 /**
  *
@@ -22,6 +20,7 @@ public class MobDef extends AnimatedEntityDef{
 	public float shieldRegen = 0f;
 	public float armor = 0f;
 	public float speed = 1f;
+	public float radius = 0.5f;
 	public ParticleFactory[] hitParticleFacts = {};
 	public ParticleFactory[] deathParticleFacts = {};
 	public float[] damagePerParticle = {};

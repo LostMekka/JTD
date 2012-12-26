@@ -89,14 +89,15 @@ public final class GameDef {
 			cannonBall.expDef = explosionDef;
 
 			TowerDef t = new TowerDef();
+			t.size = 3;
 			t.sprites = new Image[]{
 				AssetLoader.getImage("tower_body.png"), 
 				AssetLoader.getImage("tower_head.png")};
 			t.sizes = new float[]{1f, 1f};
 			t.damage = 1f + lev;
-			t.damageRadius = 0.25f;
+			t.damageRadius = 0.45f;
 			t.reloadTime = 1.5f;
-			t.range = 2f + 0.5f * lev;
+			t.range = 4f + lev;
 			t.headAcceleration = 360f;
 			t.headMaxVel = 140f;
 			t.projectileDef = cannonBall;
@@ -138,6 +139,7 @@ public final class GameDef {
 			rocketDef.particleCooldowns = new float[]{0.04f};
 
 			TowerDef t = new TowerDef();
+			t.size = 2;
 			t.sprites = new Image[]{
 				AssetLoader.getImage("freezertower_000_000.png"),
 				AssetLoader.getImage("freezertower_000_001.png")};
@@ -164,25 +166,25 @@ public final class GameDef {
 	private void initRepeaterTower(){
 		for(int lev=0; lev<5; lev++){
 			TowerDef t = new TowerDef();
+			t.size = 2;
 			t.damage = 0.1f + 0.05f * lev;
 			t.damageRadius = 0f;
 			t.reloadTime = 0.1f;
-			t.range = 1f + 0.333f * lev;
-			t.headAcceleration = 360f;
-			t.headMaxVel = 150f;
+			t.range = (8f + lev) / 3f;
+			t.headAcceleration = 400f;
+			t.headMaxVel = 200f;
 			t.sprites = new Image[]{
 				AssetLoader.getImage("repeatertower_000_000.png"),
 				AssetLoader.getImage("repeatertower_000_001.png")};
 			t.sizes = new float[]{1f, 1f};
 			t.shotParticleFactories = new ParticleFactory[]{
-				new ParticleFactory(part_casing_000, 0.1f, 0f, 80f, 60f, 400f, 1000f, 0.2f, 0.4f, 1f, 0.5f),
-				new ParticleFactory(part_muzzle_000, 0.2f, 0.01f, 0f, 0f, 0f, 0f, 0f, 0f, 0.05f, 0.01f)};
-			t.shotParticleFactories[0].locationOffset = new PointF(0.05f, 0.15f);
+				new ParticleFactory(part_casing_000, 0.2f, 0f, 80f, 60f, 400f, 1000f, 0.2f, 0.4f, 1f, 0.5f),
+				new ParticleFactory(part_muzzle_000, 0.4f, 0.02f, 0f, 0f, 0f, 0f, 0f, 0f, 0.05f, 0.01f)};
+			t.shotParticleFactories[0].locationOffset = new PointF(0.1f, 0.3f);
 			t.shotParticleFactories[0].alphaDelay = 0.8f;
-			t.shotParticleFactories[1].locationOffset = new PointF(0.5f, 0f);
+			t.shotParticleFactories[1].locationOffset = new PointF(1f, 0f);
 			t.shotParticleFactories[1].alphaDelay = 0.5f;
 			t.shotParticleCounts = new int[]{1, 1};
-			t.shotOffsets = new PointF[]{new PointF(0.15f, 0f)};
 			t.name = "Repeater Tower";
 			t.level = lev + 1;
 			if(lev > 0) t.upgradeOptions = new TowerDef[]{TOWER_REPEATER.get(lev-1)};
@@ -302,10 +304,10 @@ public final class GameDef {
 		
 		if(boss) level += 10;
 		MobDef m = new MobDef();
-		m.size = 3;
-		m.fillImages("hummer_000_", ".png", 4, 3, 0.5f, 0.09f);
+		m.size = 2;
+		m.fillImages("hummer_000_", ".png", 4, 3, 0.8f, 0.09f);
 		m.maxHP = 2f + level;
-		m.speed = 1f;
+		m.speed = 2f;
 		
 		ParticleFactory deathSplat = new ParticleFactory(part_bloodsplat_000, 0.3f, 0.1f, 0f, 360f, 0f, 0f, 0.1f, 0.5f, 5f, 0f);
 		deathSplat.locationOffset = new PointF(0.25f, 0f);

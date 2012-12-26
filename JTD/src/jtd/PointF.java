@@ -22,8 +22,13 @@ public class PointF {
 		y = 0f;
 	}
 	
+	public PointI getPointI(int entitySize){
+		float offset = (float)(entitySize - 1) / 2f;
+		return new PointI(Math.round(x - offset), Math.round(y - offset));
+	}
+	
 	public PointI getPointI(){
-		return new PointI(Math.round(x), Math.round(y));
+		return getPointI(1);
 	}
 	
 	public float distanceTo(PointF p){

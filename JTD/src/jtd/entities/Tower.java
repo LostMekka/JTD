@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import jtd.CoordinateTransformator;
 import jtd.KillListener;
 import jtd.PointF;
+import jtd.PointI;
 import jtd.def.TowerDef;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffectDef;
@@ -71,8 +72,9 @@ public class Tower extends Entity implements KillListener{
 	private float[] instantEffectCooldowns, timedEffectCooldowns, idleParticleCooldowns;
 	private int currShotOffset = 0;
 
-	public Tower(TowerDef def, PointF loc) {
-		super(loc, def);
+	public Tower(TowerDef def, PointI loc) {
+		super(loc.getPointF(def.size), def);
+		entitySize = def.size;
 		headDir = RANDOM.nextFloat() * 360f;
 		lastTargetDirection = headDir;
 		headVel = 0f;
@@ -198,7 +200,7 @@ public class Tower extends Entity implements KillListener{
 		if(headDir < 0f) headDir += 360;
 		if(headDir > 360f) headDir -= 360;
 		// aqquire new target if necessary
-		if((target == null) || (loc.distanceTo(target.loc) > def.range)){
+		if((target == null) || (loc.distanceTo(target.loc) - target.def.radius > def.range)){
 			requestTarget();
 		}
 		// targeting
@@ -247,21 +249,8 @@ public class Tower extends Entity implements KillListener{
 			Graphics grphcs, CoordinateTransformator transformator) {
 		// draw head
 		if(def.sprites[1] != null){
-			transformator.drawImage(def.sprites[1], loc, def.sizes[1], headDir);
+			transformator.drawImage(def.sprites[1], loc, def.sizes[1] * (float)entitySize, headDir);
 		}
-//		PointF tol = transformator.transformPoint(loc);
-//		grphcs.drawString("" + shotCooldown, tol.x, tol.y);
-//		if(target != null){
-//			PointF tal = transformator.transformPoint(target.loc);
-//			grphcs.drawLine(tol.x, tol.y, tal.x, tal.y);
-//		}
-//		PointF p = loc.clone();
-//		p.travelInDirection(headDir, def.range);
-//		PointF p2 = transformator.transformPoint(p);
-//		grphcs.drawLine(tol.x, tol.y, p2.x, p2.y);
-//		PointF os = transformator.transformPoint(new PointF(loc.x - def.range, loc.y - def.range));
-//		PointF oe = transformator.transformPoint(new PointF(loc.x + def.range, loc.y + def.range));
-//		grphcs.drawOval(os.x, os.y, oe.x - os.x, oe.y - os.y);
 	}
 
 	@Override

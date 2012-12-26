@@ -9,6 +9,7 @@ import java.util.Random;
 import jtd.CoordinateTransformator;
 import jtd.KillListener;
 import jtd.PointF;
+import jtd.PointI;
 import jtd.TDGameplayState;
 import jtd.def.EntityDef;
 import org.newdawn.slick.GameContainer;
@@ -26,7 +27,7 @@ public abstract class Entity {
 	
 	public PointF loc;
 	public float rotation = 0f, sizeMultiplier = 1f, spriteAlpha = 1f;
-	public int currSprite = 0;
+	public int currSprite = 0, entitySize = 1;
 	public EntityDef def;
 	
 	private LinkedList<KillListener> killListeners = new LinkedList<>();
@@ -49,6 +50,10 @@ public abstract class Entity {
 		return killListeners.remove(l);
 	}
 	
+	public PointI getPointI(){
+		return loc.getPointI(entitySize);
+	}
+	
 	public final void kill(Entity killer){
 		TDGameplayState.get().EntityKilled(this, killer);
 		for(KillListener l:killListeners) l.EntityKilled(this, killer);
@@ -64,7 +69,9 @@ public abstract class Entity {
 			Graphics grphcs, CoordinateTransformator transformator){
 		if((currSprite >= 0) && (currSprite < def.sprites.length)){
 			def.sprites[currSprite].setAlpha(spriteAlpha);
-			transformator.drawImage(def.sprites[currSprite], loc, def.sizes[currSprite] * sizeMultiplier, rotation);
+			transformator.drawImage(def.sprites[currSprite], loc, 
+					def.sizes[currSprite] * sizeMultiplier * (float)entitySize, 
+					rotation);
 		}
 		entityDraw(gc, sbg, grphcs, transformator);
 	}

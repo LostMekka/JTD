@@ -31,17 +31,22 @@ public class Mob extends AnimatedEntity {
 	
 	public Mob(PointF loc, MobDef mobDef){
 		super(loc, mobDef);
-		this.def = mobDef;
+		def = mobDef;
+		entitySize = def.size;
 		hp = mobDef.maxHP;
 		shield = mobDef.maxShield;
 		if(loc == null){
 			path = GAME.getCurrentPathingGraph(def.size).iterator();
-			this.loc = path.getLastPoint().getPointF(WALK_RANDOM_COMPONENT);
+			this.loc = path.getLastPoint().getPointF(entitySize, WALK_RANDOM_COMPONENT);
 		} else {
-			path = GAME.getCurrentPathingGraph(def.size).iterator(loc.getPointI());
+			path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
 		}
 		nextPathTarget();
-		rotation = this.loc.getRotationTo(pathTarget);
+		if(pathTarget == null){
+			rotation = RANDOM.nextFloat() + 360f;
+		} else {
+			rotation = this.loc.getRotationTo(pathTarget);
+		}
 		dmgCounters = new float[def.hitParticleFacts.length];
 	}
 	
@@ -54,7 +59,7 @@ public class Mob extends AnimatedEntity {
 		if(p == null){
 			pathTarget = null;
 		} else {
-			pathTarget = p.getPointF(WALK_RANDOM_COMPONENT);
+			pathTarget = p.getPointF(entitySize, WALK_RANDOM_COMPONENT);
 		}
 	}
 	
@@ -62,7 +67,7 @@ public class Mob extends AnimatedEntity {
 		if((path == null) || (pathTarget == null)){
 			path = GAME.getCurrentPathingGraph(def.size).iterator();
 		} else {
-			path = GAME.getCurrentPathingGraph(def.size).iterator(pathTarget.getPointI());
+			path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
 		}
 	}
 	
@@ -148,7 +153,7 @@ public class Mob extends AnimatedEntity {
 					nextPathTarget();
 					// if we have reached the last node in the path, wander around randomly
 					if(pathTarget == null){
-						GAME.pathEndReachedBy(lastTargetPoint.getPointI(), this);
+						GAME.pathEndReachedBy(getPointI(), this);
 						pathTarget = loc.clone();
 						float d = RANDOM.nextFloat() * 1.5f + 0.5f;
 						float a = RANDOM.nextFloat() * 360f;
@@ -156,7 +161,7 @@ public class Mob extends AnimatedEntity {
 						pathTarget.y += d * (float)Math.sin(a);
 						GAME.movePointIntoLevl(pathTarget);
 					} else {
-						GAME.fieldWalkedBy(pathTarget.getPointI(), this);
+						GAME.fieldWalkedBy(getPointI(), this);
 					}
 					// set proper direction
 					rotation = loc.getRotationTo(pathTarget);

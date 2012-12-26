@@ -153,19 +153,56 @@ public final class PathingGraph {
 				for(PointI p:reach){
 					if((visited[p.x][p.y] == VISITED) || !level.isWalkable(p, mobSize)) continue;
 					int hDist = p.hammingDistanceTo(node.loc);
-					if((hDist > 2) || (hDist < 1)) continue;
+					float cost;
+					int dx = p.x - x;
+					int dy = p.y - y;
+					if((hDist > 2) || (hDist < 1) || (Math.abs(dx) > 1) || (Math.abs(dy) > 1)) continue;
 					// add node to new nodes
-					Node n;
 					if(hDist == 1){
-						n = new Node(p, node, level.getPathingWeightAt(p) + WALK_COST);
+						// straight movement
+						cost = WALK_COST;
+						if(dx == 0){
+							// vertical movement
+							int yy;
+							if(dy > 0){
+								yy = y + mobSize;
+							} else {
+								yy = y - 1;
+							}
+							for(int xx=x; xx<x+mobSize; xx++){
+								cost += (float)level.getPathingWeightAt(new PointI(xx, yy));
+							}
+						} else {
+							//horizontal movement
+							int xx;
+							if(dx > 0){
+								xx = x + mobSize;
+							} else {
+								xx = x - 1;
+							}
+							for(int yy=y; yy<y+mobSize; yy++){
+								cost += (float)level.getPathingWeightAt(new PointI(xx, yy));
+							}
+						}
 					} else {
-						PointI tmp1 = new PointI(x, p.y);
-						PointI tmp2 = new PointI(p.x, y);
-						float w = (float)level.getPathingWeightAt(tmp1) + (float)level.getPathingWeightAt(tmp2);
-						w *= 0.5f * (WALK_DIAGONAL_COST - WALK_COST);
-						w += (float)level.getPathingWeightAt(p);
-						n = new Node(p, node, w + WALK_DIAGONAL_COST);
+						// diagonal movement
+						int xx = p.x;
+						if(dx > 0) xx += mobSize - 1;
+						int yy = p.y;
+						if(dy > 0) yy += mobSize - 1;
+						cost = WALK_DIAGONAL_COST;
+						cost += level.getPathingWeightAt(new PointI(xx, yy));
+						for(int i=1; i<=mobSize; i++){
+							float cx = level.getPathingWeightAt(new PointI(xx, yy - dy * i));
+							float cy = level.getPathingWeightAt(new PointI(xx - dx * i, yy));
+							if(i == mobSize){
+								cost += 0.5f * (cx + cy);
+							} else {
+								cost += cx + cy;
+							}
+						}
 					}
+					Node n = new Node(p, node, cost);
 					if(!newNodes.contains(n)) newNodes.add(n);
 					// add transition in graph
 					if(visited[p.x][p.y] == UNVISITED){

@@ -7,16 +7,26 @@ package jtd.level;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 import jtd.AssetLoader;
+import jtd.CoordinateTransformator;
+import jtd.PointF;
 import jtd.def.GameDef;
 import jtd.PointI;
+import jtd.TDGameplayState;
 import jtd.entities.Explosion;
 import jtd.entities.Mob;
 import jtd.entities.Particle;
 import jtd.entities.Projectile;
 import jtd.entities.Tower;
 import jtd.def.TowerDef;
+import org.newdawn.slick.BigImage;
+import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
+import org.newdawn.slick.SlickException;
+import org.newdawn.slick.opengl.ImageData;
+import org.newdawn.slick.opengl.Texture;
+import org.newdawn.slick.opengl.TextureImpl;
 
 /**
  *
@@ -27,30 +37,6 @@ public final class Level {
 	public enum Field{
 		wall, grass, floor, src, dest, srcAndDest;
 	}
-	
-	private static final Field[][] lev1 = {
-		{Field.src,   Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.src, Field.floor, Field.floor, Field.wall},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.dest, Field.floor, Field.grass, Field.floor, Field.grass, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.floor, Field.dest},
-	};
-	
-	private static final Field[][] lev2 = {
-		{Field.src,   Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.floor, Field.floor, Field.wall, Field.floor, Field.floor},
-		{Field.floor, Field.wall, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.grass, Field.floor, Field.grass, Field.grass},
-		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.floor, Field.floor, Field.floor, Field.floor, Field.floor},
-		{Field.grass, Field.grass, Field.floor, Field.grass, Field.grass},
-		{Field.floor, Field.floor, Field.floor, Field.floor, Field.dest},
-	};
 	
 	public Field[][] fields;
 	public Field[][][] fieldsData;
@@ -74,6 +60,8 @@ public final class Level {
 	public ArrayList<LinkedList<PointI>> sources, destinations;
 	
 	private Image iWall, iGrass, iFloor, iSrc, iDest;
+	private Image backgroundImage;
+	private PointF fieldCenter;
 		
 	public Level(GameDef def){
 		maxMobSize = 3;
@@ -83,20 +71,24 @@ public final class Level {
 		iSrc = AssetLoader.getImage("src.png", false);
 		iDest = AssetLoader.getImage("dest.png", false);
 		this.def = def;
-		fields = lev1;
+		fields = new Field[24][32];
 		h = fields.length;
 		w = fields[0].length;
+		for(int y=0; y<h; y++) for(int x=0; x<w; x++) fields[y][x] = Field.floor;
+		fields[0][0] = Field.src;
+		fields[h-1][w-1] = Field.dest;
 		// init test stuff
-		addTowerInternal(new PointI(0, 3), def.getTowerDef(GameDef.TowerType.repeater, 4));
-		addTowerInternal(new PointI(0, 4), def.getTowerDef(GameDef.TowerType.cannon, 4));
-		addTowerInternal(new PointI(0, 5), def.getTowerDef(GameDef.TowerType.repeater, 4));
-		addTowerInternal(new PointI(2, 1), def.getTowerDef(GameDef.TowerType.repeater, 2));
-
-		addTowerInternal(new PointI(6, 4), def.getTowerDef(GameDef.TowerType.repeater, 4));
-		addTowerInternal(new PointI(8, 3), def.getTowerDef(GameDef.TowerType.cannon, 1));
-		addTowerInternal(new PointI(10, 2), def.getTowerDef(GameDef.TowerType.repeater, 2));
-		addTowerInternal(new PointI(10, 5), def.getTowerDef(GameDef.TowerType.cannon, 2));
-		addTowerInternal(new PointI(11, 4), def.getTowerDef(GameDef.TowerType.freezer, 2));
+		addTowerInternal(new PointI(15, 11), def.getTowerDef(GameDef.TowerType.freezer, 3));
+		
+		addTowerInternal(new PointI(10, 6), def.getTowerDef(GameDef.TowerType.repeater, 3));
+		addTowerInternal(new PointI(20, 6), def.getTowerDef(GameDef.TowerType.repeater, 3));
+		addTowerInternal(new PointI(10, 16), def.getTowerDef(GameDef.TowerType.repeater, 3));
+		addTowerInternal(new PointI(20, 16), def.getTowerDef(GameDef.TowerType.repeater, 3));
+		
+		addTowerInternal(new PointI(0, 11), def.getTowerDef(GameDef.TowerType.cannon, 3));
+		addTowerInternal(new PointI(29, 11), def.getTowerDef(GameDef.TowerType.cannon, 3));
+		addTowerInternal(new PointI(15, 0), def.getTowerDef(GameDef.TowerType.cannon, 3));
+		addTowerInternal(new PointI(15, 21), def.getTowerDef(GameDef.TowerType.cannon, 3));
 		
 		// init pathing graphs
 		killCounts = new int[h][w];
@@ -112,6 +104,24 @@ public final class Level {
 		updateWalkables();
 		pathingGraphs = new ArrayList<>(maxMobSize);
 		for(int s=1; s<=maxMobSize; s++) pathingGraphs.add(new PathingGraph(s, this));
+	}
+	
+	public void constructBackground(){
+		try {
+			float ts = TDGameplayState.TILE_SIZE;
+			backgroundImage = new Image((int)(ts * w), (int)(ts * h));
+			Graphics g = backgroundImage.getGraphics();
+			for(int y=0; y<h; y++){
+				for(int x=0; x<w; x++){
+					g.drawImage(getTileImage(x, y), x*ts, y*ts);
+				}
+			}
+			g.drawLine(0, 0, 100, 30);
+		} catch (SlickException ex) {
+			backgroundImage = null;
+			System.err.println("err!!!");
+		}
+		fieldCenter = new PointF(-0.5f, -0.5f);
 	}
 	
 	private void updateWalkables(){
@@ -130,8 +140,8 @@ public final class Level {
 						// size is 1. simply copy level
 						boolean blocked = false;
 						for(Tower t:towers){
-							// TODO: use proper point (top left) here!
-							if(t.loc.getPointI().equals(p)){
+							PointI pt = t.getPointI();
+							if((p.x >= pt.x) && (p.x < pt.x + t.entitySize) && (p.y >= pt.y) && (p.y < pt.y + t.entitySize)){
 								blocked = true;
 								break;
 							}
@@ -216,6 +226,12 @@ public final class Level {
 		return killCounts[p.y][p.x] + damageCounts[p.y][p.x] / 100f;
 	}
 	
+	public void draw(Graphics g, CoordinateTransformator t){
+		if(backgroundImage == null) constructBackground();
+		PointF l = t.transformPoint(fieldCenter);
+		g.drawImage(backgroundImage, l.x, l.y);
+	}
+	
 	public Image getTileImage(int x, int y){
 		switch(fields[y][x]){
 			case dest: return iDest;
@@ -228,15 +244,24 @@ public final class Level {
 	}
 	
 	public boolean isBuildable(PointI loc, int towerSize){
-		for(Mob m:mobs){
-			if(m.loc.getPointI().equals(loc)) return false;
-		}
 		if((fields[loc.y][loc.x] != Field.grass) && (fields[loc.y][loc.x] != Field.floor)){
 			return false;
 		}
+		for(Mob m:mobs){
+			int s = m.def.size;
+			PointI p = m.getPointI();
+			if(		(loc.x + towerSize > p.x) && (p.x + s > loc.x) && 
+					(loc.y + towerSize > p.y) && (p.y + s > loc.y)){
+				return false;
+			}
+		}
 		for(Tower t:towers){
-			PointI p = t.loc.getPointI(); // TODO: get proper point
-			// TODO: check for collision
+			int s = t.def.size;
+			PointI p = t.getPointI();
+			if(		(loc.x + towerSize > p.x) && (p.x + s > loc.x) && 
+					(loc.y + towerSize > p.y) && (p.y + s > loc.y)){
+				return false;
+			}
 		}
 		// TODO: check for path blockage
 		return true;
@@ -293,7 +318,7 @@ public final class Level {
 	
 	private boolean addTowerInternal(PointI loc, TowerDef def){
 		if(!isBuildable(loc, def.size)) return false;
-		return towers.add(new Tower(def, loc.getPointF()));
+		return towers.add(new Tower(def, loc));
 	}
 	
 	private boolean removeTowerInternal(Tower t){
