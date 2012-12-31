@@ -154,9 +154,9 @@ public class Tower extends Entity implements KillListener{
 			shotStart = loc.clone();
 		} else {
 			shotStart = def.shotOffsets[currShotOffset].clone();
+			currShotOffset = (currShotOffset + 1) % def.shotOffsets.length;
 			shotStart.rotate(headDir);
-			shotStart.x += loc.x;
-			shotStart.y += loc.y;
+			shotStart.add(loc);
 		}
 		// fill effects
 		LinkedList<InstantEffect> instantEffects = new LinkedList<>();
@@ -188,7 +188,7 @@ public class Tower extends Entity implements KillListener{
 		// add shot particles
 		for(int i=0; i<def.shotParticleFactories.length; i++){
 			for(int n=0; n<def.shotParticleCounts[i]; n++){
-				GAME.addParticle(def.shotParticleFactories[i], loc.clone(), headDir);
+				GAME.addParticle(def.shotParticleFactories[i], shotStart.clone(), headDir);
 			}
 		}
 	}

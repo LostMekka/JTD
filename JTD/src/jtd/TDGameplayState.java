@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import jtd.def.MobDef;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
 import jtd.effect.timed.TimedEffectDef;
@@ -20,6 +21,7 @@ import jtd.entities.ParticleFactory;
 import jtd.entities.Projectile;
 import jtd.entities.Tower;
 import jtd.level.Level;
+import jtd.level.LevelDataHolder;
 import jtd.level.PathListener;
 import jtd.level.PathingGraph;
 import org.newdawn.slick.Color;
@@ -44,16 +46,17 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	}
 	private TDGameplayState(){}
 	
-	public static final float TILE_SIZE = 8f;
+	public static final float TILE_SIZE = 32f;
 	
-	public Level level;
+	public LevelDataHolder level;
 	public GameDef gameDef = new GameDef();
-	float renderScale = 4f, timeScale = 1f;
+	float renderScale = 1f, timeScale = 1f;
 	PointF renderOffset = new PointF(0f, 0f);
 	
 	// debug vars
 	public boolean debugTowers = true;
-	public int debugPathing = 2;
+	public boolean debugPathingWeights = true;
+	public int debugPathing = 0;
 
 	@Override
 	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation){
@@ -105,12 +108,6 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			Mob mob = (Mob)entity;
 			if((killer != null) && (killer instanceof Tower)){
 				mobGotKilled(mob);
-				PointI p = mob.loc.getPointI();
-				if(p.x < 0) p.x = 0;
-				if(p.x >= level.w) p.x = level.w - 1;
-				if(p.y < 0) p.y = 0;
-				if(p.y >= level.h) p.y = level.h - 1;
-				level.killHappenedAt(p);
 			}
 			level.markMobForDeletion(mob);
 			return;
@@ -163,14 +160,14 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		for(TimedEffectDef def:timedEffects) mob.applyTimedEffect(new TimedEffect(attacker, def));
 		for(InstantEffect e:instantEffects) mob.applyInstantEffect(e);
 		float dmg = mob.damage(attacker.def.damage, attacker, direction);
-		level.damageDealtAt(mob.loc.getPointI(), dmg);
+		level.damageDealtAt(mob.getPointI(), dmg, mob.def.size);
 	}
 	
 	public void dealAreaDamage(PointF loc, Tower attacker, 
 			LinkedList<InstantEffect> instantEffects, 
 			LinkedList<TimedEffectDef> timedEffects){
 		for(Mob mob:level.mobs){
-			if(mob.loc.distanceTo(loc) <= attacker.def.damageRadius){
+			if(mob.loc.distanceTo(loc) - mob.def.radius <= attacker.def.damageRadius){
 				dealDamage(mob, attacker, instantEffects, timedEffects, loc.getRotationTo(mob.loc));
 			}
 		}
@@ -213,7 +210,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
-		level = new Level(gameDef);
+		level = new LevelDataHolder(gameDef, new Level());
 	}
 
 	@Override
@@ -224,16 +221,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		// draw towers
 		for(Tower t:level.towers){
 			t.draw(gc, sbg, grphcs, this);
-			if(debugTowers){
-				PointF p1 = transformPoint(new PointF(t.loc.x - t.def.range, t.loc.y - t.def.range));
-				float diameter = transformLength(t.def.range * 2f);
-				grphcs.drawOval(p1.x, p1.y, diameter, diameter);
-				PointF p2 = transformPoint(t.loc);
-				PointF p3 = t.loc.clone();
-				p3.travelInDirection(t.getHeadDir(), t.def.range);
-				p3 = transformPoint(p3);
-				grphcs.drawLine(p2.x, p2.y, p3.x, p3.y);
-			}
+			if(debugTowers) dbgTower(grphcs, t);
 		}
 		for(Mob m:level.mobs) m.draw(gc, sbg, grphcs, this);
 		for(Explosion e:level.explosions) e.draw(gc, sbg, grphcs, this);
@@ -242,7 +230,10 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		
 		// debug stuff
 		dbgStringReset();
-		if((debugPathing > 0) && (debugPathing <= level.maxMobSize)) dbgPath(grphcs);
+		if((debugPathing > 0) && (debugPathing <= level.level.maxMobSize)) dbgPath(grphcs);
+		if(debugPathingWeights) dbgPathWeights(grphcs);
+		
+		grphcs.flush();
 	}
 	
 	private int dbgline = 1;
@@ -251,6 +242,17 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	}
 	private void dbgString(String s, Graphics grphcs){
 		grphcs.drawString(s, 10, 10 * ++dbgline);
+	}
+	private void dbgTower(Graphics g, Tower t){
+		g.setColor(Color.white);
+		PointF p1 = transformPoint(new PointF(t.loc.x - t.def.range, t.loc.y - t.def.range));
+		float diameter = transformLength(t.def.range * 2f);
+		g.drawOval(p1.x, p1.y, diameter, diameter);
+		PointF p2 = transformPoint(t.loc);
+		PointF p3 = t.loc.clone();
+		p3.travelInDirection(t.getHeadDir(), t.def.range);
+		p3 = transformPoint(p3);
+		g.drawLine(p2.x, p2.y, p3.x, p3.y);
 	}
 	private void dbgPath(Graphics grphcs){
 		dbgString("update in: " + pathTime, grphcs);
@@ -272,22 +274,40 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			}
 		}
 	}
+	private void dbgPathWeights(Graphics g){
+		float max = level.getMaxPathingWeight();
+		if(max <= 0) return;
+		g.setColor(Color.red);
+		for(int y=0; y<level.h; y++){
+			for(int x=0; x<level.w; x++){
+				PointI p = new PointI(x, y);
+				float rad = level.getPathingWeightAt(p) / max / 2f;
+				float diameter = transformLength(2f * rad);
+				if(diameter <= 4f) continue;
+				PointF p1 = transformPoint(new PointF(x - rad, y - rad));
+				g.fillOval(p1.x, p1.y, diameter, diameter);
+			}
+		}
+	}
 	
 	public PathingGraph getCurrentPathingGraph(int mobSize){
 		return level.getPathingGraph(mobSize);
 	}
 	
 	private void mobGotThrough(Mob mob){
-		spm /= tst;
+		// TODO: exchange testing code with useful stuff
+		if(spm < 1.5f) spm /= tst;
 	}
 	
 	private void mobGotKilled(Mob mob){
-		spm *= tst;
+		level.killHappenedAt(mob.getPointI(), mob.def.size);
+		// TODO: exchange testing code with useful stuff
+		if(spm > 0.01f) spm *= tst;
 	}
 	
 	Random random = new Random();
 	int maxPathTime = 500, pathTime = maxPathTime;
-	float n = 0f, spm = 3f, tst = 0.98f, t = 0f;
+	float spm = 1f, tst = 0.99f, t = spm;
 	boolean pos = true;
 	
 	@Override
@@ -311,26 +331,24 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		for(Tower t:level.towers) t.tick(time);
 		// testing stuff
 		Input in = gc.getInput();
-		if(in.isKeyPressed(Input.KEY_M)) n++;
+		if(in.isKeyPressed(Input.KEY_M)) t += spm;
 		if(in.isMousePressed(0)){
 			PointF p = transformPointBack(in.getMouseX(), in.getMouseY());
-			Mob m = new Mob(p, gameDef.getMobDef(GameDef.MobType.swarm, 1, false));
-			if(level.isWalkable(m.getPointI(), m.entitySize)) level.mobs.add(m);
+			MobDef mDef = gameDef.getMobDef(GameDef.MobType.swarm, 1, false);
+			if(level.isWalkable(p.getPointI(), mDef.size)){
+				level.mobs.add(new Mob(p, mDef));
+			}
 		}
 		t += time;
 		while(t > spm){
 			t -= spm;
-			n++;
-		}
-		while(n>0){
 			if(level.mobs.size() >= 1000) break;
-			n--;
 			GameDef.MobType t = null;
 			switch(random.nextInt(2)){
 				case 0: t = GameDef.MobType.normal; break;
 				case 1: t = GameDef.MobType.swarm; break;
 			}
-			level.mobs.add(new Mob(gameDef.getMobDef(GameDef.MobType.swarm, 1, false)));
+			level.mobs.add(new Mob(gameDef.getMobDef(t, 1, false)));
 		}
 		
 	}

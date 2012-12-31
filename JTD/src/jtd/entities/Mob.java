@@ -42,11 +42,6 @@ public class Mob extends AnimatedEntity {
 			path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
 		}
 		nextPathTarget();
-		if(pathTarget == null){
-			rotation = RANDOM.nextFloat() + 360f;
-		} else {
-			rotation = this.loc.getRotationTo(pathTarget);
-		}
 		dmgCounters = new float[def.hitParticleFacts.length];
 	}
 	
@@ -61,17 +56,37 @@ public class Mob extends AnimatedEntity {
 		} else {
 			pathTarget = p.getPointF(entitySize, WALK_RANDOM_COMPONENT);
 		}
+		updateRotation();
+	}
+	
+	private void updateRotation(){
+		if(pathTarget == null){
+			rotation = RANDOM.nextFloat() + 360f;
+		} else {
+			rotation = this.loc.getRotationTo(pathTarget);
+		}
 	}
 	
 	public final void updatePath(){
 		if((path == null) || (pathTarget == null)){
 			path = GAME.getCurrentPathingGraph(def.size).iterator();
+			nextPathTarget();
 		} else {
+			PointI p1 = path.getLastPoint();
 			path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
+			if(path != null){
+				PointI p2 = path.next();
+				if((p2 != null) && !p2.equals(p1)){
+					pathTarget = p2.getPointF(entitySize, WALK_RANDOM_COMPONENT);
+					updateRotation();
+				}
+			}
 		}
+		
 	}
 	
 	public float getDistanceStillToWalk(){
+		if(pathTarget == null) return 0f;
 		return loc.distanceTo(pathTarget) + path.getDistanceLeft();
 	}
 	

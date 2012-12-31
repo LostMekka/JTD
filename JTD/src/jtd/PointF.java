@@ -23,7 +23,7 @@ public class PointF {
 	}
 	
 	public PointI getPointI(int entitySize){
-		float offset = (float)(entitySize - 1) / 2f;
+		float offset = (float)(entitySize - 1) / 2f - 0.001f;
 		return new PointI(Math.round(x - offset), Math.round(y - offset));
 	}
 	
@@ -82,6 +82,16 @@ public class PointF {
 		float tmp = x * (float)Math.cos(amount) - y * (float)Math.sin(amount);
 		y = x * (float)Math.sin(amount) + y * (float)Math.cos(amount);
 		x = tmp;
+	}
+	
+	public void add(PointF p){
+		x += p.x;
+		y += p.y;
+	}
+	
+	public void multiply(float f){
+		x *= f;
+		y *= f;
 	}
 	
 	public boolean isInSameTileWith(PointF p){

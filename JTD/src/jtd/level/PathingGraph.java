@@ -42,7 +42,11 @@ public final class PathingGraph {
 		PointI lastPoint = null;
 		public PathingGraphIterator(PointI start) {
 			lastPoint = start;
-			nextPoints = transitions.get(start.x).get(start.y);
+			if(lastPoint.x < 0) lastPoint.x = 0;
+			if(lastPoint.y < 0) lastPoint.y = 0;
+			if(lastPoint.x >= transitions.size()) lastPoint.x = transitions.size();
+			if(lastPoint.y >= transitions.get(0).size()) lastPoint.y = transitions.get(0).size();
+			nextPoints = transitions.get(lastPoint.x).get(lastPoint.y);
 		}
 		@Override
 		public boolean hasNext() {
@@ -90,7 +94,7 @@ public final class PathingGraph {
 		return new PathingGraphIterator(startingPoints.get(random.nextInt(startingPoints.size())));
 	}
 	
-	public PathingGraph(int mobSize, Level level) {
+	public PathingGraph(int mobSize, LevelDataHolder level) {
 		transitions = new ArrayList<>(level.w);
 		for(int x=0; x<level.w; x++){
 			ArrayList<LinkedList<PointI>> l = new ArrayList<>(level.h);
@@ -106,7 +110,7 @@ public final class PathingGraph {
 	private static final byte VISITING = 1;
 	private static final byte VISITED = 2;
 	
-	public long generate(int mobSize, Level level){
+	public long generate(int mobSize, LevelDataHolder level){
 		long startTime = System.currentTimeMillis();
 		LinkedList<PointI> newStartingPoints = new LinkedList<>();
 		byte[][] visited = new byte[level.w][level.h];
@@ -157,7 +161,7 @@ public final class PathingGraph {
 					int dx = p.x - x;
 					int dy = p.y - y;
 					if((hDist > 2) || (hDist < 1) || (Math.abs(dx) > 1) || (Math.abs(dy) > 1)) continue;
-					// add node to new nodes
+					// node is valid for expansion. add it to new nodes
 					if(hDist == 1){
 						// straight movement
 						cost = WALK_COST;
