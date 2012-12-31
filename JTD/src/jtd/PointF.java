@@ -102,4 +102,10 @@ public class PointF {
 	public PointF clone(){
 		return new PointF(x, y);
 	}
+
+	@Override
+	public String toString() {
+		return "PointF{" + "x=" + x + ", y=" + y + '}';
+	}
+	
 }

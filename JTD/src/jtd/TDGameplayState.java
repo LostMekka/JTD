@@ -50,12 +50,19 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	
 	public LevelDataHolder level;
 	public GameDef gameDef = new GameDef();
-	float renderScale = 1f, timeScale = 1f;
-	PointF renderOffset = new PointF(0f, 0f);
+	public float renderScale = 1f, timeScale = 1f;
+	public PointF renderOffset = new PointF(0f, 0f);
+	public PointF renderMinOffset = null;
+	public PointF renderMaxOffset = null;
+	public GameplayGui gui = new GameplayGui();
+	
+	private boolean isZoomDragging = false;
+	private boolean isScrollDragging = false;
+	private PointF lastMousePos = new PointF();
 	
 	// debug vars
-	public boolean debugTowers = true;
-	public boolean debugPathingWeights = true;
+	public boolean debugTowers = false;
+	public boolean debugPathingWeights = false;
 	public int debugPathing = 0;
 
 	@Override
@@ -211,10 +218,22 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	@Override
 	public void init(GameContainer gc, StateBasedGame sbg) throws SlickException {
 		level = new LevelDataHolder(gameDef, new Level());
+		gui.updateGuiImage(gc);
+		gui.updateMapImage(level);
+		renderOffset = new PointF(0f, 0f);
+		PointF tmp = transformPointBack(level.w, level.h);
+		tmp.x -= gui.brCorner.x;
+		tmp.y -= gui.brCorner.y;
+		renderMinOffset = transformPoint(tmp);
+		renderMinOffset.multiply(-1f);
+		renderMaxOffset = transformPoint(gui.tlCorner.getPointF());
+//		renderOffset = renderMinOffset.clone();
+//		renderOffset.multiply(0.5f);
 	}
 
 	@Override
 	public void render(GameContainer gc, StateBasedGame sbg, Graphics grphcs) throws SlickException {
+		// TODO: draw only visible stuff (visible is between gui.tlCorner and gui.brCorner)
 		// draw terrain
 		level.draw(grphcs, this);
 		for(Particle pa:level.bgParticles) pa.draw(gc, sbg, grphcs, this);
@@ -233,6 +252,10 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		if((debugPathing > 0) && (debugPathing <= level.level.maxMobSize)) dbgPath(grphcs);
 		if(debugPathingWeights) dbgPathWeights(grphcs);
 		
+		gui.draw(grphcs);
+		dbgString(renderOffset.toString(), grphcs);
+		grphcs.drawLine(gui.tlCorner.x, gui.tlCorner.y, gui.brCorner.x, gui.brCorner.y);
+		grphcs.drawLine(gui.tlCorner.x, gui.brCorner.y, gui.brCorner.x, gui.tlCorner.y);
 		grphcs.flush();
 	}
 	
@@ -332,6 +355,8 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		// testing stuff
 		Input in = gc.getInput();
 		if(in.isKeyPressed(Input.KEY_M)) t += spm;
+		if(in.isKeyPressed(Input.KEY_ADD)) timeScale *= 1.5f;
+		if(in.isKeyPressed(Input.KEY_SUBTRACT)) timeScale /= 1.5f;
 		if(in.isMousePressed(0)){
 			PointF p = transformPointBack(in.getMouseX(), in.getMouseY());
 			MobDef mDef = gameDef.getMobDef(GameDef.MobType.swarm, 1, false);
@@ -339,6 +364,24 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 				level.mobs.add(new Mob(p, mDef));
 			}
 		}
+		
+		if(in.isMouseButtonDown(Input.MOUSE_MIDDLE_BUTTON)){
+			isScrollDragging = true;
+			float dx = transformLengthBack(lastMousePos.x - in.getMouseX());
+			float dy = transformLengthBack(lastMousePos.y - in.getMouseY());
+			renderOffset.x += dx;
+			renderOffset.y += dy;
+			if(renderOffset.x < renderMinOffset.x) renderOffset.x = renderMinOffset.x;
+			if(renderOffset.x > renderMaxOffset.x) renderOffset.x = renderMaxOffset.x;
+			if(renderOffset.y < renderMinOffset.y) renderOffset.y = renderMinOffset.y;
+			if(renderOffset.y > renderMaxOffset.y) renderOffset.y = renderMaxOffset.y;
+		} else {
+			isScrollDragging = false;
+		}
+		
+		lastMousePos.x = in.getMouseX();
+		lastMousePos.y = in.getMouseY();
+		
 		t += time;
 		while(t > spm){
 			t -= spm;
