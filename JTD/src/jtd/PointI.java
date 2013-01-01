@@ -26,22 +26,22 @@ public class PointI {
 		y = 0;
 	}
 	
-	public PointF getPointF(int entitySize, float randomComponent){
-		float offset = ((float)entitySize - 1f) / 2f;
-		return new PointF(
+	public PointD getPointF(int entitySize, double randomComponent){
+		double offset = ((double)entitySize - 1f) / 2f;
+		return new PointD(
 				x + offset + (ran.nextFloat() - 0.5f) * randomComponent, 
 				y + offset + (ran.nextFloat() - 0.5f) * randomComponent);
 	}
 	
-	public PointF getPointF(int entitySize){
+	public PointD getPointF(int entitySize){
 		return getPointF(entitySize, 0f);
 	}
 	
-	public PointF getPointF(float randomComponent){
+	public PointD getPointF(double randomComponent){
 		return getPointF(1, randomComponent);
 	}
 	
-	public PointF getPointF(){
+	public PointD getPointF(){
 		return getPointF(1, 0f);
 	}
 	
@@ -53,12 +53,12 @@ public class PointI {
 		return Math.abs(x) + Math.abs(y);
 	}
 	
-	public float distanceTo(PointI p){
-		return (float)Math.sqrt((x-p.x)*(x-p.x) + (y-p.y)*(y-p.y));
+	public double distanceTo(PointI p){
+		return (double)Math.sqrt((x-p.x)*(x-p.x) + (y-p.y)*(y-p.y));
 	}
 
-	public float length(){
-		return (float)Math.sqrt(x*x + y*y);
+	public double length(){
+		return (double)Math.sqrt(x*x + y*y);
 	}
 	
 	@Override

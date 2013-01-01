@@ -12,11 +12,11 @@ import jtd.entities.ParticleFactory;
  */
 public class ProjectileDef extends AnimatedEntityDef{
 	
-	public float speed = 1f;
-	public float lifeTime = 1f;
+	public double speed = 1f;
+	public double lifeTime = 1f;
 	public ExplosionDef expDef = null;
 	public ParticleFactory[] particleFactories = {};
-	public float[] particleCooldowns = {};
+	public double[] particleCooldowns = {};
 	public boolean isHoming = true;
 	
 }

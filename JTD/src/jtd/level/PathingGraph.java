@@ -17,14 +17,14 @@ import jtd.PointI;
  */
 public final class PathingGraph {
 	
-	public static final float WALK_COST = 0.6f;
-	public static final float WALK_DIAGONAL_COST = WALK_COST * (float)Math.sqrt(2f);
+	public static final double WALK_COST = 0.6f;
+	public static final double WALK_DIAGONAL_COST = WALK_COST * (double)Math.sqrt(2f);
 	private static final Random random = new Random();
 	
 	private static class Node{
 		public PointI loc;
-		public float weight;
-		public Node(PointI loc, Node src, float weight) {
+		public double weight;
+		public Node(PointI loc, Node src, double weight) {
 			this.loc = loc;
 			this.weight = src.weight + weight;
 		}
@@ -69,10 +69,10 @@ public final class PathingGraph {
 		public LinkedList<PointI> getNextPoints(){
 			return nextPoints;
 		}
-		public float getDistanceLeft(){
+		public double getDistanceLeft(){
 			if(!hasNext()) return 0f;
 			PathingGraphIterator iter = new PathingGraphIterator(lastPoint);
-			float ans = 0f;
+			double ans = 0f;
 			while(iter.hasNext()){
 				PointI p1 = iter.lastPoint;
 				PointI p2 = iter.next();
@@ -125,11 +125,11 @@ public final class PathingGraph {
 			currNodes.add(new Node(p));
 			visited[p.x][p.y] = VISITED;
 		}
-		float startingPointCost = -1f;
+		double startingPointCost = -1f;
 		for(;;){
 			// construct list with all nodes, that have equal, minimal weights
 			LinkedList<Node> nodesToExpand = new LinkedList<>();
-			float currWeigth = -1;
+			double currWeigth = -1;
 			ListIterator<Node> iter = currNodes.listIterator();
 			while(iter.hasNext()){
 				Node n = iter.next();
@@ -157,7 +157,7 @@ public final class PathingGraph {
 				for(PointI p:reach){
 					if((visited[p.x][p.y] == VISITED) || !level.isWalkable(p, mobSize)) continue;
 					int hDist = p.hammingDistanceTo(node.loc);
-					float cost;
+					double cost;
 					int dx = p.x - x;
 					int dy = p.y - y;
 					if((hDist > 2) || (hDist < 1) || (Math.abs(dx) > 1) || (Math.abs(dy) > 1)) continue;
@@ -174,7 +174,7 @@ public final class PathingGraph {
 								yy = y - 1;
 							}
 							for(int xx=x; xx<x+mobSize; xx++){
-								cost += (float)level.getPathingWeightAt(new PointI(xx, yy));
+								cost += (double)level.getPathingWeightAt(new PointI(xx, yy));
 							}
 						} else {
 							//horizontal movement
@@ -185,7 +185,7 @@ public final class PathingGraph {
 								xx = x - 1;
 							}
 							for(int yy=y; yy<y+mobSize; yy++){
-								cost += (float)level.getPathingWeightAt(new PointI(xx, yy));
+								cost += (double)level.getPathingWeightAt(new PointI(xx, yy));
 							}
 						}
 					} else {
@@ -197,8 +197,8 @@ public final class PathingGraph {
 						cost = WALK_DIAGONAL_COST;
 						cost += level.getPathingWeightAt(new PointI(xx, yy));
 						for(int i=1; i<=mobSize; i++){
-							float cx = level.getPathingWeightAt(new PointI(xx, yy - dy * i));
-							float cy = level.getPathingWeightAt(new PointI(xx - dx * i, yy));
+							double cx = level.getPathingWeightAt(new PointI(xx, yy - dy * i));
+							double cy = level.getPathingWeightAt(new PointI(xx - dx * i, yy));
 							if(i == mobSize){
 								cost += 0.5f * (cx + cy);
 							} else {

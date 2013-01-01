@@ -12,10 +12,10 @@ import org.newdawn.slick.Image;
  */
 public interface CoordinateTransformator {
 	
-	public void drawImage(Image i, PointF loc, float sizeInTiles, float rotation);
-	public PointF transformPoint(PointF loc);
-	public PointF transformPointBack(float x, float y);
-	public float transformLength(float len);
-	public float transformLengthBack(float len);
+	public void drawImage(Image i, PointD loc, double sizeInTiles, double rotation);
+	public PointD transformPoint(PointD loc);
+	public PointD transformPointBack(double x, double y);
+	public double transformLength(double len);
+	public double transformLengthBack(double len);
 	
 }

@@ -16,11 +16,11 @@ public abstract class EntityDef {
 	public static final Image errorImage = AssetLoader.getErrorImage();
 	
 	public Image[] sprites = {errorImage};
-	public float[] sizes = {0};
+	public double[] sizes = {0};
 	
-	public void fillImage(String name, float size){
+	public void fillImage(String name, double size){
 		sprites = new Image[]{AssetLoader.getImage(name)};
-		sizes = new float[]{size};
+		sizes = new double[]{size};
 	}
 
 	public void fillImages(String nameStart, String nameEnd, int imageCount, int digitCount){
@@ -36,9 +36,9 @@ public abstract class EntityDef {
 		}
 	}
 	
-	public void fillImages(String nameStart, String nameEnd, int imageCount, int digitCount, float sizes){
+	public void fillImages(String nameStart, String nameEnd, int imageCount, int digitCount, double sizes){
 		fillImages(nameStart, nameEnd, imageCount, digitCount);
-		this.sizes = new float[imageCount];
+		this.sizes = new double[imageCount];
 		for(int i=0; i<imageCount; i++){
 			this.sizes[i] = sizes;
 		}

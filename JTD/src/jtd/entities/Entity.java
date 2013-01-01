@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.Random;
 import jtd.CoordinateTransformator;
 import jtd.KillListener;
-import jtd.PointF;
+import jtd.PointD;
 import jtd.PointI;
 import jtd.TDGameplayState;
 import jtd.def.EntityDef;
@@ -25,15 +25,15 @@ public abstract class Entity {
 	public static final TDGameplayState GAME = TDGameplayState.get();	
 	public static final Random RANDOM = new Random();
 	
-	public PointF loc;
-	public float rotation = 0f, sizeMultiplier = 1f, spriteAlpha = 1f;
+	public PointD loc;
+	public double rotation = 0f, sizeMultiplier = 1f, spriteAlpha = 1f;
 	public int currSprite = 0, entitySize = 1;
 	public EntityDef def;
 	
 	private LinkedList<KillListener> killListeners = new LinkedList<>();
 	private boolean initialTick = true;
 
-	public Entity(PointF loc, EntityDef def) {
+	public Entity(PointD loc, EntityDef def) {
 		this.loc = loc;
 		this.def = def;
 	}
@@ -59,7 +59,7 @@ public abstract class Entity {
 		for(KillListener l:killListeners) l.EntityKilled(this, killer);
 	}
 	
-	public final void rotate(float amount){
+	public final void rotate(double amount){
 		while(amount < 0) amount += 360f;
 		rotation = (rotation + amount) % 360f;
 	}
@@ -68,15 +68,15 @@ public abstract class Entity {
 			GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator){
 		if((currSprite >= 0) && (currSprite < def.sprites.length)){
-			def.sprites[currSprite].setAlpha(spriteAlpha);
+			def.sprites[currSprite].setAlpha((float)spriteAlpha);
 			transformator.drawImage(def.sprites[currSprite], loc, 
-					def.sizes[currSprite] * sizeMultiplier * (float)entitySize, 
+					def.sizes[currSprite] * sizeMultiplier * (double)entitySize, 
 					rotation);
 		}
 		entityDraw(gc, sbg, grphcs, transformator);
 	}
 	
-	public final void tick(float time){
+	public final void tick(double time){
 		entityTick(time);
 		if(initialTick){
 			initialTick = false;
@@ -84,7 +84,7 @@ public abstract class Entity {
 		}
 	}
 	
-	public void entityTick(float time){}
+	public void entityTick(double time){}
 	public void entityInitialTick(){}
 	public void entityDraw(
 			GameContainer gc, StateBasedGame sbg, 

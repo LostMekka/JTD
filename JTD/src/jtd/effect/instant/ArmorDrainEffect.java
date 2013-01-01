@@ -12,9 +12,9 @@ import jtd.entities.Mob;
  */
 public class ArmorDrainEffect extends InstantEffect{
 
-	public float amount;
+	public double amount;
 
-	public ArmorDrainEffect(float amount, float cooldown) {
+	public ArmorDrainEffect(double amount, double cooldown) {
 		super(cooldown);
 		this.amount = amount;
 	}
@@ -23,6 +23,11 @@ public class ArmorDrainEffect extends InstantEffect{
 	public void apply(Mob mob) {
 		mob.armorOffset -= amount;
 		if(mob.armorOffset < 0) mob.armorOffset = 0;
+	}
+
+	@Override
+	public String getString() {
+		return "" + amount + " armor drain";
 	}
 	
 }

@@ -5,7 +5,7 @@
 package jtd.entities;
 
 import jtd.def.AnimatedEntityDef;
-import jtd.PointF;
+import jtd.PointD;
 
 /**
  *
@@ -13,21 +13,21 @@ import jtd.PointF;
  */
 public abstract class AnimatedEntity extends Entity{
 
-	public float animationSpeed = 1f;
+	public double animationSpeed = 1f;
 	
-	private float animationTime;
+	private double animationTime;
 	private AnimatedEntityDef def;
 	
-	public AnimatedEntity(PointF loc, AnimatedEntityDef animatedDef) {
+	public AnimatedEntity(PointD loc, AnimatedEntityDef animatedDef) {
 		super(loc, animatedDef);
 		this.def = animatedDef;
 		animationTime = 0f;
 		currSprite = RANDOM.nextInt(def.times.length);
-		animationTime = def.times[currSprite] * RANDOM.nextFloat();
+		animationTime = def.times[currSprite] * RANDOM.nextDouble();
 	}
 
 	@Override
-	public final void entityTick(float time) {
+	public final void entityTick(double time) {
 		if(animationTime >= 0){
 			animationTime += time * animationSpeed;
 			while(animationTime >= def.times[currSprite]){
@@ -50,6 +50,6 @@ public abstract class AnimatedEntity extends Entity{
 	
 	public void animationCycled(){}
 	public void animationEnded(){}
-	public void animatedEntityTick(float time){}
+	public void animatedEntityTick(double time){}
 	
 }

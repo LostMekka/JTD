@@ -5,7 +5,7 @@
 package jtd.entities;
 
 import java.util.Random;
-import jtd.PointF;
+import jtd.PointD;
 import jtd.def.ParticleDef;
 
 /**
@@ -17,21 +17,21 @@ public class ParticleFactory {
 	private static final Random ran = new Random();
 	
 	public ParticleDef def;
-	public PointF locationOffset;
-	public float sizeOffset, sizeRandom;
-	public float rotationOffset, rotationRandom;
-	public float spinOffset, spinRandom;
-	public float forceOffset, forceRandom;
-	public float lifeOffset, lifeRandom;
-	public boolean isBackgroundParticle = false;
-	public float alphaDelay = 0f;
+	public PointD locationOffset, locationOffsetAfterSpin;
+	public double sizeOffset, sizeRandom;
+	public double rotationOffset, rotationRandom;
+	public double spinOffset, spinRandom;
+	public double forceOffset, forceRandom;
+	public double lifeOffset, lifeRandom;
+	public boolean isBackgroundParticle = false, ignoresDirection = false;
+	public double alphaDelay = 0f;
 
 	public ParticleFactory(ParticleDef def,
-			float sizeOffset, float sizeRandom, 
-			float rotationOffset, float rotationRandom, 
-			float spinOffset, float spinRandom, 
-			float forceOffset, float forceRandom,
-			float lifeOffset, float lifeRandom) {
+			double sizeOffset, double sizeRandom, 
+			double rotationOffset, double rotationRandom, 
+			double spinOffset, double spinRandom, 
+			double forceOffset, double forceRandom,
+			double lifeOffset, double lifeRandom) {
 		this.def = def;
 		this.sizeOffset = sizeOffset;
 		this.sizeRandom = sizeRandom;
@@ -43,22 +43,26 @@ public class ParticleFactory {
 		this.forceRandom = forceRandom;
 		this.lifeOffset = lifeOffset;
 		this.lifeRandom = lifeRandom;
-		locationOffset = new PointF();
+		locationOffset = new PointD();
+		locationOffsetAfterSpin = new PointD();
 	}
 
-	public Particle createParticle(PointF loc, float direction){
-		float size = sizeOffset + ran.nextFloat() * sizeRandom;
-		float force = forceOffset + ran.nextFloat() * forceRandom;
-		float rot = direction + rotationOffset + (ran.nextFloat() - 0.5f) * rotationRandom;
-		float spin = spinOffset + ran.nextFloat() * spinRandom;
-		float life = lifeOffset + ran.nextFloat() * lifeRandom;
-		PointF start = locationOffset.clone();
+	public Particle createParticle(PointD loc, double direction){
+		double size = sizeOffset + ran.nextFloat() * sizeRandom;
+		double force = forceOffset + ran.nextFloat() * forceRandom;
+		double rot = rotationOffset + (ran.nextFloat() - 0.5f) * rotationRandom;
+		if(!ignoresDirection) rot += direction;
+		double spin = spinOffset + ran.nextFloat() * spinRandom;
+		double life = lifeOffset + ran.nextFloat() * lifeRandom;
+		PointD start = locationOffset.clone();
 		start.rotate(direction);
-		start.x += loc.x;
-		start.y += loc.y;
-		PointF vel = new PointF(
-				(float)Math.cos(rot / 180f * Math.PI) * force, 
-				(float)Math.sin(rot / 180f * Math.PI) * force);
+		start.add(loc);
+		PointD off2 = locationOffsetAfterSpin.clone();
+		off2.rotate(rot);
+		start.add(off2);
+		PointD vel = new PointD(
+				(double)Math.cos(rot / 180f * Math.PI) * force, 
+				(double)Math.sin(rot / 180f * Math.PI) * force);
 		return new Particle(def, start, vel, size, rot, spin, life, alphaDelay);
 	}
 }

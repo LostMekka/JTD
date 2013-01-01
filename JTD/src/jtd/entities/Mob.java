@@ -5,7 +5,7 @@
 package jtd.entities;
 
 import java.util.LinkedList;
-import jtd.PointF;
+import jtd.PointD;
 import jtd.PointI;
 import jtd.def.MobDef;
 import jtd.effect.instant.InstantEffect;
@@ -18,18 +18,18 @@ import jtd.level.PathingGraph;
  */
 public class Mob extends AnimatedEntity {
 
-	public static final float WALK_RANDOM_COMPONENT = 0.33f;
+	public static final double WALK_RANDOM_COMPONENT = 0.33f;
 	
 	public MobDef def;
-	public float speedMultiplier = 1f, armorOffset = 0f, bonusDamage = 0f;
-	public float hp, shield;
+	public double speedMultiplier = 1f, armorOffset = 0f, bonusDamage = 0f;
+	public double hp, shield;
 	
-	private float[] dmgCounters;
+	private double[] dmgCounters;
 	private PathingGraph.PathingGraphIterator path = null;
-	private PointF pathTarget;
+	private PointD pathTarget;
 	private LinkedList<TimedEffect> effects = new LinkedList<>(), effectsToRemove = new LinkedList<>();
 	
-	public Mob(PointF loc, MobDef mobDef){
+	public Mob(PointD loc, MobDef mobDef){
 		super(loc, mobDef);
 		def = mobDef;
 		entitySize = def.size;
@@ -42,7 +42,7 @@ public class Mob extends AnimatedEntity {
 			path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
 		}
 		nextPathTarget();
-		dmgCounters = new float[def.hitParticleFacts.length];
+		dmgCounters = new double[def.hitParticleFacts.length];
 	}
 	
 	public Mob(MobDef mobDef){
@@ -85,7 +85,7 @@ public class Mob extends AnimatedEntity {
 		
 	}
 	
-	public float getDistanceStillToWalk(){
+	public double getDistanceStillToWalk(){
 		if(pathTarget == null) return 0f;
 		return loc.distanceTo(pathTarget) + path.getDistanceLeft();
 	}
@@ -104,11 +104,11 @@ public class Mob extends AnimatedEntity {
 		effect.remove(this);
 	}
 	
-	public float damage(float damage, Entity attacker){
+	public double damage(double damage, Entity attacker){
 		return damage(damage, attacker, null);
 	}
 	
-	public float damage(float damage, Entity attacker, Float direction){
+	public double damage(double damage, Entity attacker, Double direction){
 		damage += bonusDamage;
 		if(damage <= shield){
 			shield -= damage;
@@ -145,7 +145,7 @@ public class Mob extends AnimatedEntity {
 	}
 
 	@Override
-	public void animatedEntityTick(float time) {
+	public void animatedEntityTick(double time) {
 		// tick effects
 		for(TimedEffect e:effects) e.tick(time, this);
 		for(TimedEffect e:effectsToRemove) effects.remove(e);
@@ -160,20 +160,20 @@ public class Mob extends AnimatedEntity {
 		if(shield < 0) shield = 0;
 		// move mob
 		if(pathTarget != null){
-			float travel = time * def.speed * speedMultiplier;
+			double travel = time * def.speed * speedMultiplier;
 			while(travel > 0){
 				travel -= loc.travelTo(pathTarget, travel, true);
 				if(travel > 0){
-					PointF lastTargetPoint = pathTarget;
+					PointD lastTargetPoint = pathTarget;
 					nextPathTarget();
 					// if we have reached the last node in the path, wander around randomly
 					if(pathTarget == null){
 						GAME.pathEndReachedBy(getPointI(), this);
 						pathTarget = loc.clone();
-						float d = RANDOM.nextFloat() * 1.5f + 0.5f;
-						float a = RANDOM.nextFloat() * 360f;
-						pathTarget.x += d * (float)Math.cos(a);
-						pathTarget.y += d * (float)Math.sin(a);
+						double d = RANDOM.nextFloat() * 1.5f + 0.5f;
+						double a = RANDOM.nextFloat() * 360f;
+						pathTarget.x += d * (double)Math.cos(a);
+						pathTarget.y += d * (double)Math.sin(a);
 						GAME.movePointIntoLevl(pathTarget);
 					} else {
 						GAME.fieldWalkedBy(getPointI(), this);

@@ -13,16 +13,21 @@ import jtd.entities.Mob;
  */
 public class PoisonEffectDef extends TimedEffectDef{
 	
-	public float damage;
+	public double damage;
 
-	public PoisonEffectDef(float damage, float duration, float cooldown) {
+	public PoisonEffectDef(double damage, double duration, double cooldown) {
 		super(duration, cooldown);
 		this.damage = damage;
 	}
 
 	@Override
-	public void tick(float time, Mob mob, Entity caster) {
+	public void tick(double time, Mob mob, Entity caster) {
 		mob.damage(time * damage, caster);
 	}
 	
+	@Override
+	public String getString() {
+		return "" + damage + "poison";
+	}
+
 }

@@ -12,12 +12,18 @@ import jtd.entities.Mob;
  */
 public abstract class InstantEffect {
 	
-	public float cooldown;
+	public double cooldown;
 
-	public InstantEffect(float cooldown) {
+	public InstantEffect(double cooldown) {
 		this.cooldown = cooldown;
+	}
+
+	@Override
+	public String toString() {
+		return getString();
 	}
 	
 	public abstract void apply(Mob mob);
+	protected abstract String getString();
 	
 }

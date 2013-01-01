@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import jtd.AssetLoader;
 import jtd.CoordinateTransformator;
-import jtd.PointF;
+import jtd.PointD;
 import jtd.PointI;
 import jtd.TDGameplayState;
 import jtd.def.GameDef;
@@ -18,6 +18,7 @@ import jtd.entities.Mob;
 import jtd.entities.Particle;
 import jtd.entities.Projectile;
 import jtd.entities.Tower;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
@@ -28,10 +29,10 @@ import org.newdawn.slick.SlickException;
  */
 public class LevelDataHolder {
 	
-	public static final float DAMAGE_COST_MULTIPLIER = 0.05f;
+	public static final double DAMAGE_COST_MULTIPLIER = 0.05f;
 	
 	public Level.Field[][][] fieldsData;
-	public float[][] pathingWeights;
+	public double[][] pathingWeights;
 	public int w, h;
 	
 	public GameDef def;
@@ -55,7 +56,7 @@ public class LevelDataHolder {
 	
 	private Image iWall, iGrass, iFloor, iSrc, iDest;
 	private Image backgroundImage;
-	private PointF backgroundLoc;
+	private PointD backgroundLoc;
 
 	public LevelDataHolder(GameDef def, Level level) {
 		this.def = def;
@@ -68,17 +69,6 @@ public class LevelDataHolder {
 		iSrc = AssetLoader.getImage("src.png", false);
 		iDest = AssetLoader.getImage("dest.png", false);
 		// init test stuff
-//		addTowerInternal(new PointI(15, 11), def.getTowerDef(GameDef.TowerType.freezer, 3));
-//		
-//		addTowerInternal(new PointI(10, 6), def.getTowerDef(GameDef.TowerType.repeater, 3));
-//		addTowerInternal(new PointI(20, 6), def.getTowerDef(GameDef.TowerType.repeater, 3));
-//		addTowerInternal(new PointI(10, 16), def.getTowerDef(GameDef.TowerType.repeater, 3));
-//		addTowerInternal(new PointI(20, 16), def.getTowerDef(GameDef.TowerType.repeater, 3));
-//		
-//		addTowerInternal(new PointI(0, 11), def.getTowerDef(GameDef.TowerType.cannon, 3));
-//		addTowerInternal(new PointI(29, 11), def.getTowerDef(GameDef.TowerType.cannon, 3));
-//		addTowerInternal(new PointI(15, 0), def.getTowerDef(GameDef.TowerType.cannon, 3));
-	
 		addTowerInternal(new PointI(7, 7), def.getTowerDef(GameDef.TowerType.repeater, 4));
 		addTowerInternal(new PointI(12, 6), def.getTowerDef(GameDef.TowerType.repeater, 4));
 		addTowerInternal(new PointI(17, 6), def.getTowerDef(GameDef.TowerType.repeater, 4));
@@ -96,7 +86,7 @@ public class LevelDataHolder {
 		addTowerInternal(new PointI(4, 19), def.getTowerDef(GameDef.TowerType.freezer, 4));
 		
 		// init pathing graphs
-		pathingWeights = new float[h][w];
+		pathingWeights = new double[h][w];
 		sources = new ArrayList<>(level.maxMobSize);
 		destinations = new ArrayList<>(level.maxMobSize);
 		for(int i=0; i<level.maxMobSize; i++){
@@ -113,12 +103,13 @@ public class LevelDataHolder {
 
 	public void constructBackground(){
 		try {
-			float ts = TDGameplayState.TILE_SIZE;
+			double ts = TDGameplayState.TILE_SIZE;
 			backgroundImage = new Image((int)(ts * w), (int)(ts * h));
 			Graphics g = backgroundImage.getGraphics();
+			Graphics.setCurrent(g);
 			for(int y=0; y<h; y++){
 				for(int x=0; x<w; x++){
-					g.drawImage(getTileImage(x, y), x*ts, y*ts);
+					g.drawImage(getTileImage(x, y), (float)(x*ts), (float)(y*ts));
 				}
 			}
 			g.flush();
@@ -127,13 +118,13 @@ public class LevelDataHolder {
 			backgroundImage = null;
 			System.err.println("err!!!");
 		}
-		backgroundLoc = new PointF(-0.5f, -0.5f);
+		backgroundLoc = new PointD(-0.5f, -0.5f);
 	}
 	
 	public void draw(Graphics g, CoordinateTransformator t){
 		if(backgroundImage == null) constructBackground();
-		PointF p1 = t.transformPoint(backgroundLoc);
-		backgroundImage.draw(p1.x, p1.y, t.transformLength(1f/TDGameplayState.TILE_SIZE));
+		PointD p1 = t.transformPoint(backgroundLoc);
+		backgroundImage.draw((float)p1.x, (float)p1.y, (float)t.transformLength(1d/TDGameplayState.TILE_SIZE));
 	}
 	
 	private void updateWalkables(){
@@ -226,9 +217,9 @@ public class LevelDataHolder {
 				(fieldsData[s][y+1][x+1] == f);
 	}
 	
-	public void damageDealtAt(PointI p, float damage, int mobSize){
+	public void damageDealtAt(PointI p, double damage, int mobSize){
 		if((p.x < 0) || (p.y < 0) || (p.x >= w) || (p.y >= h)) return;
-		float amount = damage / mobSize * mobSize * DAMAGE_COST_MULTIPLIER;
+		double amount = damage / mobSize * mobSize * DAMAGE_COST_MULTIPLIER;
 		for(int y=0; (y<mobSize)&&(p.y+y<h); y++){
 			for(int x=0; (x<mobSize)&&(p.x+x<w); x++){
 				pathingWeights[p.y + y][p.x + x] += amount;
@@ -238,7 +229,7 @@ public class LevelDataHolder {
 	
 	public void killHappenedAt(PointI p, int mobSize){
 		if((p.x < 0) || (p.y < 0) || (p.x >= w) || (p.y >= h)) return;
-		float amount = 1f / mobSize / mobSize;
+		double amount = 1f / mobSize / mobSize;
 		for(int y=0; y<mobSize; y++){
 			for(int x=0; x<mobSize; x++){
 				pathingWeights[p.y+ y][p.x + x] += amount;
@@ -246,19 +237,27 @@ public class LevelDataHolder {
 		}
 	}
 	
-	public float getPathingWeightAt(PointI p){
+	public double getPathingWeightAt(PointI p){
 		return pathingWeights[p.y][p.x];
 	}
 	
-	public float getMaxPathingWeight(){
-		float ans = 0f;
+	public double getMaxPathingWeight(){
+		double ans = 0f;
 		for(int y=0; y<h; y++){
 			for(int x=0; x<w; x++){
-				float f = pathingWeights[y][x];
+				double f = pathingWeights[y][x];
 				if(f > ans) ans = f;
 			}
 		}
 		return ans;
+	}
+	
+	public void resetPathingWeights(){
+		for(int y=0; y<h; y++){
+			for(int x=0; x<w; x++){
+				pathingWeights[y][x] = 0f;
+			}
+		}
 	}
 	
 	public Image getTileImage(int x, int y){
@@ -270,6 +269,24 @@ public class LevelDataHolder {
 			case wall: return iWall;
 			default: return null;
 		}
+	}
+	
+	public Color getTileColor(int x, int y, int pixelSize){
+		float r = 0, g = 0, b = 0, n = 0;
+		for(int x2=x; x2<x+pixelSize; x2++){
+			for(int y2=y; y2<y+pixelSize; y2++){
+				if((x2 >= w) || (y2 > h)) break;
+				n++;
+				switch(level.fields[y][x]){
+					case dest: b += 1f; break;
+					case floor: r += 0.7f; g += 0.7f; b += 0.7f; break;
+					case grass: g += 1f; break;
+					case src: r += 1f; g += 0.3f; b += 0.3f; break;
+					case wall: r += 0.4f; g += 0.4f; b += 0.4f; break;
+				}
+			}
+		}
+		return new Color(r/n, g/n, b/n);
 	}
 	
 	public boolean isBuildable(PointI loc, int towerSize){

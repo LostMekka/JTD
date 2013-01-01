@@ -13,7 +13,7 @@ import jtd.entities.Mob;
  */
 public final class TimedEffect{
 	
-	public float timeLeft;
+	public double timeLeft;
 	public Entity caster;
 	public TimedEffectDef def;
 
@@ -31,7 +31,7 @@ public final class TimedEffect{
 		def.remove(mob, caster);
 	}
 	
-	public final void tick(float time, Mob mob){
+	public final void tick(double time, Mob mob){
 		timeLeft -= time;
 		if(timeLeft <= 0){
 			mob.removeTimedEffect(this);

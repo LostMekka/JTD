@@ -13,9 +13,9 @@ import jtd.entities.Mob;
  */
 public class SlowEffectDef extends TimedEffectDef{
 	
-	public float speedup;
+	public double speedup;
 	
-	public SlowEffectDef(float speedup, float duration, float cooldown) {
+	public SlowEffectDef(double speedup, double duration, double cooldown) {
 		super(duration, cooldown);
 		this.speedup = speedup;
 	}
@@ -30,6 +30,11 @@ public class SlowEffectDef extends TimedEffectDef{
 	public void remove(Mob mob, Entity caster) {
 		mob.speedMultiplier /= speedup;
 		mob.animationSpeed /= speedup;
+	}
+
+	@Override
+	public String getString() {
+		return "speedup by " + speedup;
 	}
 
 }

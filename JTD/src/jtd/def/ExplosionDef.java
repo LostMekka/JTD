@@ -14,7 +14,7 @@ public class ExplosionDef extends AnimatedEntityDef{
 
 	public ParticleFactory[] particleFactories = {};
 	public ParticleFactory[] initialParticleFactories = {};
-	public float[] particleCooldowns = {};
+	public double[] particleCooldowns = {};
 	public int[] initialParticleCounts = {};
 
 	public ExplosionDef() {

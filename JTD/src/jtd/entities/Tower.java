@@ -8,7 +8,7 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import jtd.CoordinateTransformator;
 import jtd.KillListener;
-import jtd.PointF;
+import jtd.PointD;
 import jtd.PointI;
 import jtd.def.TowerDef;
 import jtd.effect.instant.InstantEffect;
@@ -30,8 +30,8 @@ public class Tower extends Entity implements KillListener{
 	private static final Comparator<Mob> NEAREST_COMPARATOR = new Comparator<Mob>() {
 		@Override
 		public int compare(Mob o1, Mob o2) {
-			float d1 = o1.getDistanceStillToWalk();
-			float d2 = o2.getDistanceStillToWalk();
+			double d1 = o1.getDistanceStillToWalk();
+			double d2 = o2.getDistanceStillToWalk();
 			if(d1 > d2) return 1;
 			if(d1 < d2) return -1;
 			return 0;
@@ -61,15 +61,16 @@ public class Tower extends Entity implements KillListener{
 		}
 	}
 	
-	public static final float IDLE_COOLDOWN_TIME = 2f;
-	public static final float IDLE_COOLDOWN_RANDOM_TIME = 14f;
+	public static final double IDLE_COOLDOWN_TIME = 2f;
+	public static final double IDLE_COOLDOWN_RANDOM_TIME = 14f;
 	
 	public TowerDef def;
 	public Mob target = null;
 	public TargetingMode targetingMode;
+	public int kills = 0;
 	
-	private float shotCooldown, headDir, headVel, idleCounter, lastTargetDirection;
-	private float[] instantEffectCooldowns, timedEffectCooldowns, idleParticleCooldowns;
+	private double shotCooldown, headDir, headVel, idleCounter, lastTargetDirection;
+	private double[] instantEffectCooldowns, timedEffectCooldowns, idleParticleCooldowns;
 	private int currShotOffset = 0;
 
 	public Tower(TowerDef def, PointI loc) {
@@ -83,7 +84,7 @@ public class Tower extends Entity implements KillListener{
 		targetingMode = def.defaultTargetingMode;
 	}
 
-	public float getHeadDir() {
+	public double getHeadDir() {
 		return headDir;
 	}
 
@@ -95,17 +96,17 @@ public class Tower extends Entity implements KillListener{
 		// reset shot cooldown
 		shotCooldown = towerDef.reloadTime;
 		// init instant effect cooldowns
-		instantEffectCooldowns = new float[towerDef.instantEffects.length];
+		instantEffectCooldowns = new double[towerDef.instantEffects.length];
 		for(int i=0; i<instantEffectCooldowns.length; i++){
 			instantEffectCooldowns[i] = towerDef.instantEffects[i].cooldown;
 		}
 		// init timed effect cooldowns
-		timedEffectCooldowns = new float[towerDef.timedEffects.length];
+		timedEffectCooldowns = new double[towerDef.timedEffects.length];
 		for(int i=0; i<timedEffectCooldowns.length; i++){
 			timedEffectCooldowns[i] = towerDef.timedEffects[i].cooldown;
 		}
 		// init idle particle cooldowns
-		idleParticleCooldowns = new float[towerDef.idlePartCooldowns.length];
+		idleParticleCooldowns = new double[towerDef.idlePartCooldowns.length];
 		System.arraycopy(towerDef.idlePartCooldowns, 0, idleParticleCooldowns, 0, idleParticleCooldowns.length);
 	}
 	
@@ -121,11 +122,11 @@ public class Tower extends Entity implements KillListener{
 		idleCounter = IDLE_COOLDOWN_TIME + RANDOM.nextFloat() * IDLE_COOLDOWN_RANDOM_TIME;
 	}
 
-	private float turnTo(float direction, float tickTime){
-		float dirDiff = direction - headDir;
+	private double turnTo(double direction, double tickTime){
+		double dirDiff = direction - headDir;
 		while(dirDiff < -180f) dirDiff += 360f;
 		while(dirDiff > 180f) dirDiff -= 360f;
-		float sign = Math.signum(dirDiff);
+		double sign = Math.signum(dirDiff);
 		// already time to decelerate?
 		if(dirDiff * sign <= headVel * headVel / def.headAcceleration * 0.5f){
 			// decelerate
@@ -139,8 +140,8 @@ public class Tower extends Entity implements KillListener{
 		return dirDiff;
 	}
 	
-	private float accelerateTo(float velocity, float tickTime){
-		float sign = Math.signum(velocity - headVel);
+	private double accelerateTo(double velocity, double tickTime){
+		double sign = Math.signum(velocity - headVel);
 		headVel += sign * def.headAcceleration * tickTime;
 		if(headVel * sign > velocity * sign){
 			headVel = velocity;
@@ -149,7 +150,7 @@ public class Tower extends Entity implements KillListener{
 	}
 	
 	public void shoot(){
-		PointF shotStart;
+		PointD shotStart;
 		if(def.shotOffsets == null){
 			shotStart = loc.clone();
 		} else {
@@ -194,7 +195,7 @@ public class Tower extends Entity implements KillListener{
 	}
 	
 	@Override
-	public void entityTick(float time) {
+	public void entityTick(double time) {
 		// compute tower rotation
 		headDir += headVel * time;
 		if(headDir < 0f) headDir += 360;
@@ -204,7 +205,7 @@ public class Tower extends Entity implements KillListener{
 			requestTarget();
 		}
 		// targeting
-		float targetDirDiff = 180f;
+		double targetDirDiff = 180f;
 		if(target == null){
 			// no target. rotate to last target direction and spin sweep after the timeout
 			idleCounter -= time;
@@ -249,7 +250,7 @@ public class Tower extends Entity implements KillListener{
 			Graphics grphcs, CoordinateTransformator transformator) {
 		// draw head
 		if(def.sprites[1] != null){
-			transformator.drawImage(def.sprites[1], loc, def.sizes[1] * (float)entitySize, headDir);
+			transformator.drawImage(def.sprites[1], loc, def.sizes[1] * (double)entitySize, headDir);
 		}
 	}
 

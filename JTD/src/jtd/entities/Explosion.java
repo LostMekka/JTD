@@ -4,7 +4,7 @@
  */
 package jtd.entities;
 
-import jtd.PointF;
+import jtd.PointD;
 import jtd.def.ExplosionDef;
 
 /**
@@ -15,18 +15,18 @@ public class Explosion extends AnimatedEntity{
 
 	public ExplosionDef def;
 	
-	private Float initialDirection;
-	private float[] particleTimes;
+	private Double initialDirection;
+	private double[] particleTimes;
 
-	public Explosion(PointF loc, ExplosionDef explosionDef, Float initialDirection) {
+	public Explosion(PointD loc, ExplosionDef explosionDef, Double initialDirection) {
 		super(loc, explosionDef);
 		if(initialDirection == null){
-			this.initialDirection = 0f;
+			this.initialDirection = 0d;
 		} else {
 			this.initialDirection = initialDirection;
 		}
 		this.def = explosionDef;
-		particleTimes = new float[explosionDef.particleCooldowns.length];
+		particleTimes = new double[explosionDef.particleCooldowns.length];
 		System.arraycopy(explosionDef.particleCooldowns, 0, particleTimes, 0, particleTimes.length);
 	}
 
@@ -36,7 +36,7 @@ public class Explosion extends AnimatedEntity{
 	}
 
 	@Override
-	public void animatedEntityTick(float time) {
+	public void animatedEntityTick(double time) {
 		for(int i=0; i<particleTimes.length; i++){
 			particleTimes[i] -= time;
 			while(particleTimes[i] <= 0f){

@@ -13,15 +13,21 @@ import jtd.entities.Mob;
  */
 public abstract class TimedEffectDef {
 	
-	public float duration, cooldown;
+	public double duration, cooldown;
 
-	public TimedEffectDef(float duration, float cooldown) {
+	public TimedEffectDef(double duration, double cooldown) {
 		this.duration = duration;
 		this.cooldown = cooldown;
 	}
 	
+	@Override
+	public String toString() {
+		return getString() + "(" + duration + "s)";
+	}
+	
 	public void apply(Mob mob, Entity caster){}
 	public void remove(Mob mob, Entity caster){}
-	public void tick(float time, Mob mob, Entity caster){}
+	public void tick(double time, Mob mob, Entity caster){}
+	public abstract String getString();
 	
 }

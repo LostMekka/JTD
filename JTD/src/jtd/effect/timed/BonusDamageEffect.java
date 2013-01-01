@@ -13,9 +13,9 @@ import jtd.entities.Mob;
  */
 public class BonusDamageEffect extends TimedEffectDef{
 	
-	public float bonusDamage;
+	public double bonusDamage;
 
-	public BonusDamageEffect(float bonusDamage, float duration, float cooldown) {
+	public BonusDamageEffect(double bonusDamage, double duration, double cooldown) {
 		super(duration, cooldown);
 		this.bonusDamage = bonusDamage;
 	}
@@ -28,6 +28,11 @@ public class BonusDamageEffect extends TimedEffectDef{
 	@Override
 	public void remove(Mob mob, Entity caster) {
 		mob.bonusDamage -= bonusDamage;
+	}
+
+	@Override
+	public String getString() {
+		return "" + bonusDamage + "bonus damage";
 	}
 
 }

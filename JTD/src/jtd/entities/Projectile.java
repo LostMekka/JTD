@@ -6,7 +6,7 @@ package jtd.entities;
 
 import java.util.LinkedList;
 import jtd.KillListener;
-import jtd.PointF;
+import jtd.PointD;
 import jtd.TDGameplayState;
 import jtd.def.ProjectileDef;
 import jtd.effect.instant.InstantEffect;
@@ -20,19 +20,19 @@ public class Projectile extends AnimatedEntity implements KillListener{
 
 	public ProjectileDef def;
 	public Mob target;
-	public PointF targetLoc;
+	public PointD targetLoc;
 	public Tower attacker;
 	public LinkedList<InstantEffect> instantEffects;
 	public LinkedList<TimedEffectDef> timedEffects;
 	
-	private float lifeTime = 0f;
-	private float[] particleCooldowns;
+	private double lifeTime = 0f;
+	private double[] particleCooldowns;
 
 	public Projectile(
 			ProjectileDef def, Mob target, Tower attacker, 
 			LinkedList<InstantEffect> instantEffects, 
 			LinkedList<TimedEffectDef> timedEffects, 
-			PointF loc) {
+			PointD loc) {
 		super(loc, def);
 		this.def = def;
 		target.addKillListener(this);
@@ -48,12 +48,12 @@ public class Projectile extends AnimatedEntity implements KillListener{
 		this.instantEffects = instantEffects;
 		this.timedEffects = timedEffects;
 		rotation = attacker.loc.getRotationTo(target.loc);
-		particleCooldowns = new float[this.def.particleFactories.length];
+		particleCooldowns = new double[this.def.particleFactories.length];
 		System.arraycopy(this.def.particleCooldowns, 0, particleCooldowns, 0, particleCooldowns.length);
 	}
 	
 	@Override
-	public void animatedEntityTick(float time) {
+	public void animatedEntityTick(double time) {
 		// tick lifetime, kill if expired
 		lifeTime += time;
 		if(lifeTime >= def.lifeTime){

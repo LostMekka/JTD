@@ -4,7 +4,7 @@
  */
 package jtd.def;
 
-import jtd.PointF;
+import jtd.PointD;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffectDef;
 import jtd.entities.ParticleFactory;
@@ -17,13 +17,13 @@ import jtd.entities.Tower;
 public class TowerDef extends EntityDef{
 
 	public int size = 1;
-	public float range = 1f;
-	public float damageRadius = 0f;
-	public float reloadTime = 1f;
-	public float damage = 1f;
-	public float headMaxVel = 1f;
-	public float headAcceleration = 1f;
-	public float cost = 1f;	
+	public double range = 1f;
+	public double damageRadius = 0f;
+	public double reloadTime = 1f;
+	public double damage = 1f;
+	public double headMaxVel = 1f;
+	public double headAcceleration = 1f;
+	public double cost = 1f;	
 	public TowerDef[] upgradeOptions = {};
 	public ProjectileDef projectileDef = null;
 	public String name = "<NO NAME SET>";
@@ -32,9 +32,9 @@ public class TowerDef extends EntityDef{
 	public TimedEffectDef[] timedEffects = {};
 	public InstantEffect[] instantEffects = {};
 	public ParticleFactory[] idlePartFacts = {};
-	public float[] idlePartCooldowns = {};
+	public double[] idlePartCooldowns = {};
 	public ParticleFactory[] shotParticleFactories = {};
 	public int[] shotParticleCounts = {};
-	public PointF[] shotOffsets = {new PointF()};
+	public PointD[] shotOffsets = {new PointD()};
 
 }

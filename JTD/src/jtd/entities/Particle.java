@@ -5,7 +5,7 @@
 package jtd.entities;
 
 import jtd.def.ParticleDef;
-import jtd.PointF;
+import jtd.PointD;
 
 /**
  *
@@ -14,14 +14,14 @@ import jtd.PointF;
 public class Particle extends AnimatedEntity{
 
 	public ParticleDef def;
-	public PointF vel;
-	public float spinVel;
-	public float alphaDelay;
+	public PointD vel;
+	public double spinVel;
+	public double alphaDelay;
 	
-	private float lifeTimeLeft, initialLifeTime;
+	private double lifeTimeLeft, initialLifeTime;
 
-	public Particle(ParticleDef particleDef, PointF loc, PointF vel, float size, 
-			float rotation, float spinVel, float lifeTime, float alphaDelay) {
+	public Particle(ParticleDef particleDef, PointD loc, PointD vel, double size, 
+			double rotation, double spinVel, double lifeTime, double alphaDelay) {
 		super(loc, particleDef);
 		this.def = particleDef;
 		this.vel = vel;
@@ -32,14 +32,14 @@ public class Particle extends AnimatedEntity{
 		lifeTimeLeft = lifeTime;
 		initialLifeTime = lifeTime;
 		if(!def.isCyclic){
-			float t = 0f;
-			for(float f:def.times) t += f;
+			double t = 0f;
+			for(double f:def.times) t += f;
 			if(t < initialLifeTime) initialLifeTime = t;
 		}
 	}
 
 	@Override
-	public void animatedEntityTick(float time) {
+	public void animatedEntityTick(double time) {
 		lifeTimeLeft -= time;
 		if(lifeTimeLeft <= 0f){
 			kill(null);
@@ -48,7 +48,7 @@ public class Particle extends AnimatedEntity{
 		loc.x += time * vel.x;
 		loc.y += time * vel.y;
 		rotate(time * spinVel);
-		float a = lifeTimeLeft / initialLifeTime;
+		double a = lifeTimeLeft / initialLifeTime;
 		if(a < 1f - alphaDelay) spriteAlpha = a / (1f - alphaDelay);
 	}
 
