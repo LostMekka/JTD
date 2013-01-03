@@ -68,23 +68,6 @@ public class LevelDataHolder {
 		iFloor = AssetLoader.getImage("floor.png", false);
 		iSrc = AssetLoader.getImage("src.png", false);
 		iDest = AssetLoader.getImage("dest.png", false);
-		// init test stuff
-		addTowerInternal(new PointI(7, 7), def.getTowerDef(GameDef.TowerType.repeater, 4));
-		addTowerInternal(new PointI(12, 6), def.getTowerDef(GameDef.TowerType.repeater, 4));
-		addTowerInternal(new PointI(17, 6), def.getTowerDef(GameDef.TowerType.repeater, 4));
-		addTowerInternal(new PointI(22, 5), def.getTowerDef(GameDef.TowerType.repeater, 3));
-
-		addTowerInternal(new PointI(23, 15), def.getTowerDef(GameDef.TowerType.repeater, 4));
-		addTowerInternal(new PointI(18, 16), def.getTowerDef(GameDef.TowerType.repeater, 4));
-		addTowerInternal(new PointI(13, 16), def.getTowerDef(GameDef.TowerType.repeater, 4));
-		addTowerInternal(new PointI(8, 17), def.getTowerDef(GameDef.TowerType.repeater, 3));
-		
-		addTowerInternal(new PointI(0, 7), def.getTowerDef(GameDef.TowerType.cannon, 2));
-		addTowerInternal(new PointI(29, 14), def.getTowerDef(GameDef.TowerType.cannon, 2));
-		
-		addTowerInternal(new PointI(26, 3), def.getTowerDef(GameDef.TowerType.freezer, 4));
-		addTowerInternal(new PointI(4, 19), def.getTowerDef(GameDef.TowerType.freezer, 4));
-		
 		// init pathing graphs
 		pathingWeights = new double[h][w];
 		sources = new ArrayList<>(level.maxMobSize);
@@ -290,18 +273,19 @@ public class LevelDataHolder {
 	}
 	
 	public boolean isBuildable(PointI loc, int towerSize){
-		if((level.fields[loc.y][loc.x] != Level.Field.grass) && 
-				(level.fields[loc.y][loc.x] != Level.Field.floor)){
-			return false;
-		}
-		for(Mob m:mobs){
-			int s = m.def.size;
-			PointI p = m.getPointI();
-			if(		(loc.x + towerSize > p.x) && (p.x + s > loc.x) && 
-					(loc.y + towerSize > p.y) && (p.y + s > loc.y)){
-				return false;
+		// check coordinates
+		if((loc.x < 0) || (loc.x + towerSize > w) 
+				|| (loc.y < 0) || (loc.y + towerSize > h)) return false;
+		// check fields
+		for(int x=loc.x; x<loc.x+towerSize; x++){
+			for(int y=loc.y; y<loc.y+towerSize; y++){
+				if((level.fields[y][x] != Level.Field.grass) && 
+						(level.fields[y][x] != Level.Field.floor)){
+					return false;
+				}
 			}
 		}
+		// check towers
 		for(Tower t:towers){
 			int s = t.def.size;
 			PointI p = t.getPointI();
@@ -310,8 +294,33 @@ public class LevelDataHolder {
 				return false;
 			}
 		}
-		// TODO: check for path blockage
+		// check mobs
+		for(Mob m:mobs){
+			int s = m.def.size;
+			PointI p = m.getPointI();
+			if(		(loc.x + towerSize > p.x) && (p.x + s > loc.x) && 
+					(loc.y + towerSize > p.y) && (p.y + s > loc.y)){
+				return false;
+			}
+		}
 		return true;
+	}
+	
+	public boolean isBlocking(PointI loc, int towerSize){
+		// add temporary tower
+		TowerDef td = new TowerDef();
+		td.size = towerSize;
+		Tower t = new Tower(td, loc);
+		addTowerInternal(t);
+		// generate new walkables
+		Level.Field[][][] walkables = fieldsData;
+		updateWalkables();
+		// generate new pathing graph for biggest mob
+		PathingGraph g = new PathingGraph(level.maxMobSize, this);
+		// cleanup
+		fieldsData = walkables;
+		removeTower(t);
+		return g.startingPoints.isEmpty();
 	}
 	
 	public boolean isWalkable(PointI loc, int mobSize){
@@ -345,8 +354,9 @@ public class LevelDataHolder {
 		return ans;
 	}
 	
-	public boolean addTower(PointI loc, TowerDef def){
-		boolean ans = addTowerInternal(loc, def);
+	public boolean addTower(Tower t){
+		if(!isBuildable(t.getPointI(), t.def.size)) return false;
+		boolean ans = addTowerInternal(t);
 		if(ans){
 			updateWalkables();
 			updatePaths();
@@ -355,17 +365,17 @@ public class LevelDataHolder {
 	}
 	
 	public boolean removeTower(Tower t){
-		boolean ans = removeTowerInternal(t);
-		if(ans){
-			updateWalkables();
-			updatePaths();
+		if(!removeTowerInternal(t)) return false;
+		updateWalkables();
+		updatePaths();
+		for(Mob m:mobs){
+			m.updatePath();
 		}
 		return true;
 	}
 	
-	private boolean addTowerInternal(PointI loc, TowerDef def){
-		if(!isBuildable(loc, def.size)) return false;
-		return towers.add(new Tower(def, loc));
+	private boolean addTowerInternal(Tower t){
+		return towers.add(t);
 	}
 	
 	private boolean removeTowerInternal(Tower t){

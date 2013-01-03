@@ -4,7 +4,6 @@
  */
 package jtd;
 
-import com.sun.org.apache.bcel.internal.generic.AALOAD;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jtd.entities.Mob;
@@ -27,10 +26,11 @@ public class GameplayGui {
 	public static final int BOX_SIZE = 8;
 	
 	public PointD tlCorner = null, brCorner = null;
+	public PlayerAction[][] actions = new PlayerAction[0][0];
 	
 	private Image guiImage = null, mapImage = null;
-	private PointI mapLoc = null, mapLUCorner = null, infoTextLocation = null;
-	private int fieldsPerPixel = 1, pixelsPerField = 1, textOffset = 0;
+	private PointI mapLoc = null, mapLUCorner = null, infoTextLocation = null, actionsStart = null;
+	private int fieldsPerPixel = 1, pixelsPerField = 1, textOffset = 0, actionsSize = 40, actionsBorder = 4;
 	
 	private void draw(Graphics g, Image i, float x, float y, float ox, float oy){
 		g.drawImage(i, x*8 + ox/GUI_SCALE, y*8 + oy/GUI_SCALE);
@@ -90,7 +90,8 @@ public class GameplayGui {
 		tlCorner = new PointD(border + 1, border + 1);
 		brCorner = new PointD(w - (2 + BOX_SIZE) * tileSize, h - border);
 		mapLoc = new PointI((int)((a + 2f) * tileSize), (int)(tileSize * 0.85f));
-		infoTextLocation = new PointI((int)((a + 2f) * tileSize), (int)((BOX_SIZE + 2f) * tileSize));
+		infoTextLocation = new PointI((int)((a + 1.75f) * tileSize), (int)((BOX_SIZE + 1.75f) * tileSize));
+		actionsStart = new PointI((int)((a + 2f) * tileSize), (int)((BOX_SIZE + 3f + c) * tileSize));
 	}
 	
 	public void updateMapImage(LevelDataHolder l){
@@ -174,12 +175,56 @@ public class GameplayGui {
 		double h = (p2.y - p1.y - 0.1d) * pixelsPerField / fieldsPerPixel;
 		g.setColor(new Color(1f, 1f, 1f, 0.8f));
 		g.drawRect((float)x, (float)y, (float)w, (float)h);
+		for(int ay=0; ay<actions.length; ay++){
+			for(int ax=0; ax<actions[ay].length; ax++){
+				int xi = actionsStart.x + ax * (actionsSize + actionsBorder);
+				int yi = actionsStart.y + ay * (actionsSize + actionsBorder);
+				Image i = actions[ay][ax].icon;
+				float scale = actionsSize / (float)Math.max(i.getWidth(), i.getHeight());
+				i.draw(xi, yi, scale);
+			}
+		}
 		textOffset = 0;
 	}
 	
-	public void drawInfoText(Graphics g, String s, int lineHeight){
+	public void print(Graphics g, String s, int lineHeight){
 		g.drawString(s, infoTextLocation.x, infoTextLocation.y + textOffset);
 		textOffset += lineHeight;
+	}
+	
+	public boolean isOnGui(int x, int y){
+		return (x < tlCorner.x) || (x > brCorner.x) || (y < tlCorner.y) || (y > brCorner.y);
+	}
+	
+	public boolean isOnMap(int x, int y){
+		return (x >= mapLUCorner.x) && (x < mapLUCorner.x + mapImage.getWidth()) &&
+				(y >= mapLUCorner.y) && (y < mapLUCorner.y + mapImage.getHeight());
+	}
+	
+	public PlayerAction isOnActionList(int x, int y){
+		if(actions.length <= 0) return null;
+		for(int ay=0; ay<actions.length; ay++){
+			for(int ax=0; ax<actions[ay].length; ax++){
+				int x1 = actionsStart.x + ax * (actionsSize + actionsBorder);
+				int x2 = x1 + actionsSize;
+				int y1 = actionsStart.y + ay * (actionsSize + actionsBorder);
+				int y2 = y1 + actionsSize;
+				if((x >= x1) && (x < x2) && (y >= y1) && (y < y2)) return actions[ay][ax];
+			}
+		}
+		return null;
+	}
+	
+	public PlayerAction getAction(int x, int y){
+		if((y < 0) || (y >= actions.length) || (x < 0) || (x >= actions[y].length)) return null;
+		return actions[y][x];
+	}
+	
+	public PointD getMapLocation(int x, int y){
+		if(!isOnMap(x, y)) return null;
+		return new PointD(
+				(x - mapLUCorner.x) * pixelsPerField / (double)fieldsPerPixel, 
+				(y - mapLUCorner.y) * pixelsPerField / (double)fieldsPerPixel);
 	}
 	
 }

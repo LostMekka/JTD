@@ -23,7 +23,7 @@ public class TowerDef extends EntityDef{
 	public double damage = 1f;
 	public double headMaxVel = 1f;
 	public double headAcceleration = 1f;
-	public double cost = 1f;	
+	public int cost = 1;	
 	public TowerDef[] upgradeOptions = {};
 	public ProjectileDef projectileDef = null;
 	public String name = "<NO NAME SET>";

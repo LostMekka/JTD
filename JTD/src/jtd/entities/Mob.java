@@ -37,7 +37,7 @@ public class Mob extends AnimatedEntity {
 		shield = mobDef.maxShield;
 		if(loc == null){
 			path = GAME.getCurrentPathingGraph(def.size).iterator();
-			this.loc = path.getLastPoint().getPointF(entitySize, WALK_RANDOM_COMPONENT);
+			this.loc = path.getLastPoint().getPointD(entitySize, WALK_RANDOM_COMPONENT);
 		} else {
 			path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
 		}
@@ -54,7 +54,7 @@ public class Mob extends AnimatedEntity {
 		if(p == null){
 			pathTarget = null;
 		} else {
-			pathTarget = p.getPointF(entitySize, WALK_RANDOM_COMPONENT);
+			pathTarget = p.getPointD(entitySize, WALK_RANDOM_COMPONENT);
 		}
 		updateRotation();
 	}
@@ -77,7 +77,7 @@ public class Mob extends AnimatedEntity {
 			if(path != null){
 				PointI p2 = path.next();
 				if((p2 != null) && !p2.equals(p1)){
-					pathTarget = p2.getPointF(entitySize, WALK_RANDOM_COMPONENT);
+					pathTarget = p2.getPointD(entitySize, WALK_RANDOM_COMPONENT);
 					updateRotation();
 				}
 			}

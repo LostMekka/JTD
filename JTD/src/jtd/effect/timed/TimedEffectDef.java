@@ -22,7 +22,7 @@ public abstract class TimedEffectDef {
 	
 	@Override
 	public String toString() {
-		return getString() + "(" + duration + "s)";
+		return getString() + String.format("(%1.2fs)", duration);
 	}
 	
 	public void apply(Mob mob, Entity caster){}

@@ -27,7 +27,7 @@ public class PoisonEffectDef extends TimedEffectDef{
 	
 	@Override
 	public String getString() {
-		return "" + damage + "poison";
+		return String.format("%1.2f poison dmg", damage);
 	}
 
 }

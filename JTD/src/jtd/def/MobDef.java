@@ -14,6 +14,7 @@ import jtd.entities.ParticleFactory;
 public class MobDef extends AnimatedEntityDef{
 
 	public int size = 1;
+	public int reward = 1;
 	public double maxHP = 1f;
 	public double hpRegen = 0f;
 	public double maxShield = 0f;

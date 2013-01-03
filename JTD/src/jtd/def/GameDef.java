@@ -5,6 +5,7 @@
 package jtd.def;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import jtd.AssetLoader;
 import jtd.PointD;
 import jtd.effect.timed.SlowEffectDef;
@@ -89,6 +90,7 @@ public final class GameDef {
 			cannonBall.expDef = explosionDef;
 
 			TowerDef t = new TowerDef();
+			t.cost = 150 * (int)Math.pow(2, lev);
 			t.size = 3;
 			t.sprites = new Image[]{
 				AssetLoader.getImage("tower_body.png"), 
@@ -109,8 +111,8 @@ public final class GameDef {
 			t.shotParticleCounts = new int[]{1, 12};
 			t.name = "Cannon Tower";
 			t.level = lev + 1;
-			if(lev > 0) t.upgradeOptions = new TowerDef[]{TOWER_CANNON.get(lev-1)};
 			TOWER_CANNON.add(t);
+			if(lev > 0) TOWER_CANNON.get(lev-1).upgradeOptions = new TowerDef[]{t};
 		}
 	}
 	
@@ -138,6 +140,7 @@ public final class GameDef {
 			rocketDef.particleCooldowns = new double[]{0.04d};
 
 			TowerDef t = new TowerDef();
+			t.cost = 80 * (int)Math.pow(2, lev);
 			t.size = 2;
 			t.sprites = new Image[]{
 				AssetLoader.getImage("freezertower_000_000.png"),
@@ -162,14 +165,15 @@ public final class GameDef {
 				new PointD(0.6d, 0.6d)};
 			t.name = "Freezer Tower";
 			t.level = (int)lev + 1;
-			if(lev > 0) t.upgradeOptions = new TowerDef[]{TOWER_FREEZER.get((int)lev-1)};
 			TOWER_FREEZER.add(t);
+			if(lev > 0) TOWER_FREEZER.get((int)lev-1).upgradeOptions = new TowerDef[]{t};
 		}
 	}
 	
 	private void initRepeaterTower(){
 		for(int lev=0; lev<5; lev++){
 			TowerDef t = new TowerDef();
+			t.cost = 30 * (int)Math.pow(2, lev);
 			t.size = 2;
 			t.damage = 0.2d + 0.1d * lev;
 			t.damageRadius = 0d;
@@ -191,9 +195,9 @@ public final class GameDef {
 			t.shotParticleCounts = new int[]{1, 1};
 			t.name = "Repeater Tower";
 			t.level = lev + 1;
-			if(lev > 0) t.upgradeOptions = new TowerDef[]{TOWER_REPEATER.get(lev-1)};
 			t.defaultTargetingMode = Tower.TargetingMode.random;
 			TOWER_REPEATER.add(t);
+			if(lev > 0) TOWER_REPEATER.get(lev-1).upgradeOptions = new TowerDef[]{t};
 		}
 	}
 	
@@ -278,6 +282,7 @@ public final class GameDef {
 	private MobDef generateSwarmMobDef(int level, boolean boss){
 		if(boss) level += 10;
 		MobDef m = new MobDef();
+		m.reward = 2 * (level + 1);
 		m.maxHP = 1d + 0.5d * level;
 		m.speed = 2.1d;
 		Image i = AssetLoader.getImage("ball_000_000.png");
@@ -309,6 +314,7 @@ public final class GameDef {
 		
 		if(boss) level += 10;
 		MobDef m = new MobDef();
+		m.reward = 5 * (level + 1);
 		m.size = 2;
 		m.fillImages("hummer_000_", ".png", 4, 3, 0.8d, 0.09d);
 		m.maxHP = 3d + 2d * level;
@@ -335,6 +341,15 @@ public final class GameDef {
 		m.hitParticleFacts[0].alphaDelay = 1d;
 		m.damagePerParticle = new double[]{0.15d};
 		return m;
+	}
+	
+	
+	public LinkedList<TowerDef> getBuildableTowers(){
+		LinkedList<TowerDef> ans = new LinkedList<>();
+		ans.add(TOWER_REPEATER.get(0));
+		ans.add(TOWER_CANNON.get(0));
+		ans.add(TOWER_FREEZER.get(0));
+		return ans;
 	}
 	
 }

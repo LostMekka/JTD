@@ -32,7 +32,7 @@ public class BonusDamageEffect extends TimedEffectDef{
 
 	@Override
 	public String getString() {
-		return "" + bonusDamage + "bonus damage";
+		return String.format("%1.2f bonus damage", bonusDamage);
 	}
 
 }

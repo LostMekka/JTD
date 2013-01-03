@@ -27,7 +27,7 @@ public class ArmorDrainEffect extends InstantEffect{
 
 	@Override
 	public String getString() {
-		return "" + amount + " armor drain";
+		return String.format("%1.2f armor drain", amount);
 	}
 	
 }

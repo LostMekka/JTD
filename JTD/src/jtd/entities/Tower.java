@@ -67,21 +67,30 @@ public class Tower extends Entity implements KillListener{
 	public TowerDef def;
 	public Mob target = null;
 	public TargetingMode targetingMode;
-	public int kills = 0;
+	public int kills = 0, cumulativeCost;
 	
 	private double shotCooldown, headDir, headVel, idleCounter, lastTargetDirection;
 	private double[] instantEffectCooldowns, timedEffectCooldowns, idleParticleCooldowns;
 	private int currShotOffset = 0;
 
-	public Tower(TowerDef def, PointI loc) {
-		super(loc.getPointF(def.size), def);
+	private Tower(TowerDef def, PointI loc, int cost, double headDir) {
+		super(loc.getPointD(def.size), def);
+		cumulativeCost = cost;
 		entitySize = def.size;
-		headDir = RANDOM.nextFloat() * 360f;
+		this.headDir = headDir;
 		lastTargetDirection = headDir;
 		headVel = 0f;
 		updateTowerDef(def);
 		resetIdleCounter();
 		targetingMode = def.defaultTargetingMode;
+	}
+
+	public Tower(TowerDef def, PointI loc) {
+		this(def, loc, def.cost, RANDOM.nextFloat() * 360d);
+	}
+	
+	public Tower(TowerDef def, Tower parent) {
+		this(def, parent.getPointI(), def.cost + parent.cumulativeCost, parent.headDir);
 	}
 
 	public double getHeadDir() {
@@ -127,11 +136,16 @@ public class Tower extends Entity implements KillListener{
 		while(dirDiff < -180f) dirDiff += 360f;
 		while(dirDiff > 180f) dirDiff -= 360f;
 		double sign = Math.signum(dirDiff);
+		// already done?
+		if(dirDiff * sign <= 0.5d){
+			headVel = 0d;
+			return 0d;
+		}
 		// already time to decelerate?
 		if(dirDiff * sign <= headVel * headVel / def.headAcceleration * 0.5f){
 			// decelerate
 			headVel -= sign * def.headAcceleration * tickTime;
-			if(headVel * sign < 0f) headVel = 0f;
+			if(headVel * sign < 0.5d) headVel = 0f;
 		} else {
 			// accelerate if still possible
 			headVel += sign * def.headAcceleration * tickTime;

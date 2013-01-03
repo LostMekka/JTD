@@ -34,7 +34,7 @@ public class SlowEffectDef extends TimedEffectDef{
 
 	@Override
 	public String getString() {
-		return "speedup by " + speedup;
+		return String.format("speedup by %1.2f", speedup);
 	}
 
 }

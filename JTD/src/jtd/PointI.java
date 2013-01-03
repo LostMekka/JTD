@@ -26,23 +26,23 @@ public class PointI {
 		y = 0;
 	}
 	
-	public PointD getPointF(int entitySize, double randomComponent){
+	public PointD getPointD(int entitySize, double randomComponent){
 		double offset = ((double)entitySize - 1f) / 2f;
 		return new PointD(
-				x + offset + (ran.nextFloat() - 0.5f) * randomComponent, 
-				y + offset + (ran.nextFloat() - 0.5f) * randomComponent);
+				x + offset + (ran.nextFloat() - 0.5d) * randomComponent, 
+				y + offset + (ran.nextFloat() - 0.5d) * randomComponent);
 	}
 	
-	public PointD getPointF(int entitySize){
-		return getPointF(entitySize, 0f);
+	public PointD getPointD(int entitySize){
+		return getPointD(entitySize, 0f);
 	}
 	
-	public PointD getPointF(double randomComponent){
-		return getPointF(1, randomComponent);
+	public PointD getPointD(double randomComponent){
+		return getPointD(1, randomComponent);
 	}
 	
-	public PointD getPointF(){
-		return getPointF(1, 0f);
+	public PointD getPointD(){
+		return getPointD(1, 0f);
 	}
 	
 	public int hammingDistanceTo(PointI p){
