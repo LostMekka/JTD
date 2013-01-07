@@ -257,21 +257,21 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		TowerDef can2 = gameDef.getTowerDef(GameDef.TowerType.cannon, 2);
 		TowerDef frz4 = gameDef.getTowerDef(GameDef.TowerType.freezer, 4);
 		
-//		level.addTower(new Tower(rep4, new PointI(7, 7)));
-//		level.addTower(new Tower(rep4, new PointI(12, 6)));
-//		level.addTower(new Tower(rep4, new PointI(17, 6)));
-//		level.addTower(new Tower(rep3, new PointI(22, 5)));
-//		
-//		level.addTower(new Tower(rep4, new PointI(23, 15)));
-//		level.addTower(new Tower(rep4, new PointI(18, 16)));
-//		level.addTower(new Tower(rep4, new PointI(13, 16)));
-//		level.addTower(new Tower(rep3, new PointI(8, 17)));
-//
-//		level.addTower(new Tower(can2, new PointI(0, 7)));
-//		level.addTower(new Tower(can2, new PointI(29, 14)));
-//		
-//		level.addTower(new Tower(frz4, new PointI(26, 3)));
-//		level.addTower(new Tower(frz4, new PointI(4, 19)));
+		level.addTower(new Tower(rep4, new PointI(7, 7)));
+		level.addTower(new Tower(rep4, new PointI(12, 6)));
+		level.addTower(new Tower(rep4, new PointI(17, 6)));
+		level.addTower(new Tower(rep3, new PointI(22, 5)));
+		
+		level.addTower(new Tower(rep4, new PointI(23, 15)));
+		level.addTower(new Tower(rep4, new PointI(18, 16)));
+		level.addTower(new Tower(rep4, new PointI(13, 16)));
+		level.addTower(new Tower(rep3, new PointI(8, 17)));
+
+		level.addTower(new Tower(can2, new PointI(0, 7)));
+		level.addTower(new Tower(can2, new PointI(29, 14)));
+		
+		level.addTower(new Tower(frz4, new PointI(26, 3)));
+		level.addTower(new Tower(frz4, new PointI(4, 19)));
 		
 		gui.updateGuiImage(gc);
 		gui.updateMapImage(level);
