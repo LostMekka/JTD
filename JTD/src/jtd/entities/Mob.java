@@ -23,6 +23,7 @@ public class Mob extends AnimatedEntity {
 	public MobDef def;
 	public double speedMultiplier = 1f, armorOffset = 0f, bonusDamage = 0f;
 	public double hp, shield;
+	public boolean lastDamageWasSplashDamage = false;
 	
 	private double[] dmgCounters;
 	private PathingGraph.PathingGraphIterator path = null;
@@ -67,22 +68,38 @@ public class Mob extends AnimatedEntity {
 		}
 	}
 	
-	public final void updatePath(){
+	public final void updatePath(boolean aquireTargetImeediately){
 		if((path == null) || (pathTarget == null)){
 			path = GAME.getCurrentPathingGraph(def.size).iterator();
 			nextPathTarget();
 		} else {
 			PointI p1 = path.getLastPoint();
-			path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
-			if(path != null){
-				PointI p2 = path.next();
-				if((p2 != null) && !p2.equals(p1)){
-					pathTarget = p2.getPointD(entitySize, WALK_RANDOM_COMPONENT);
-					updateRotation();
+			if(aquireTargetImeediately){
+				path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
+				if(path != null){
+					PointI p2 = path.next();
+					if((p2 != null) && !p2.equals(p1)){
+						pathTarget = p2.getPointD(entitySize, WALK_RANDOM_COMPONENT);
+						updateRotation();
+					}
 				}
+			} else {
+				path = GAME.getCurrentPathingGraph(def.size).iterator(pathTarget.getPointI(def.size));
 			}
 		}
 		
+	}
+	
+	public boolean walksIntoTower(Tower t){
+		int ms = def.size;
+		int ts = t.def.size;
+		PointI mp = pathTarget.getPointI(ms);
+		PointI tp = t.getPointI();
+		return (
+				(mp.x + ms - 1 >= tp.x) &&
+				(mp.x <= tp.x + ts - 1) &&
+				(mp.y + ms - 1 >= tp.y) &&
+				(mp.y <= tp.y + ts - 1));
 	}
 	
 	public double getDistanceStillToWalk(){
