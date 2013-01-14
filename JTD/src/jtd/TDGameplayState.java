@@ -94,7 +94,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 
 	// debug vars
 	public boolean debugTowers = false;
-	public boolean debugPathingWeights = true;
+	public boolean debugPathingWeights = false;
 	public int debugPathing = 0;
 
 	@Override
