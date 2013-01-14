@@ -245,8 +245,8 @@ public final class PathingGraph {
 					} else {
 						alreadyVisited = true;
 						if(!node.containsTransitionTo(n)){
-							double splashRate = level.getSplashDamageRate(p, mobSize);
-								n.addTransition(node, n.cumulativeCost / cost * (1d - splashRate));
+							double splashRate = level.getSplashDamageRate(node.loc, mobSize);
+							n.addTransition(node, n.cumulativeCost / cost * (1d - splashRate));
 						}
 					}
 					if(!alreadyVisited && !newNodes.contains(n)) newNodes.add(n);
