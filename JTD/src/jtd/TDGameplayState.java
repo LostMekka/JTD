@@ -9,7 +9,6 @@ import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import jtd.def.GameDef;
-import jtd.def.MobDef;
 import jtd.def.TowerDef;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffect;
@@ -23,7 +22,6 @@ import jtd.entities.Projectile;
 import jtd.entities.Tower;
 import jtd.level.Level;
 import jtd.level.LevelDataHolder;
-import jtd.level.PathListener;
 import jtd.level.PathingGraph;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.GameContainer;
@@ -38,7 +36,7 @@ import org.newdawn.slick.state.StateBasedGame;
  *
  * @author LostMekka
  */
-public class TDGameplayState extends BasicGameState implements KillListener, CoordinateTransformator, PathListener{
+public class TDGameplayState extends BasicGameState implements GameControllerInterface {
 	
 	private static TDGameplayState in = null;
 	public static TDGameplayState get(){
@@ -61,7 +59,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	public LevelDataHolder level;
 	public GameDef gameDef = new GameDef();
 	public GameplayGui gui = new GameplayGui();
-	public int money = 100;
+	public int money = 10000000;
 	
 	public double renderScale = 1d;
 	public double renderMaxScale = 2d;
@@ -108,10 +106,20 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 	}
 
 	@Override
-	public PointD transformPoint(PointD loc) {
+	public PointD transformPoint(PointD p) {
+		return transformPoint(p.x, p.y);
+	}
+
+	@Override
+	public PointD transformPoint(double x, double y) {
 		return new PointD(
-				(loc.x + renderOffset.x + 0.5f) * TILE_SIZE * renderScale, 
-				(loc.y + renderOffset.y + 0.5f) * TILE_SIZE * renderScale);
+				(x + renderOffset.x + 0.5f) * TILE_SIZE * renderScale, 
+				(y + renderOffset.y + 0.5f) * TILE_SIZE * renderScale);
+	}
+
+	@Override
+	public PointD transformPointBack(PointD p) {
+		return transformPointBack(p.x, p.y);
 	}
 
 	@Override
@@ -173,6 +181,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		}
 	}
 
+	@Override
 	public Mob giveTarget(Tower tower){
 		SortedSet<Mob> mobs = new TreeSet<>(tower.getComparator());
 		for(Mob m:level.mobs){
@@ -184,16 +193,12 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		return mobs.first();
 	}
 	
-	public void shoot(
-			PointD loc, Tower tower, Mob mob, 
-			LinkedList<InstantEffect> instantEffects, 
-			LinkedList<TimedEffectDef> timedEffects){
-		Projectile p = new Projectile(
-				tower.def.projectileDef, mob, tower, 
-				instantEffects, timedEffects, loc);
+	@Override
+	public void addProjectile(Projectile p){
 		level.projectiles.add(p);
 	}
 	
+	@Override
 	public void dealDamage(Mob mob, Tower attacker, 
 			LinkedList<InstantEffect> instantEffects, 
 			LinkedList<TimedEffectDef> timedEffects, Double direction){
@@ -203,6 +208,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		level.damageDealtAt(mob.getPointI(), dmg, mob.def.size);
 	}
 	
+	@Override
 	public void dealAreaDamage(PointD loc, Tower attacker, 
 			LinkedList<InstantEffect> instantEffects, 
 			LinkedList<TimedEffectDef> timedEffects){
@@ -213,6 +219,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		}
 	}
 	
+	@Override
 	public boolean addParticle(ParticleFactory f, PointD point, double dir){
 		Particle p = f.createParticle(point, dir);
 		if(f.isBackgroundParticle){
@@ -222,7 +229,8 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		}
 	}
 	
-	public boolean movePointIntoLevl(PointD p){
+	@Override
+	public boolean movePointIntoLevel(PointD p){
 		boolean ans = false;
 		if(p.x < -0.5f){
 			p.x = -0.5f;
@@ -241,6 +249,16 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 			ans = true;
 		}
 		return ans;
+	}
+
+	@Override
+	public boolean isVisible(Entity e) {
+		if(selectedTower == e) return true;
+		PointD p1 = transformPointBack(gui.tlCorner);
+		PointD p2 = transformPointBack(gui.brCorner);
+		double s = e.entitySize * e.sizeMultiplier / 2d;
+		return (e.loc.x - s/2d > p1.x - 1d) && (e.loc.x + s < p2.x + 1d) && 
+				(e.loc.y - s > p1.y - 1d) && (e.loc.y + s < p2.y + 1d);
 	}
 	
 	@Override
@@ -487,6 +505,7 @@ public class TDGameplayState extends BasicGameState implements KillListener, Coo
 		}
 	}
 	
+	@Override
 	public PathingGraph getCurrentPathingGraph(int mobSize){
 		return level.getPathingGraph(mobSize);
 	}

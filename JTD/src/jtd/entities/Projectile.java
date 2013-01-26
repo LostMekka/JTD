@@ -5,6 +5,7 @@
 package jtd.entities;
 
 import java.util.LinkedList;
+import jtd.GameCtrl;
 import jtd.KillListener;
 import jtd.PointD;
 import jtd.TDGameplayState;
@@ -65,10 +66,10 @@ public class Projectile extends AnimatedEntity implements KillListener{
 		// if target is reached, deal damage and kill self
 		if(loc.hammingDistanceTo(targetLoc) < 0.1f){
 			if(attacker.def.damageRadius > 0){
-				TDGameplayState.get().dealAreaDamage(targetLoc, attacker, instantEffects, timedEffects);
+				GameCtrl.get().dealAreaDamage(targetLoc, attacker, instantEffects, timedEffects);
 			} else {
 				if(target != null){
-					TDGameplayState.get().dealDamage(target, attacker, instantEffects, timedEffects, rotation);
+					GameCtrl.get().dealDamage(target, attacker, instantEffects, timedEffects, rotation);
 				}
 			}
 			kill(null);
@@ -80,7 +81,7 @@ public class Projectile extends AnimatedEntity implements KillListener{
 			particleCooldowns[i] -= time;
 			while(particleCooldowns[i] <= 0){
 				particleCooldowns[i] += def.particleCooldowns[i];
-				GAME.addParticle(def.particleFactories[i], loc.clone(), rotation + 180f);
+				GameCtrl.get().addParticle(def.particleFactories[i], loc.clone(), rotation + 180f);
 			}
 		}
 	}

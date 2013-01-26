@@ -17,9 +17,14 @@ import jtd.PointI;
  */
 public final class PathingGraph {
 	
-	public static final double WALK_COST = 0.6f;
-	public static final double WALK_DIAGONAL_COST = WALK_COST * (double)Math.sqrt(2f);
+	private static double WALK_COST = 3f;
+	private static double WALK_DIAGONAL_COST = WALK_COST * Math.sqrt(2f);
 	private static final Random random = new Random();
+	
+	public static void setStaticWalkCost(double cost){
+		WALK_COST = cost;
+		WALK_DIAGONAL_COST = WALK_COST * Math.sqrt(2f);
+	}
 	
 	private static class Node{
 		public PointI loc;

@@ -7,6 +7,7 @@ package jtd.entities;
 import java.util.LinkedList;
 import java.util.Random;
 import jtd.CoordinateTransformator;
+import jtd.GameCtrl;
 import jtd.KillListener;
 import jtd.PointD;
 import jtd.PointI;
@@ -22,7 +23,6 @@ import org.newdawn.slick.state.StateBasedGame;
  */
 public abstract class Entity {
 	
-	public static final TDGameplayState GAME = TDGameplayState.get();	
 	public static final Random RANDOM = new Random();
 	
 	public PointD loc;
@@ -55,7 +55,7 @@ public abstract class Entity {
 	}
 	
 	public final void kill(Entity killer){
-		TDGameplayState.get().EntityKilled(this, killer);
+		GameCtrl.get().EntityKilled(this, killer);
 		for(KillListener l:killListeners) l.EntityKilled(this, killer);
 	}
 	
@@ -67,6 +67,7 @@ public abstract class Entity {
 	public final void draw(
 			GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator){
+		if(!GameCtrl.get().isVisible(this)) return;
 		if((currSprite >= 0) && (currSprite < def.sprites.length)){
 			def.sprites[currSprite].setAlpha((float)spriteAlpha);
 			transformator.drawImage(def.sprites[currSprite], loc, 

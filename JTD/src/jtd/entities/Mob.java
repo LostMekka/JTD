@@ -5,6 +5,7 @@
 package jtd.entities;
 
 import java.util.LinkedList;
+import jtd.GameCtrl;
 import jtd.PointD;
 import jtd.PointI;
 import jtd.def.MobDef;
@@ -36,10 +37,10 @@ public class Mob extends AnimatedEntity {
 		hp = mobDef.maxHP;
 		shield = mobDef.maxShield;
 		if(loc == null){
-			path = GAME.getCurrentPathingGraph(def.size).iterator();
+			path = GameCtrl.get().getCurrentPathingGraph(def.size).iterator();
 			this.loc = path.getLastPoint().getPointD(entitySize, WALK_RANDOM_COMPONENT);
 		} else {
-			path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
+			path = GameCtrl.get().getCurrentPathingGraph(def.size).iterator(getPointI());
 		}
 		nextPathTarget();
 		dmgCounters = new double[def.hitParticleFacts.length];
@@ -69,11 +70,11 @@ public class Mob extends AnimatedEntity {
 	
 	public final void updatePath(){
 		if((path == null) || (pathTarget == null)){
-			path = GAME.getCurrentPathingGraph(def.size).iterator();
+			path = GameCtrl.get().getCurrentPathingGraph(def.size).iterator();
 			nextPathTarget();
 		} else {
 			PointI p1 = path.getLastPoint();
-			path = GAME.getCurrentPathingGraph(def.size).iterator(getPointI());
+			path = GameCtrl.get().getCurrentPathingGraph(def.size).iterator(getPointI());
 			if(path != null){
 				PointI p2 = path.next();
 				if((p2 != null) && !p2.equals(p1)){
@@ -125,7 +126,7 @@ public class Mob extends AnimatedEntity {
 					dmgCounters[i] += damage;
 					while(dmgCounters[i] >= def.damagePerParticle[i]){
 						dmgCounters[i] -= def.damagePerParticle[i];
-						GAME.addParticle(def.hitParticleFacts[i], loc.clone(), direction);
+						GameCtrl.get().addParticle(def.hitParticleFacts[i], loc.clone(), direction);
 					}
 				}
 			}
@@ -133,7 +134,7 @@ public class Mob extends AnimatedEntity {
 				// add death particles
 				for(int i=0; i<def.deathParticleFacts.length; i++){
 					for(int n=0; n<def.deathParticleCounts[i]; n++){
-						GAME.addParticle(def.deathParticleFacts[i], loc.clone(), rotation);
+						GameCtrl.get().addParticle(def.deathParticleFacts[i], loc.clone(), rotation);
 					}
 				}
 				// kill mob
@@ -168,15 +169,15 @@ public class Mob extends AnimatedEntity {
 					nextPathTarget();
 					// if we have reached the last node in the path, wander around randomly
 					if(pathTarget == null){
-						GAME.pathEndReachedBy(getPointI(), this);
+						GameCtrl.get().pathEndReachedBy(getPointI(), this);
 						pathTarget = loc.clone();
 						double d = RANDOM.nextFloat() * 1.5f + 0.5f;
 						double a = RANDOM.nextFloat() * 360f;
 						pathTarget.x += d * (double)Math.cos(a);
 						pathTarget.y += d * (double)Math.sin(a);
-						GAME.movePointIntoLevl(pathTarget);
+						GameCtrl.get().movePointIntoLevel(pathTarget);
 					} else {
-						GAME.fieldWalkedBy(getPointI(), this);
+						GameCtrl.get().fieldWalkedBy(getPointI(), this);
 					}
 					// set proper direction
 					rotation = loc.getRotationTo(pathTarget);

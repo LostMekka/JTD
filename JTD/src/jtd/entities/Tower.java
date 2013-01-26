@@ -7,6 +7,7 @@ package jtd.entities;
 import java.util.Comparator;
 import java.util.LinkedList;
 import jtd.CoordinateTransformator;
+import jtd.GameCtrl;
 import jtd.KillListener;
 import jtd.PointD;
 import jtd.PointI;
@@ -120,7 +121,7 @@ public class Tower extends Entity implements KillListener{
 	}
 	
 	private void requestTarget(){
-		target = GAME.giveTarget(this);
+		target = GameCtrl.get().giveTarget(this);
 		if(target != null){
 			target.addKillListener(this);
 			resetIdleCounter();
@@ -192,18 +193,20 @@ public class Tower extends Entity implements KillListener{
 		if(def.projectileDef == null){
 			// no projectile! deal damage immediately
 			if(def.damageRadius > 0f){
-				GAME.dealAreaDamage(target.loc, this, instantEffects, timedEffects);
+				GameCtrl.get().dealAreaDamage(target.loc, this, instantEffects, timedEffects);
 			} else {
-				GAME.dealDamage(target, this, instantEffects, timedEffects, headDir);
+				GameCtrl.get().dealDamage(target, this, instantEffects, timedEffects, headDir);
 			}
 		} else {
 			// shoot projectile
-			GAME.shoot(shotStart, this, target, instantEffects, timedEffects);
+			Projectile p = new Projectile(def.projectileDef, target, this, 
+					instantEffects, timedEffects, loc.clone());
+			GameCtrl.get().addProjectile(p);
 		}
 		// add shot particles
 		for(int i=0; i<def.shotParticleFactories.length; i++){
 			for(int n=0; n<def.shotParticleCounts[i]; n++){
-				GAME.addParticle(def.shotParticleFactories[i], shotStart.clone(), headDir);
+				GameCtrl.get().addParticle(def.shotParticleFactories[i], shotStart.clone(), headDir);
 			}
 		}
 	}
@@ -253,7 +256,7 @@ public class Tower extends Entity implements KillListener{
 			idleParticleCooldowns[i] -= time;
 			while(idleParticleCooldowns[i] <= 0){
 				idleParticleCooldowns[i] += def.idlePartCooldowns[i];
-				GAME.addParticle(def.idlePartFacts[i], loc.clone(), 0f);
+				GameCtrl.get().addParticle(def.idlePartFacts[i], loc.clone(), 0f);
 			}
 		}
 	}

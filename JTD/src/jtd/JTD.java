@@ -7,7 +7,9 @@ package jtd;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.newdawn.slick.AppGameContainer;
+import org.newdawn.slick.BigImage;
 import org.newdawn.slick.GameContainer;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.state.StateBasedGame;
 
@@ -25,6 +27,7 @@ public class JTD {
 			@Override
 			public void initStatesList(GameContainer gc) throws SlickException {
 				addState(TDGameplayState.get());
+				GameCtrl.setController(TDGameplayState.get());
 			}
 		};
 		try {

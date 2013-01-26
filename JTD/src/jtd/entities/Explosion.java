@@ -4,6 +4,7 @@
  */
 package jtd.entities;
 
+import jtd.GameCtrl;
 import jtd.PointD;
 import jtd.def.ExplosionDef;
 
@@ -41,7 +42,7 @@ public class Explosion extends AnimatedEntity{
 			particleTimes[i] -= time;
 			while(particleTimes[i] <= 0f){
 				particleTimes[i] += def.particleCooldowns[i];
-				GAME.addParticle(def.particleFactories[i], loc.clone(), RANDOM.nextFloat() * 360f);
+				GameCtrl.get().addParticle(def.particleFactories[i], loc.clone(), RANDOM.nextFloat() * 360f);
 			}
 		}
 	}
@@ -51,7 +52,7 @@ public class Explosion extends AnimatedEntity{
 		for(int i=0; i<def.initialParticleFactories.length; i++){
 			ParticleFactory f = def.initialParticleFactories[i];
 			for(int n=0; n<def.initialParticleCounts[i]; n++){
-				GAME.addParticle(f, loc.clone(), initialDirection);
+				GameCtrl.get().addParticle(f, loc.clone(), initialDirection);
 			}
 		}
 	}

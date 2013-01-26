@@ -19,7 +19,7 @@ import org.newdawn.slick.Image;
  * @author LostMekka
  */
 public final class GameDef {
-	
+
 	public enum TowerType{
 		cannon, freezer, repeater
 	}
@@ -33,7 +33,24 @@ public final class GameDef {
 		initCannonTower();
 		initFreezerTower();
 		initRepeaterTower();
+		initBuildableTowers();
 	}
+	
+	// lists
+	private LinkedList<TowerDef> BUILDABLE_TOWERS = new LinkedList<>();
+	
+	private ArrayList<TowerDef> TOWER_CANNON = new ArrayList<>();
+	private ArrayList<TowerDef> TOWER_FREEZER = new ArrayList<>();
+	private ArrayList<TowerDef> TOWER_REPEATER = new ArrayList<>();
+	
+	private ArrayList<MobDef> MOB_NORMAL = new ArrayList<>(200);
+	private ArrayList<MobDef> BOSS_NORMAL = new ArrayList<>(200);
+
+	private ArrayList<MobDef> MOB_SWARM = new ArrayList<>(200);
+	private ArrayList<MobDef> BOSS_SWARM = new ArrayList<>(200);
+
+	private ArrayList<MobDef> MOB_ARMORED = new ArrayList<>(200);
+	private ArrayList<MobDef> BOSS_ARMORED = new ArrayList<>(200);
 	
 	// common defs
 	private ParticleDef part_blood_000;
@@ -43,6 +60,12 @@ public final class GameDef {
 	private ParticleDef part_casing_000;
 	private ParticleDef part_muzzle_000;
 	private ParticleDef part_iceshard_000;
+	
+	private void initBuildableTowers() {
+		BUILDABLE_TOWERS.add(TOWER_REPEATER.get(0));
+		BUILDABLE_TOWERS.add(TOWER_CANNON.get(0));
+		BUILDABLE_TOWERS.add(TOWER_FREEZER.get(0));
+	}
 	
 	private void initCommonDefs(){
 		//-------- particles ---------------------------------------------------
@@ -201,19 +224,6 @@ public final class GameDef {
 		}
 	}
 	
-	private ArrayList<TowerDef> TOWER_CANNON = new ArrayList<>();
-	private ArrayList<TowerDef> TOWER_FREEZER = new ArrayList<>();
-	private ArrayList<TowerDef> TOWER_REPEATER = new ArrayList<>();
-	
-	private ArrayList<MobDef> MOB_NORMAL = new ArrayList<>(200);
-	private ArrayList<MobDef> BOSS_NORMAL = new ArrayList<>(200);
-
-	private ArrayList<MobDef> MOB_SWARM = new ArrayList<>(200);
-	private ArrayList<MobDef> BOSS_SWARM = new ArrayList<>(200);
-
-	private ArrayList<MobDef> MOB_ARMORED = new ArrayList<>(200);
-	private ArrayList<MobDef> BOSS_ARMORED = new ArrayList<>(200);
-	
 	private ArrayList<TowerDef> getTowerList(TowerType t){
 		switch(t){
 			case cannon: return TOWER_CANNON;
@@ -345,11 +355,7 @@ public final class GameDef {
 	
 	
 	public LinkedList<TowerDef> getBuildableTowers(){
-		LinkedList<TowerDef> ans = new LinkedList<>();
-		ans.add(TOWER_REPEATER.get(0));
-		ans.add(TOWER_CANNON.get(0));
-		ans.add(TOWER_FREEZER.get(0));
-		return ans;
+		return BUILDABLE_TOWERS;
 	}
 	
 }
