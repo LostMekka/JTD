@@ -32,7 +32,8 @@ public class LevelDataHolder {
 	public static final double DAMAGE_COST_MULTIPLIER = 0.05f;
 	
 	public Level.Field[][][] fieldsData;
-	public double[][] pathingWeights;
+	public double[][] normalKillCounts;
+	public double[][] splashKillCounts;
 	public int w, h;
 	
 	public GameDef def;
@@ -69,7 +70,8 @@ public class LevelDataHolder {
 		iSrc = AssetLoader.getImage("src.png", false);
 		iDest = AssetLoader.getImage("dest.png", false);
 		// init pathing graphs
-		pathingWeights = new double[h][w];
+		normalKillCounts = new double[h][w];
+		splashKillCounts = new double[h][w];
 		sources = new ArrayList<>(level.maxMobSize);
 		destinations = new ArrayList<>(level.maxMobSize);
 		for(int i=0; i<level.maxMobSize; i++){
@@ -200,35 +202,46 @@ public class LevelDataHolder {
 				(fieldsData[s][y+1][x+1] == f);
 	}
 	
-	public void damageDealtAt(PointI p, double damage, int mobSize){
-		if((p.x < 0) || (p.y < 0) || (p.x >= w) || (p.y >= h)) return;
-		double amount = damage / mobSize * mobSize * DAMAGE_COST_MULTIPLIER;
-		for(int y=0; (y<mobSize)&&(p.y+y<h); y++){
-			for(int x=0; (x<mobSize)&&(p.x+x<w); x++){
-				pathingWeights[p.y + y][p.x + x] += amount;
-			}
-		}
-	}
-	
-	public void killHappenedAt(PointI p, int mobSize){
+	public void killHappenedAt(PointI p, int mobSize, boolean wasSplashDamage){
 		if((p.x < 0) || (p.y < 0) || (p.x >= w) || (p.y >= h)) return;
 		double amount = 1f / mobSize / mobSize;
 		for(int y=0; y<mobSize; y++){
 			for(int x=0; x<mobSize; x++){
-				pathingWeights[p.y+ y][p.x + x] += amount;
+				if(wasSplashDamage){
+					splashKillCounts[p.y + y][p.x + x] += amount;
+				} else {
+					normalKillCounts[p.y + y][p.x + x] += amount;
+				}
 			}
 		}
 	}
 	
+	public double getSplashDamageRate(PointI p, int mobSize){
+		double sd = 0d, nd = 0d;
+		for(int x=p.x; x<p.x+mobSize; x++){
+			for(int y=p.y; y<p.y+mobSize; y++){
+				sd += splashKillCounts[y][x];
+				nd += normalKillCounts[y][x];
+			}
+		}
+		if(sd == 0d) return 1d;
+		if(nd == 0d) return 0d;
+		return sd / (sd + nd);
+	}
+	
 	public double getPathingWeightAt(PointI p){
-		return pathingWeights[p.y][p.x];
+		return getPathingWeightAt(p.x, p.y);
+	}
+	
+	public double getPathingWeightAt(int x, int y){
+		return splashKillCounts[y][x] + normalKillCounts[y][x];
 	}
 	
 	public double getMaxPathingWeight(){
 		double ans = 0f;
 		for(int y=0; y<h; y++){
 			for(int x=0; x<w; x++){
-				double f = pathingWeights[y][x];
+				double f = getPathingWeightAt(x, y);
 				if(f > ans) ans = f;
 			}
 		}
@@ -238,7 +251,8 @@ public class LevelDataHolder {
 	public void resetPathingWeights(){
 		for(int y=0; y<h; y++){
 			for(int x=0; x<w; x++){
-				pathingWeights[y][x] = 0f;
+				normalKillCounts[y][x] = 0d;
+				normalKillCounts[y][x] = 0d;
 			}
 		}
 	}
@@ -369,7 +383,7 @@ public class LevelDataHolder {
 		updateWalkables();
 		updatePaths();
 		for(Mob m:mobs){
-			m.updatePath();
+			m.updatePath(false);
 		}
 		return true;
 	}
@@ -431,6 +445,25 @@ public class LevelDataHolder {
 			ans += pathingGraphs.get(s-1).lastTime;
 		}
 		return ans;
+	}
+	
+	private static final double lambda = -Math.log(2d) / 100;
+	
+	public void update(double time){
+		for(Particle p:particles) p.tick(time);
+		for(Particle p:bgParticles) p.tick(time);
+		for(Explosion e:explosions) e.tick(time);
+		for(Projectile p:projectiles) p.tick(time);
+		for(Mob m:mobs) m.tick(time);
+		deleteMarkedEntities();
+		for(Tower t:towers) t.tick(time);
+		double exp = Math.exp(lambda * time);
+		for(int x=0; x<w; x++){
+			for(int y=0; y<h; y++){
+				normalKillCounts[y][x] *= exp;
+				splashKillCounts[y][x] *= exp;
+			}
+		}
 	}
 	
 }

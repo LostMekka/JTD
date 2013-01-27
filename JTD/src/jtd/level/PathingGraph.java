@@ -21,66 +21,98 @@ public final class PathingGraph {
 	private static double WALK_DIAGONAL_COST = WALK_COST * Math.sqrt(2f);
 	private static final Random random = new Random();
 	
-	public static void setStaticWalkCost(double cost){
-		WALK_COST = cost;
-		WALK_DIAGONAL_COST = WALK_COST * Math.sqrt(2f);
+	public static class Transition{
+		public Node n;
+		public double p;
+		public Transition(Node loc, double p) {
+			this.n = loc;
+			this.p = p;
+		}
 	}
 	
-	private static class Node{
+	public static class Node{
 		public PointI loc;
-		public double weight;
-		public Node(PointI loc, Node src, double weight) {
+		public LinkedList<Transition> transitions;
+		public double cumulativeCost, cumulativeP;
+		public Node(PointI loc, double cumulativeCost) {
 			this.loc = loc;
-			this.weight = src.weight + weight;
+			this.cumulativeCost = cumulativeCost;
+			transitions = new LinkedList<>();
 		}
-		public Node(PointI loc) {
-			this.loc = loc;
-			this.weight = 0;
+		public void addTransition(Node n, double p){
+			transitions.add(new Transition(n, p));
 		}
-		@Override
-		public String toString() {
-			return "Node(" + loc.x + ", " + loc.y + ") = " + weight;
+		public Node getNextNode(){
+			if(transitions.isEmpty()) return null;
+			double maxP = 0d;
+			for(Transition t:transitions) maxP += t.p;
+			double ran = random.nextDouble() * maxP;
+			for(Transition t:transitions){
+				if(ran > t.p){
+					ran -= t.p;
+				} else {
+					return t.n;
+				}
+			}
+			return transitions.getLast().n;
+		}
+		public Node getShortestNode(){
+			if(transitions.isEmpty()) return null;
+			return transitions.getFirst().n;
+		}
+		public boolean containsTransitionTo(Node n){
+			for(Transition t:transitions){
+				if(t.n == n) return true;
+			}
+			return false;
 		}
 	}
+	
 	public class PathingGraphIterator implements Iterator<PointI>{
-		LinkedList<PointI> nextPoints;
-		PointI lastPoint = null;
+		private Node currNode;
+		private PathingGraphIterator(Node currNode) {
+			this.currNode = currNode;
+		}
 		public PathingGraphIterator(PointI start) {
-			lastPoint = start;
-			if(lastPoint.x < 0) lastPoint.x = 0;
-			if(lastPoint.y < 0) lastPoint.y = 0;
-			if(lastPoint.x >= transitions.size()) lastPoint.x = transitions.size();
-			if(lastPoint.y >= transitions.get(0).size()) lastPoint.y = transitions.get(0).size();
-			nextPoints = transitions.get(lastPoint.x).get(lastPoint.y);
+			if(start.x < 0) start.x = 0;
+			if(start.y < 0) start.y = 0;
+			if(start.x >= nodes.length) start.x = nodes.length;
+			if(start.y >= nodes[0].length) start.y = nodes[0].length;
+			currNode = getNode(start);
 		}
 		@Override
 		public boolean hasNext() {
-			return !nextPoints.isEmpty();
+			if(currNode == null) return false;
+			return !currNode.transitions.isEmpty();
 		}
 		@Override
 		public PointI next() {
-			if(nextPoints.isEmpty()) return null;
-			lastPoint = nextPoints.get(random.nextInt(nextPoints.size()));
-			nextPoints = transitions.get(lastPoint.x).get(lastPoint.y);
-			return lastPoint;
+			if(currNode == null) return null;
+			currNode = currNode.getNextNode();
+			if(currNode == null) return null;
+			return currNode.loc;
+		}
+		public PointI shortest() {
+			if(currNode == null) return null;
+			currNode = currNode.getShortestNode();
+			if(currNode == null) return null;
+			return currNode.loc;
 		}
 		@Override
 		public void remove() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 		public PointI getLastPoint() {
-			return lastPoint;
-		}
-		public LinkedList<PointI> getNextPoints(){
-			return nextPoints;
+			if(currNode == null) return null;
+			return currNode.loc;
 		}
 		public double getDistanceLeft(){
 			if(!hasNext()) return 0f;
-			PathingGraphIterator iter = new PathingGraphIterator(lastPoint);
+			PathingGraphIterator iter = new PathingGraphIterator(currNode);
 			double ans = 0f;
 			while(iter.hasNext()){
-				PointI p1 = iter.lastPoint;
-				PointI p2 = iter.next();
+				PointI p1 = iter.currNode.loc;
+				PointI p2 = iter.shortest();
 				ans += p1.distanceTo(p2);
 			}
 			return ans;
@@ -88,9 +120,13 @@ public final class PathingGraph {
 	}
 	
 	public LinkedList<PointI> startingPoints;
-	public ArrayList<ArrayList<LinkedList<PointI>>> transitions;
+	public Node[][] nodes;
 	public long lastTime = 0;
 
+	public Node getNode(PointI p){
+		return nodes[p.x][p.y];
+	}
+	
 	public PathingGraphIterator iterator(PointI start){
 		return new PathingGraphIterator(start);
 	}
@@ -100,14 +136,6 @@ public final class PathingGraph {
 	}
 	
 	public PathingGraph(int mobSize, LevelDataHolder level) {
-		transitions = new ArrayList<>(level.w);
-		for(int x=0; x<level.w; x++){
-			ArrayList<LinkedList<PointI>> l = new ArrayList<>(level.h);
-			transitions.add(l);
-			for(int y=0; y<level.h; y++){
-				l.add(new LinkedList<PointI>());
-			}
-		}
 		generate(mobSize, level);
 	}
 	
@@ -117,18 +145,12 @@ public final class PathingGraph {
 	
 	public long generate(int mobSize, LevelDataHolder level){
 		long startTime = System.currentTimeMillis();
-		LinkedList<PointI> newStartingPoints = new LinkedList<>();
-		byte[][] visited = new byte[level.w][level.h];
-		for(int x=0; x<level.w; x++){
-			for(int y=0; y<level.h; y++){
-				visited[x][y] = UNVISITED;
-			}
-		}
-		LinkedList<Node> currNodes = new LinkedList<>();
+		nodes = new Node[level.w][level.h];
+		startingPoints = new LinkedList<>();
 		// init node list
+		LinkedList<Node> currNodes = new LinkedList<>();
 		for(PointI p:level.destinations.get(mobSize-1)){
-			currNodes.add(new Node(p));
-			visited[p.x][p.y] = VISITED;
+			currNodes.add(new Node(p, 0d));
 		}
 		double startingPointCost = -1f;
 		for(;;){
@@ -141,9 +163,9 @@ public final class PathingGraph {
 				if(nodesToExpand.isEmpty()){
 					nodesToExpand.add(n);
 					iter.remove();
-					currWeigth = n.weight;
+					currWeigth = n.cumulativeCost;
 				} else {
-					if(n.weight == currWeigth){
+					if(n.cumulativeCost == currWeigth){
 						nodesToExpand.add(n);
 						iter.remove();
 					} else {
@@ -160,7 +182,8 @@ public final class PathingGraph {
 				int y = node.loc.y;
 				LinkedList<PointI> reach = level.getWalkableTilesFrom(node.loc, mobSize);
 				for(PointI p:reach){
-					if((visited[p.x][p.y] == VISITED) || !level.isWalkable(p, mobSize)) continue;
+					if(!level.isWalkable(p, mobSize)) continue;
+					if(level.destinations.get(mobSize-1).contains(p)) continue;
 					int hDist = p.hammingDistanceTo(node.loc);
 					double cost;
 					int dx = p.x - x;
@@ -211,32 +234,38 @@ public final class PathingGraph {
 							}
 						}
 					}
-					Node n = new Node(p, node, cost);
-					if(!newNodes.contains(n)) newNodes.add(n);
-					// add transition in graph
-					if(visited[p.x][p.y] == UNVISITED){
-						transitions.get(p.x).get(p.y).clear();
-						visited[p.x][p.y] = VISITING;
+					cost += node.cumulativeCost;
+					// get node or construct it if it is not there yet
+					Node n = getNode(p);
+					boolean alreadyVisited = false;
+					if(n == null){
+						n = new Node(p, cost);
+						nodes[p.x][p.y] = n;
+						n.addTransition(node, 1d);
+					} else {
+						alreadyVisited = true;
+						if(!node.containsTransitionTo(n)){
+							double splashRate = level.getSplashDamageRate(node.loc, mobSize);
+							n.addTransition(node, n.cumulativeCost / cost * (1d - splashRate));
+						}
 					}
-					LinkedList<PointI> l = transitions.get(p.x).get(p.y);
-					if(!l.contains(node.loc)) l.add(node.loc);
+					if(!alreadyVisited && !newNodes.contains(n)) newNodes.add(n);
 					// add location to stating point list, if cost is not higher
+					// TODO: make starting points selectable with a node
 					if(level.sources.get(mobSize-1).contains(p)){
-						if(newStartingPoints.isEmpty() || (n.weight <= startingPointCost)){
-							newStartingPoints.add(p);
-							startingPointCost = n.weight;
+						if(startingPoints.isEmpty() || (n.cumulativeCost <= startingPointCost)){
+							startingPoints.add(p);
+							startingPointCost = n.cumulativeCost;
 						}
 					}
 				}
 			}
 			// add new nodes to curr nodes, mark them as visited
 			for(Node n:newNodes){
-				visited[n.loc.x][n.loc.y] = VISITED;
 				insertNode(n, currNodes);
 			}
 			if(currNodes.isEmpty()) break;
 		}
-		startingPoints = newStartingPoints;
 		long endTime = System.currentTimeMillis();
 		lastTime = endTime - startTime;
 		return lastTime;
@@ -252,7 +281,7 @@ public final class PathingGraph {
 		ListIterator<Node> iter = list.listIterator();
 		while(iter.hasNext()){
 			Node next = iter.next();
-			if(next.weight >= node.weight){
+			if(next.cumulativeCost >= node.cumulativeCost){
 				// greater node found. insert node one step before this one
 				iter.previous();
 				iter.add(node);

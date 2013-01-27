@@ -12,4 +12,4 @@ to build you need these libs:
     - slick.jar
 
 to start, use the parameter
-  - -Djava.library.path=<pathToLwjglNatives>
+  - -Djava.library.path= ...pathToLwjglNatives...

@@ -204,8 +204,8 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 			LinkedList<TimedEffectDef> timedEffects, Double direction){
 		for(TimedEffectDef def:timedEffects) mob.applyTimedEffect(new TimedEffect(attacker, def));
 		for(InstantEffect e:instantEffects) mob.applyInstantEffect(e);
-		double dmg = mob.damage(attacker.def.damage, attacker, direction);
-		level.damageDealtAt(mob.getPointI(), dmg, mob.def.size);
+		mob.damage(attacker.def.damage, attacker, direction);
+		mob.lastDamageWasSplashDamage = true;
 	}
 	
 	@Override
@@ -215,6 +215,7 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 		for(Mob mob:level.mobs){
 			if(mob.loc.distanceTo(loc) - mob.def.radius <= attacker.def.damageRadius){
 				dealDamage(mob, attacker, instantEffects, timedEffects, loc.getRotationTo(mob.loc));
+				mob.lastDamageWasSplashDamage = true;
 			}
 		}
 	}
@@ -275,21 +276,21 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 		TowerDef can2 = gameDef.getTowerDef(GameDef.TowerType.cannon, 2);
 		TowerDef frz4 = gameDef.getTowerDef(GameDef.TowerType.freezer, 4);
 		
-//		level.addTower(new Tower(rep4, new PointI(7, 7)));
-//		level.addTower(new Tower(rep4, new PointI(12, 6)));
-//		level.addTower(new Tower(rep4, new PointI(17, 6)));
-//		level.addTower(new Tower(rep3, new PointI(22, 5)));
-//		
-//		level.addTower(new Tower(rep4, new PointI(23, 15)));
-//		level.addTower(new Tower(rep4, new PointI(18, 16)));
-//		level.addTower(new Tower(rep4, new PointI(13, 16)));
-//		level.addTower(new Tower(rep3, new PointI(8, 17)));
-//
-//		level.addTower(new Tower(can2, new PointI(0, 7)));
-//		level.addTower(new Tower(can2, new PointI(29, 14)));
-//		
-//		level.addTower(new Tower(frz4, new PointI(26, 3)));
-//		level.addTower(new Tower(frz4, new PointI(4, 19)));
+		level.addTower(new Tower(rep4, new PointI(7, 7)));
+		level.addTower(new Tower(rep4, new PointI(12, 6)));
+		level.addTower(new Tower(rep4, new PointI(17, 6)));
+		level.addTower(new Tower(rep3, new PointI(22, 5)));
+		
+		level.addTower(new Tower(rep4, new PointI(23, 15)));
+		level.addTower(new Tower(rep4, new PointI(18, 16)));
+		level.addTower(new Tower(rep4, new PointI(13, 16)));
+		level.addTower(new Tower(rep3, new PointI(8, 17)));
+
+		level.addTower(new Tower(can2, new PointI(0, 7)));
+		level.addTower(new Tower(can2, new PointI(29, 14)));
+		
+		level.addTower(new Tower(frz4, new PointI(26, 3)));
+		level.addTower(new Tower(frz4, new PointI(4, 19)));
 		
 		gui.updateGuiImage(gc);
 		gui.updateMapImage(level);
@@ -480,17 +481,22 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 		for(int x=0; x<level.w; x++){
 			for(int y=0; y<level.h; y++){
 				PointD p1 = transformPoint(new PointD(x, y));
-				for(PointI p:graph.transitions.get(x).get(y)){
-					PointD p2 = transformPoint(p.getPointD());
+				PathingGraph.Node n = graph.getNode(new PointI(x, y));
+				if(n == null) continue;
+				for(PathingGraph.Transition t:n.transitions){
+					PointD p2 = transformPoint(t.n.loc.getPointD());
+					Color c1 = new Color(1f, 0f, 0f, (float)t.p);
+					Color c2 = new Color(1f, 1f, 0f, (float)t.p);
 					grphcs.drawGradientLine(
-							(float)p1.x, (float)p1.y, Color.red, 
-							(float)p2.x, (float)p2.y, Color.yellow);
+							(float)p1.x, (float)p1.y, c1, 
+							(float)p2.x, (float)p2.y, c2);
 				}
 			}
 		}
 	}
 	private void dbgPathWeights(Graphics g){
 		double max = level.getMaxPathingWeight();
+		dbgString("maxPathingWeight=" + max, g);
 		if(max <= 0) return;
 		g.setColor(Color.red);
 		for(int y=0; y<level.h; y++){
@@ -498,7 +504,7 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 				PointI p = new PointI(x, y);
 				double rad = level.getPathingWeightAt(p) / max / 2f;
 				double diameter = transformLength(2f * rad);
-				if(diameter <= 4f) continue;
+				if(diameter <= 1f) continue;
 				PointD p1 = transformPoint(new PointD(x - rad, y - rad));
 				g.fillOval((float)p1.x, (float)p1.y, (float)diameter, (float)diameter);
 			}
@@ -516,7 +522,7 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 	}
 	
 	private void mobGotKilled(Mob mob){
-		level.killHappenedAt(mob.getPointI(), mob.def.size);
+		level.killHappenedAt(mob.getPointI(), mob.def.size, !mob.lastDamageWasSplashDamage);
 		money += mob.def.reward;
 		// TODO: exchange testing code with useful stuff
 		if(spm > 0.01f) spm *= tst;
@@ -806,6 +812,11 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 								money -= selectedTowerDef.cost;
 								Tower t = new Tower(selectedTowerDef, placeTowerLocation);
 								level.addTower(t);
+								level.updatePaths();
+								for(Mob m:level.mobs){
+									m.updatePath(m.walksIntoTower(t));
+								}
+								// TODO: update
 								setInteractionState(InteractionState.normal);
 							}
 							break;
@@ -884,7 +895,7 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 		if(pathTime <= 0){
 			pathTime = maxPathTime;
 			level.updatePaths();
-			for(Mob m:level.mobs) m.updatePath();
+			for(Mob m:level.mobs) m.updatePath(false);
 		}
 		// minimap
 		mapTime -= i;
@@ -894,13 +905,7 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 		}
 		// tick entities
 		double time = ((double)i) / 1000f * timeScale;
-		for(Particle p:level.particles) p.tick(time);
-		for(Particle p:level.bgParticles) p.tick(time);
-		for(Explosion e:level.explosions) e.tick(time);
-		for(Projectile p:level.projectiles) p.tick(time);
-		for(Mob m:level.mobs) m.tick(time);
-		level.deleteMarkedEntities();
-		for(Tower t:level.towers) t.tick(time);
+		level.update(time);
 		// if state is placeTower, check if the tower can be placed at the current position
 		if(interactionState == InteractionState.placeTower){
 			towerIsPlaceable = (
