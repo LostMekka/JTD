@@ -4,6 +4,7 @@
  */
 package jtd.def;
 
+import jtd.Animation;
 import jtd.entities.Mob;
 import jtd.entities.ParticleFactory;
 
@@ -11,8 +12,9 @@ import jtd.entities.ParticleFactory;
  *
  * @author LostMekka
  */
-public class MobDef extends AnimatedEntityDef{
+public class MobDef{
 
+	public Animation[] walkAnimations, deathAnimations, bithAnimations;
 	public int size = 1;
 	public int reward = 1;
 	public double maxHP = 1f;

@@ -4,48 +4,79 @@
  */
 package jtd.entities;
 
-import jtd.def.AnimatedEntityDef;
+import jtd.Animation;
 import jtd.PointD;
 
 /**
  *
  * @author LostMekka
  */
-public abstract class AnimatedEntity extends Entity{
+public class AnimatedEntity extends Entity{
 
 	public double animationSpeed = 1f;
+	public Animation[] currAnimationSet = null;
+	public Animation currAnimation = null;
 	
-	private double animationTime;
-	private AnimatedEntityDef def;
+	private int currAnimationState = 0;
+	private double animationTime = -1d;
+	private boolean cycleAnimation = false;
 	
-	public AnimatedEntity(PointD loc, AnimatedEntityDef animatedDef) {
-		super(loc, animatedDef);
-		this.def = animatedDef;
-		animationTime = 0f;
-		currSprite = RANDOM.nextInt(def.times.length);
-		animationTime = def.times[currSprite] * RANDOM.nextDouble();
+	public AnimatedEntity(PointD loc) {
+		super(loc);
 	}
 
 	@Override
 	public final void entityTick(double time) {
-		if(animationTime >= 0){
+		if(currAnimation != null){
 			animationTime += time * animationSpeed;
-			while(animationTime >= def.times[currSprite]){
-				animationTime -= def.times[currSprite];
-				if(currSprite < def.sprites.length - 1){
-					currSprite++;
+			while(animationTime >= currAnimation.times[currAnimationState]){
+				animationTime -= currAnimation.times[currAnimationState];
+				if(currAnimationState < currAnimation.images.length - 1){
+					currAnimationState++;
 				} else {
-					if(def.isCyclic){
-						currSprite = 0;
+					if(cycleAnimation){
+						if(currAnimationSet == null){
+							currAnimationState = 0;
+						} else {
+							startAnimation(currAnimationSet);
+						}
 						animationCycled();
 					} else {
-						animationTime = -1f;
+						currAnimation = null;
 						animationEnded();
 					}
 				}
 			}
 		}
 		animatedEntityTick(time);
+	}
+	
+	public void setAnimation(Animation animation, boolean cycleAnimation){
+		this.cycleAnimation = cycleAnimation;
+		currAnimationSet = null;
+		startAnimation(animation);
+	}
+	
+	public void setAnimationSet(Animation[] animations, boolean cycleAnimation){
+		this.cycleAnimation = cycleAnimation;
+		currAnimationSet = animations;
+		startAnimation(animations);
+	}
+	
+	private void startAnimation(Animation[] a){
+		startAnimation(a[RANDOM.nextInt(a.length)]);
+	}
+	
+	private void startAnimation(Animation a){
+		currAnimation = a;
+		currAnimationState = 0;
+		animationTime = 0d;
+		if((a != null) && (a.images.length > 0)){
+			currSprite = a.images[0];
+		} else {
+			currSprite = null;
+			currAnimation = null;
+		}
 	}
 	
 	public void animationCycled(){}

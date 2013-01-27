@@ -34,7 +34,7 @@ public class Projectile extends AnimatedEntity implements KillListener{
 			LinkedList<InstantEffect> instantEffects, 
 			LinkedList<TimedEffectDef> timedEffects, 
 			PointD loc) {
-		super(loc, def);
+		super(loc);
 		this.def = def;
 		target.addKillListener(this);
 		if(def.isHoming){
@@ -48,6 +48,7 @@ public class Projectile extends AnimatedEntity implements KillListener{
 		this.attacker = attacker;
 		this.instantEffects = instantEffects;
 		this.timedEffects = timedEffects;
+		setAnimationSet(def.animations, true);
 		rotation = attacker.loc.getRotationTo(target.loc);
 		particleCooldowns = new double[this.def.particleFactories.length];
 		System.arraycopy(this.def.particleCooldowns, 0, particleCooldowns, 0, particleCooldowns.length);

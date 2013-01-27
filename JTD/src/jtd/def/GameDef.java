@@ -6,6 +6,7 @@ package jtd.def;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import jtd.Animation;
 import jtd.AssetLoader;
 import jtd.PointD;
 import jtd.effect.timed.SlowEffectDef;
@@ -68,37 +69,37 @@ public final class GameDef {
 	}
 	
 	private void initCommonDefs(){
+		Animation a;
 		//-------- particles ---------------------------------------------------
 		part_blood_000 = new ParticleDef();
-		part_blood_000.fillImage("blood_000_000.png", 1d, 1d);
+		part_blood_000.animations = new Animation[]{new Animation("blood_000_000.png", 1d, 1d)};
 
 		part_bloodsplat_000 = new ParticleDef();
-		part_bloodsplat_000.fillImages("bloodsplat_000_", ".png", 6, 3, 1d, 0.12d);
-		part_bloodsplat_000.isCyclic = false;
+		part_bloodsplat_000.animations = new Animation[]{new Animation("bloodsplat_000_", ".png", 6, 3, 0.12d, 1d)};
 
 		part_iceshard_000 = new ParticleDef();
-		part_iceshard_000.fillImage("iceshard_000_000.png", 1d, 1d);
+		part_iceshard_000.animations = new Animation[]{new Animation("iceshard_000_000.png", 1d, 1d)};
 
 		part_dust_000 = new ParticleDef();
-		part_dust_000.fillImages("dust_000_", ".png", 5, 3, 1d, 1d);
+		part_dust_000.animations = new Animation[]{new Animation("dust_000_", ".png", 5, 3, 1d, 1d)};
 
 		part_dust_001 = new ParticleDef();
-		part_dust_001.fillImages("dust_001_", ".png", 2, 3, 1d, 1d);
+		part_dust_001.animations = new Animation[]{new Animation("dust_001_", ".png", 2, 3, 1d, 1d)};
 
 		part_muzzle_000 = new ParticleDef();
-		part_muzzle_000.fillImage("muzzleflash_000_000.png", 1d, 1d);
+		part_muzzle_000.animations = new Animation[]{new Animation("muzzleflash_000_000.png", 1d, 1d)};
 		
 		part_casing_000 = new ParticleDef();
-		part_casing_000.fillImage("casing_000_000.png", 1d, 1d);
+		part_casing_000.animations = new Animation[]{new Animation("casing_000_000.png", 1d, 1d)};
 	}
 	
 	private void initCannonTower(){
 		for(int lev=0; lev<5; lev++){
 			ParticleDef cannonballPart = new ParticleDef();
-			cannonballPart.fillImage("shot.png", 1d, 1d);
+			cannonballPart.animations = new Animation[]{new Animation("shot.png", 1d, 1d)};
 			
 			ExplosionDef explosionDef = new ExplosionDef();
-			explosionDef.fillImage("explosion.png", 0.8d, 0.25d);
+			explosionDef.animations = new Animation[]{new Animation("explosion.png", 0.8d, 0.25d)};
 			explosionDef.initialParticleFactories = new ParticleFactory[]{
 				new ParticleFactory(part_dust_001, 0.4d, 0d, 0d, 360d, 0d, 0d, 1d, 0.2d, 0.5d, 0.5d),
 				new ParticleFactory(cannonballPart, 0.4d, 0d, 0d, 0d, 0d, 0d, 1.6d, 0.4d, 0.5d, 0.3d)};
@@ -106,7 +107,7 @@ public final class GameDef {
 			explosionDef.initialParticleCounts = new int[]{8, 1};
 
 			ProjectileDef cannonBall = new ProjectileDef();
-			cannonBall.fillImage("shot.png", 0.4d, 0.2d);
+			cannonBall.animations = new Animation[]{new Animation("shot.png", 0.4d, 0.2d)};
 			cannonBall.isHoming = false;
 			cannonBall.speed = 22d;
 			cannonBall.lifeTime = 5d;
@@ -115,10 +116,8 @@ public final class GameDef {
 			TowerDef t = new TowerDef();
 			t.cost = 150 * (int)Math.pow(2, lev);
 			t.size = 3;
-			t.sprites = new Image[]{
-				AssetLoader.getImage("tower_body.png"), 
-				AssetLoader.getImage("tower_head.png")};
-			t.sizes = new double[]{1d, 1d};
+			t.baseIdleAnimations = new Animation[]{new Animation("tower_body.png", 1d, 1d)};
+			t.headIdleAnimations = new Animation[]{new Animation("tower_head.png", 1d, 1d)};
 			t.damage = 2d + lev;
 			t.damageRadius = 0.2d;
 			t.reloadTime = 1.2d;
@@ -142,7 +141,7 @@ public final class GameDef {
 	private void initFreezerTower(){
 		for(double lev=0; lev<5; lev++){
 			ExplosionDef explosionDef = new ExplosionDef();
-			explosionDef.fillImage("explosion.png", 0.5d, 0.25d);
+			explosionDef.animations = new Animation[]{new Animation("explosion.png", 0.5d, 0.25d)};
 			explosionDef.particleFactories = new ParticleFactory[]{
 					new ParticleFactory(part_dust_001, 0.4d, 0d, 0d, 360d, 0d, 0d, 1d, 1.5d, 0.5d, 0.5d)};
 			explosionDef.particleCooldowns = new double[]{0.1d};
@@ -156,7 +155,7 @@ public final class GameDef {
 			rocketDef.expDef = explosionDef;
 			rocketDef.speed = 4d;
 			rocketDef.lifeTime = 5d;
-			rocketDef.fillImages("icerocket_000_", ".png", 2, 3, 1d, 0.2d);
+			rocketDef.animations = new Animation[]{new Animation("icerocket_000_", ".png", 2, 3, 1d, 0.2d)};
 			rocketDef.particleFactories = new ParticleFactory[]{
 				new ParticleFactory(part_dust_001, 0.15d, 0d, 0d, 50d, 0d, 0d, 1d, 0.1d, 1d, 1d)};
 			rocketDef.particleFactories[0].locationOffset = new PointD(-0.15d, 0d);
@@ -165,10 +164,8 @@ public final class GameDef {
 			TowerDef t = new TowerDef();
 			t.cost = 80 * (int)Math.pow(2, lev);
 			t.size = 2;
-			t.sprites = new Image[]{
-				AssetLoader.getImage("freezertower_000_000.png"),
-				AssetLoader.getImage("freezertower_000_001.png")};
-			t.sizes = new double[]{1d, 1d};
+			t.baseIdleAnimations = new Animation[]{new Animation("freezertower_000_000.png", 1d, 1d)};
+			t.headIdleAnimations = new Animation[]{new Animation("freezertower_000_001.png", 1d, 1d)};
 			t.damage = 0d;
 			t.damageRadius = 0.33d + 0.33d * lev;
 			t.reloadTime = 3d;
@@ -204,10 +201,8 @@ public final class GameDef {
 			t.range = 3d + lev * 0.2d;
 			t.headAcceleration = 600d;
 			t.headMaxVel = 450d;
-			t.sprites = new Image[]{
-				AssetLoader.getImage("repeatertower_000_000.png"),
-				AssetLoader.getImage("repeatertower_000_001.png")};
-			t.sizes = new double[]{1d, 1d};
+			t.baseIdleAnimations = new Animation[]{new Animation("repeatertower_000_000.png", 1d, 1d)};
+			t.headIdleAnimations = new Animation[]{new Animation("repeatertower_000_001.png", 1d, 1d)};
 			t.shotParticleFactories = new ParticleFactory[]{
 				new ParticleFactory(part_casing_000, 0.2d, 0d, 80d, 60d, 400d, 1000d, 0.4d, 0.9d, 1d, 0.5d),
 				new ParticleFactory(part_muzzle_000, 0.4d, 0.02d, 0d, 0d, 0d, 0d, 0d, 0d, 0.05d, 0.01d)};
@@ -296,9 +291,11 @@ public final class GameDef {
 		m.maxHP = 1d + 0.5d * level;
 		m.speed = 2.1d;
 		Image i = AssetLoader.getImage("ball_000_000.png");
-		m.sprites = new Image[]{i, i, i, i, i};
-		m.times = new double[]{0.15d, 0.15d, 0.15d, 0.15d, 0.15d};
-		m.sizes = new double[]{0.5d, 0.6d, 0.65d, 0.6d, 0.5d};
+		Animation a = new Animation();
+		a.images = new Image[]{i, i, i, i, i};
+		a.times = new double[]{0.15d, 0.15d, 0.15d, 0.15d, 0.15d};
+		a.sizes = new double[]{0.5d, 0.6d, 0.65d, 0.6d, 0.5d};
+		m.walkAnimations = new Animation[]{a};
 		m.deathParticleFacts = new ParticleFactory[]{
 			new ParticleFactory(part_bloodsplat_000, 0.4d, 0.15d, 0d, 360d, 0d, 0d, 0.1d, 0.8d, 5d, 0d),
 			new ParticleFactory(part_blood_000, 0.5d, 0.1d, 0d, 0d, 0d, 0d, 0d, 0d, 10d, 10d)};
@@ -318,15 +315,15 @@ public final class GameDef {
 	
 	private MobDef generateNormalMobDef(int level, boolean boss){
 		ParticleDef gib000 = new ParticleDef();
-		gib000.fillImages("hummer_000_gib000_", ".png", 2, 3, 1d, 0.25d);
+		gib000.animations = new Animation[]{new Animation("hummer_000_gib000_", ".png", 2, 3, 1d, 0.25d)};
 		ParticleDef gib001 = new ParticleDef();
-		gib001.fillImages("hummer_000_gib001_", ".png", 2, 3, 1d, 0.25d);
+		gib001.animations = new Animation[]{new Animation("hummer_000_gib001_", ".png", 2, 3, 1d, 0.25d)};
 		
 		if(boss) level += 10;
 		MobDef m = new MobDef();
 		m.reward = 5 * (level + 1);
 		m.size = 2;
-		m.fillImages("hummer_000_", ".png", 4, 3, 0.8d, 0.09d);
+		m.walkAnimations = new Animation[]{new Animation("hummer_000_", ".png", 4, 3, 0.8d, 0.09d)};
 		m.maxHP = 3d + 2d * level;
 		m.speed = 1.5d;
 		

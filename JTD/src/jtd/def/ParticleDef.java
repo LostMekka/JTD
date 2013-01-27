@@ -4,14 +4,15 @@
  */
 package jtd.def;
 
+import jtd.Animation;
+
 /**
  *
  * @author LostMekka
  */
-public class ParticleDef extends AnimatedEntityDef{
+public class ParticleDef{
 
-	public ParticleDef() {
-		isCyclic = true;
-	}
-
+	public Animation[] animations = null;
+	public boolean animationsAreCyclic = true;
+	
 }

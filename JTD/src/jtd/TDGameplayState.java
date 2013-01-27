@@ -257,7 +257,7 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 		if(selectedTower == e) return true;
 		PointD p1 = transformPointBack(gui.tlCorner);
 		PointD p2 = transformPointBack(gui.brCorner);
-		double s = e.entitySize * e.sizeMultiplier / 2d;
+		double s = e.getSize() * e.sizeMultiplier / 2d;
 		return (e.loc.x - s/2d > p1.x - 1d) && (e.loc.x + s < p2.x + 1d) && 
 				(e.loc.y - s > p1.y - 1d) && (e.loc.y + s < p2.y + 1d);
 	}
@@ -276,21 +276,21 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 		TowerDef can2 = gameDef.getTowerDef(GameDef.TowerType.cannon, 2);
 		TowerDef frz4 = gameDef.getTowerDef(GameDef.TowerType.freezer, 4);
 		
-		level.addTower(new Tower(rep4, new PointI(7, 7)));
-		level.addTower(new Tower(rep4, new PointI(12, 6)));
-		level.addTower(new Tower(rep4, new PointI(17, 6)));
-		level.addTower(new Tower(rep3, new PointI(22, 5)));
-		
-		level.addTower(new Tower(rep4, new PointI(23, 15)));
-		level.addTower(new Tower(rep4, new PointI(18, 16)));
-		level.addTower(new Tower(rep4, new PointI(13, 16)));
-		level.addTower(new Tower(rep3, new PointI(8, 17)));
-
-		level.addTower(new Tower(can2, new PointI(0, 7)));
-		level.addTower(new Tower(can2, new PointI(29, 14)));
-		
-		level.addTower(new Tower(frz4, new PointI(26, 3)));
-		level.addTower(new Tower(frz4, new PointI(4, 19)));
+//		level.addTower(new Tower(rep4, new PointI(7, 7)));
+//		level.addTower(new Tower(rep4, new PointI(12, 6)));
+//		level.addTower(new Tower(rep4, new PointI(17, 6)));
+//		level.addTower(new Tower(rep3, new PointI(22, 5)));
+//		
+//		level.addTower(new Tower(rep4, new PointI(23, 15)));
+//		level.addTower(new Tower(rep4, new PointI(18, 16)));
+//		level.addTower(new Tower(rep4, new PointI(13, 16)));
+//		level.addTower(new Tower(rep3, new PointI(8, 17)));
+//
+//		level.addTower(new Tower(can2, new PointI(0, 7)));
+//		level.addTower(new Tower(can2, new PointI(29, 14)));
+//		
+//		level.addTower(new Tower(frz4, new PointI(26, 3)));
+//		level.addTower(new Tower(frz4, new PointI(4, 19)));
 		
 		gui.updateGuiImage(gc);
 		gui.updateMapImage(level);
@@ -713,6 +713,7 @@ public class TDGameplayState extends BasicGameState implements GameControllerInt
 			case Input.KEY_X: executeAction(gui.getAction(1, 3)); break;
 			case Input.KEY_C: executeAction(gui.getAction(2, 3)); break;
 			case Input.KEY_V: executeAction(gui.getAction(3, 3)); break;
+			case Input.KEY_P: spm = 0.1; break;
 			case Input.KEY_M:
 				t += spm;
 				break;

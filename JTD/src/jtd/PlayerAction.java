@@ -57,8 +57,9 @@ public final class PlayerAction {
 	}
 	
 	private Image generateIcon(TowerDef def){
-		Image body = def.sprites[0];
-		Image head = def.sprites[1];
+		Image body = def.baseIdleAnimations[0].images[0];
+		Image head = null;
+		if(def.headIdleAnimations != null) head = def.headIdleAnimations[0].images[0];
 		int w = Math.max(body.getWidth(), head.getWidth());
 		int h = Math.max(body.getHeight(), head.getHeight());
 		int s = Math.max(w, h);
@@ -70,9 +71,11 @@ public final class PlayerAction {
 			g.setBackground(Color.gray);
 			g.clear();
 			body.setRotation(0f);
-			head.setRotation(0f);
 			body.drawCentered(s/2, s/2);
-			head.drawCentered(s/2, s/2);
+			if(head != null){
+				head.setRotation(0f);
+				head.drawCentered(s/2, s/2);
+			}
 			g.flush();
 		} catch (SlickException ex) {
 			Logger.getLogger(PlayerAction.class.getName()).log(Level.SEVERE, null, ex);

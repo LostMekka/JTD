@@ -22,7 +22,7 @@ public class Particle extends AnimatedEntity{
 
 	public Particle(ParticleDef particleDef, PointD loc, PointD vel, double size, 
 			double rotation, double spinVel, double lifeTime, double alphaDelay) {
-		super(loc, particleDef);
+		super(loc);
 		this.def = particleDef;
 		this.vel = vel;
 		sizeMultiplier = size;
@@ -31,9 +31,10 @@ public class Particle extends AnimatedEntity{
 		this.alphaDelay = alphaDelay;
 		lifeTimeLeft = lifeTime;
 		initialLifeTime = lifeTime;
-		if(!def.isCyclic){
+		setAnimationSet(def.animations, true);
+		if(!def.animationsAreCyclic){
 			double t = 0f;
-			for(double f:def.times) t += f;
+			for(double f:currAnimation.times) t += f;
 			if(t < initialLifeTime) initialLifeTime = t;
 		}
 	}

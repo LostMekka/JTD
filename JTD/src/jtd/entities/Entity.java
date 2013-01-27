@@ -11,10 +11,9 @@ import jtd.GameCtrl;
 import jtd.KillListener;
 import jtd.PointD;
 import jtd.PointI;
-import jtd.TDGameplayState;
-import jtd.def.EntityDef;
 import org.newdawn.slick.GameContainer;
 import org.newdawn.slick.Graphics;
+import org.newdawn.slick.Image;
 import org.newdawn.slick.state.StateBasedGame;
 
 /**
@@ -27,15 +26,13 @@ public abstract class Entity {
 	
 	public PointD loc;
 	public double rotation = 0f, sizeMultiplier = 1f, spriteAlpha = 1f;
-	public int currSprite = 0, entitySize = 1;
-	public EntityDef def;
+	public Image currSprite = null;
 	
 	private LinkedList<KillListener> killListeners = new LinkedList<>();
 	private boolean initialTick = true;
 
-	public Entity(PointD loc, EntityDef def) {
+	public Entity(PointD loc) {
 		this.loc = loc;
-		this.def = def;
 	}
 	
 	public final boolean addKillListener(KillListener l){
@@ -51,7 +48,7 @@ public abstract class Entity {
 	}
 	
 	public PointI getPointI(){
-		return loc.getPointI(entitySize);
+		return loc.getPointI(getSize());
 	}
 	
 	public final void kill(Entity killer){
@@ -68,11 +65,9 @@ public abstract class Entity {
 			GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator){
 		if(!GameCtrl.get().isVisible(this)) return;
-		if((currSprite >= 0) && (currSprite < def.sprites.length)){
-			def.sprites[currSprite].setAlpha((float)spriteAlpha);
-			transformator.drawImage(def.sprites[currSprite], loc, 
-					def.sizes[currSprite] * sizeMultiplier * (double)entitySize, 
-					rotation);
+		if(currSprite != null){
+			currSprite.setAlpha((float)spriteAlpha);
+			transformator.drawImage(currSprite, loc, getSize() * sizeMultiplier, rotation);
 		}
 		entityDraw(gc, sbg, grphcs, transformator);
 	}
@@ -90,5 +85,6 @@ public abstract class Entity {
 	public void entityDraw(
 			GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator){}
+	public int getSize(){return 1;}
 		
 }

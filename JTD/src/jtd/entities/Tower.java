@@ -4,6 +4,7 @@
  */
 package jtd.entities;
 
+import com.sun.org.glassfish.external.arc.Stability;
 import java.util.Comparator;
 import java.util.LinkedList;
 import jtd.CoordinateTransformator;
@@ -22,7 +23,7 @@ import org.newdawn.slick.state.StateBasedGame;
  *
  * @author LostMekka
  */
-public class Tower extends Entity implements KillListener{
+public class Tower extends AnimatedEntity implements KillListener{
 
 	public enum TargetingMode{
 		nearest, leatHealth, random
@@ -62,6 +63,8 @@ public class Tower extends Entity implements KillListener{
 		}
 	}
 	
+	private enum State{ idle, charging, reloading }
+	
 	public static final double IDLE_COOLDOWN_TIME = 2f;
 	public static final double IDLE_COOLDOWN_RANDOM_TIME = 14f;
 	
@@ -70,20 +73,28 @@ public class Tower extends Entity implements KillListener{
 	public TargetingMode targetingMode;
 	public int kills = 0, cumulativeCost;
 	
-	private double shotCooldown, headDir, headVel, idleCounter, lastTargetDirection;
+	private double shotCooldown, headVel, idleCounter, lastTargetDirection;
 	private double[] instantEffectCooldowns, timedEffectCooldowns, idleParticleCooldowns;
 	private int currShotOffset = 0;
+	private AnimatedEntity head;
+	private State state = State.idle;
 
-	private Tower(TowerDef def, PointI loc, int cost, double headDir) {
-		super(loc.getPointD(def.size), def);
+	private Tower(TowerDef towerDef, PointI loc, int cost, double headDir) {
+		super(loc.getPointD(towerDef.size));
+		if(def.headIdleAnimations == null){
+			head = null;
+		} else {
+			head = new AnimatedEntity(this.loc);
+			head.rotation = headDir;
+			head.setAnimationSet(def.headIdleAnimations, true);
+		}
 		cumulativeCost = cost;
-		entitySize = def.size;
-		this.headDir = headDir;
 		lastTargetDirection = headDir;
 		headVel = 0f;
-		updateTowerDef(def);
+		updateTowerDef(towerDef);
 		resetIdleCounter();
 		targetingMode = def.defaultTargetingMode;
+		setAnimationSet(def.baseIdleAnimations, true);
 	}
 
 	public Tower(TowerDef def, PointI loc) {
@@ -91,18 +102,18 @@ public class Tower extends Entity implements KillListener{
 	}
 	
 	public Tower(TowerDef def, Tower parent) {
-		this(def, parent.getPointI(), def.cost + parent.cumulativeCost, parent.headDir);
+		this(def, parent.getPointI(), def.cost + parent.cumulativeCost, parent.head.rotation);
 	}
 
 	public double getHeadDir() {
-		return headDir;
+		if(head == null) return 0d;
+		return head.rotation;
 	}
 
 	public final void updateTowerDef(TowerDef towerDef){
 		if(this.def == towerDef) return;
 		// update def references
 		this.def = towerDef;
-		super.def = towerDef;
 		// reset shot cooldown
 		shotCooldown = towerDef.reloadTime;
 		// init instant effect cooldowns
@@ -133,7 +144,7 @@ public class Tower extends Entity implements KillListener{
 	}
 
 	private double turnTo(double direction, double tickTime){
-		double dirDiff = direction - headDir;
+		double dirDiff = direction - head.rotation;
 		while(dirDiff < -180f) dirDiff += 360f;
 		while(dirDiff > 180f) dirDiff -= 360f;
 		double sign = Math.signum(dirDiff);
@@ -164,14 +175,26 @@ public class Tower extends Entity implements KillListener{
 		return velocity - headVel;
 	}
 	
+	@Override
+	public void animationEnded() {
+		switch(state){
+			case charging: shoot(); break;
+			case reloading:
+				state = State.idle;
+				setAnimationSet(def.baseIdleAnimations, true);
+				if(head != null) head.setAnimationSet(def.baseIdleAnimations, true);
+				break;
+		}
+	}
+
 	public void shoot(){
 		PointD shotStart;
-		if(def.shotOffsets == null){
+		if((head == null) || (def.shotOffsets == null)){
 			shotStart = loc.clone();
 		} else {
 			shotStart = def.shotOffsets[currShotOffset].clone();
 			currShotOffset = (currShotOffset + 1) % def.shotOffsets.length;
-			shotStart.rotate(headDir);
+			shotStart.rotate(head.rotation);
 			shotStart.add(loc);
 		}
 		// fill effects
@@ -193,9 +216,22 @@ public class Tower extends Entity implements KillListener{
 		if(def.projectileDef == null){
 			// no projectile! deal damage immediately
 			if(def.damageRadius > 0f){
-				GameCtrl.get().dealAreaDamage(target.loc, this, instantEffects, timedEffects);
+				if(head == null){
+					// tower has no head. deal area damage around tower
+					GameCtrl.get().dealAreaDamage(loc, this, instantEffects, timedEffects);
+				} else {
+					// tower has a head. deal area damage around target
+					GameCtrl.get().dealAreaDamage(target.loc, this, instantEffects, timedEffects);
+				}
 			} else {
-				GameCtrl.get().dealDamage(target, this, instantEffects, timedEffects, headDir);
+				double shotDir;
+				if(head == null){
+					// tower has no head. direction must be calculated.
+					shotDir = loc.getRotationTo(target.loc);
+				} else {
+					shotDir = head.rotation;
+				}
+				GameCtrl.get().dealDamage(target, this, instantEffects, timedEffects, shotDir);
 			}
 		} else {
 			// shoot projectile
@@ -204,71 +240,93 @@ public class Tower extends Entity implements KillListener{
 			GameCtrl.get().addProjectile(p);
 		}
 		// add shot particles
+		double dir = 0d;
+		if(head != null) dir = head.rotation;
 		for(int i=0; i<def.shotParticleFactories.length; i++){
 			for(int n=0; n<def.shotParticleCounts[i]; n++){
-				GameCtrl.get().addParticle(def.shotParticleFactories[i], shotStart.clone(), headDir);
+				GameCtrl.get().addParticle(def.shotParticleFactories[i], shotStart.clone(), dir);
 			}
+		}
+		// enter reloading state or idle, if reload animation does not exist
+		shotCooldown += def.reloadTime;
+		if(def.baseReloadAnimations == null){
+			state = State.idle;
+			setAnimationSet(def.baseIdleAnimations, true);
+		} else {
+			state = State.reloading;
+			setAnimationSet(def.baseReloadAnimations, false);
 		}
 	}
 	
 	@Override
-	public void entityTick(double time) {
-		// compute tower rotation
-		headDir += headVel * time;
-		if(headDir < 0f) headDir += 360;
-		if(headDir > 360f) headDir -= 360;
+	public void animatedEntityTick(double time) {
 		// aqquire new target if necessary
-		if((target == null) || (loc.distanceTo(target.loc) - target.def.radius > def.range)){
+		if((state == State.idle) && 
+				((target == null) || 
+				(loc.distanceTo(target.loc) - target.def.radius > def.range))){
 			requestTarget();
 		}
-		// targeting
 		double targetDirDiff = 180f;
-		if(target == null){
-			// no target. rotate to last target direction and spin sweep after the timeout
-			idleCounter -= time;
-			turnTo(lastTargetDirection, time);
-			if(idleCounter <= 0f){
-				lastTargetDirection = RANDOM.nextFloat() * 360f;
-				resetIdleCounter();
-			}
-		} else {
-			// there is a target. turn towards it and set its direction and the angle left to turn
-			// (used by the shooting part later)
-			lastTargetDirection = loc.getRotationTo(target.loc);
-			targetDirDiff = turnTo(lastTargetDirection, time);
-		}
-		// shot cooldowns / reload times
-		shotCooldown -= time;
-		for(int i=0; i<instantEffectCooldowns.length; i++) instantEffectCooldowns[i] -= time;
-		for(int i=0; i<timedEffectCooldowns.length; i++) timedEffectCooldowns[i] -= time;
-		// shooting
-		if(shotCooldown <= 0f){
-			// if tower has no target or tower does not face target, delay shot
-			if((target == null) || (Math.abs(targetDirDiff) > 5f)){
-				shotCooldown = 0f;
+		if(head != null){
+			// compute tower rotation
+			head.rotation += headVel * time;
+			if(head.rotation < 0f) head.rotation += 360;
+			if(head.rotation > 360f) head.rotation -= 360;
+			// targeting
+			if(target == null){
+				// no target. rotate to last target direction and spin sweep after the timeout
+				idleCounter -= time;
+				turnTo(lastTargetDirection, time);
+				if(idleCounter <= 0f){
+					lastTargetDirection = RANDOM.nextFloat() * 360f;
+					resetIdleCounter();
+				}
 			} else {
-				shoot();
-				shotCooldown += def.reloadTime;
+				// there is a target. turn towards it and set its direction and the angle left to turn
+				// (used by the shooting part later)
+				lastTargetDirection = loc.getRotationTo(target.loc);
+				targetDirDiff = turnTo(lastTargetDirection, time);
 			}
 		}
-		// idle particles
-		for(int i=0; i<idleParticleCooldowns.length; i++){
-			idleParticleCooldowns[i] -= time;
-			while(idleParticleCooldowns[i] <= 0){
-				idleParticleCooldowns[i] += def.idlePartCooldowns[i];
-				GameCtrl.get().addParticle(def.idlePartFacts[i], loc.clone(), 0f);
+		if(state == State.idle){
+			// shot cooldowns / reload times
+			shotCooldown -= time;
+			for(int i=0; i<instantEffectCooldowns.length; i++) instantEffectCooldowns[i] -= time;
+			for(int i=0; i<timedEffectCooldowns.length; i++) timedEffectCooldowns[i] -= time;
+			// shooting
+			if(shotCooldown <= 0f){
+				// if tower has no target or tower does not face target, delay shot
+				if(((target == null) || (Math.abs(targetDirDiff) > 5f)) && (head != null)){
+					shotCooldown = 0f;
+				} else {
+					// all green. initiate shot
+					if(def.baseChargeAnimations == null){
+						shoot();
+					} else {
+						state = State.charging;
+						setAnimationSet(def.baseChargeAnimations, false);
+						if(head != null) head.setAnimationSet(def.headChargeAnimations, false);
+					}
+					
+					
+				}
+			}
+			// idle particles
+			for(int i=0; i<idleParticleCooldowns.length; i++){
+				idleParticleCooldowns[i] -= time;
+				while(idleParticleCooldowns[i] <= 0){
+					idleParticleCooldowns[i] += def.idlePartCooldowns[i];
+					GameCtrl.get().addParticle(def.idlePartFacts[i], loc.clone(), 0f);
+				}
 			}
 		}
 	}
 
 	@Override
-	public void entityDraw(
-			GameContainer gc, StateBasedGame sbg, 
+	public void entityDraw(GameContainer gc, StateBasedGame sbg, 
 			Graphics grphcs, CoordinateTransformator transformator) {
 		// draw head
-		if(def.sprites[1] != null){
-			transformator.drawImage(def.sprites[1], loc, def.sizes[1] * (double)entitySize, headDir);
-		}
+		head.draw(gc, sbg, grphcs, transformator);
 	}
 
 	@Override

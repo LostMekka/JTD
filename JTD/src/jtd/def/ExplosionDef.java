@@ -4,21 +4,19 @@
  */
 package jtd.def;
 
+import jtd.Animation;
 import jtd.entities.ParticleFactory;
 
 /**
  *
  * @author LostMekka
  */
-public class ExplosionDef extends AnimatedEntityDef{
+public class ExplosionDef{
 
+	public Animation[] animations = null;
 	public ParticleFactory[] particleFactories = {};
 	public ParticleFactory[] initialParticleFactories = {};
 	public double[] particleCooldowns = {};
 	public int[] initialParticleCounts = {};
 
-	public ExplosionDef() {
-		isCyclic = false;
-	}
-	
 }

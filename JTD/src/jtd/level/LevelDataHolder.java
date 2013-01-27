@@ -129,7 +129,7 @@ public class LevelDataHolder {
 						boolean blocked = false;
 						for(Tower t:towers){
 							PointI pt = t.getPointI();
-							if((p.x >= pt.x) && (p.x < pt.x + t.entitySize) && (p.y >= pt.y) && (p.y < pt.y + t.entitySize)){
+							if((p.x >= pt.x) && (p.x < pt.x + t.getSize()) && (p.y >= pt.y) && (p.y < pt.y + t.getSize())){
 								blocked = true;
 								break;
 							}

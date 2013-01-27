@@ -20,13 +20,14 @@ public class Explosion extends AnimatedEntity{
 	private double[] particleTimes;
 
 	public Explosion(PointD loc, ExplosionDef explosionDef, Double initialDirection) {
-		super(loc, explosionDef);
+		super(loc);
 		if(initialDirection == null){
 			this.initialDirection = 0d;
 		} else {
 			this.initialDirection = initialDirection;
 		}
-		this.def = explosionDef;
+		def = explosionDef;
+		setAnimationSet(def.animations, false);
 		particleTimes = new double[explosionDef.particleCooldowns.length];
 		System.arraycopy(explosionDef.particleCooldowns, 0, particleTimes, 0, particleTimes.length);
 	}

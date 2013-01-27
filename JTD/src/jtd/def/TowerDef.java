@@ -4,6 +4,7 @@
  */
 package jtd.def;
 
+import jtd.Animation;
 import jtd.PointD;
 import jtd.effect.instant.InstantEffect;
 import jtd.effect.timed.TimedEffectDef;
@@ -14,8 +15,14 @@ import jtd.entities.Tower;
  *
  * @author LostMekka
  */
-public class TowerDef extends EntityDef{
+public class TowerDef{
 
+	public Animation[] baseIdleAnimations = null;
+	public Animation[] baseChargeAnimations = null;
+	public Animation[] baseReloadAnimations = null;
+	public Animation[] headIdleAnimations = null;
+	public Animation[] headChargeAnimations = null;
+	public Animation[] headReloadAnimations = null;
 	public int size = 1;
 	public double range = 1f;
 	public double damageRadius = 0f;
