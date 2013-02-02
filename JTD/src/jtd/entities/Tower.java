@@ -4,7 +4,6 @@
  */
 package jtd.entities;
 
-import com.sun.org.glassfish.external.arc.Stability;
 import java.util.Comparator;
 import java.util.LinkedList;
 import jtd.CoordinateTransformator;
